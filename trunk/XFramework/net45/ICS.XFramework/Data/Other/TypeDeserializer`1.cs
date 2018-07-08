@@ -411,7 +411,7 @@ namespace ICS.XFramework.Data
         // 导航属性
         private void Deserialize_Navigation(object model, string typeName)
         {
-            // CRM_SaleOrder.Client
+            // CRM_SaleOrder.Client 
             // Client.AccountList
             Type pType = model.GetType();
             TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(pType);
