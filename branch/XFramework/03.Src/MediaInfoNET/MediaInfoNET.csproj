@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <ProjectType>local</ProjectType>
+    <ProjectVersion>7.10.377</ProjectVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E4860A49-6FEA-4DDA-9EBE-886C08AFD6B9}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <AssemblyName>TXEnterprise.MediaInfo</AssemblyName>
+    <OutputType>Library</OutputType>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\01.Bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\01.Bin\TXEnterprise.MediaInfo.XML</DocumentationFile>
+    <NoWarn>1591;0108;1573</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>TXEnterprise.MediaInfo</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="System" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Global.cs" />
+    <Compile Include="MediaInfoNET\My\MyApplication.cs" />
+    <Compile Include="MediaInfoNET\My\MyComputer.cs" />
+    <Compile Include="MediaInfoNET\My\MyProject.cs" />
+    <Compile Include="MediaInfoNET\File.cs" />
+    <Compile Include="MediaInfoNET\MediaFile.cs" />
+    <Compile Include="MediaInfoNET\MediaInfo_Stream.cs" />
+    <Compile Include="MediaInfoNET\MediaInfo_Stream_Audio.cs" />
+    <Compile Include="MediaInfoNET\MediaInfo_Stream_Chapters.cs" />
+    <Compile Include="MediaInfoNET\MediaInfo_Stream_Data.cs" />
+    <Compile Include="MediaInfoNET\MediaInfo_Stream_General.cs" />
+    <Compile Include="MediaInfoNET\MediaInfo_Stream_Image.cs" />
+    <Compile Include="MediaInfoNET\MediaInfo_Stream_Menu.cs" />
+    <Compile Include="MediaInfoNET\MediaInfo_Stream_Text.cs" />
+    <Compile Include="MediaInfoNET\MediaInfo_Stream_Video.cs" />
+    <Compile Include="MediaInfoNET\StreamKind.cs" />
+    <Compile Include="MediaInfoNET\InfoKind.cs" />
+    <Compile Include="MediaInfoNET\InfoOptions.cs" />
+    <Compile Include="MediaInfoNET\MediaInfo.cs" />
+    <Compile Include="MediaInfoNET\modCommon.cs" />
+    <Compile Include="MediaInfoNET\My\Resources\Resources.cs" />
+    <Compile Include="MediaInfoNET\My\MySettings.cs" />
+    <EmbeddedResource Include="MediaInfoNET.Resources.resources" />
+  </ItemGroup>
+</Project>

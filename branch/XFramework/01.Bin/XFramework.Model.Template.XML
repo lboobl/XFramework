@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>XFramework.Model.Template</name>
+    </assembly>
+    <members>
+        <member name="M:XTemplate.Common.GetFieldName(System.String)">
+            <summary>
+            根据列名获取实体对应的字段名，如 _level
+            </summary>
+            <param name="columnName">列名</param>
+            <returns></returns>
+        </member>
+        <member name="M:XTemplate.Common.GetEntityName(SchemaExplorer.TableSchema)">
+            <summary>
+            根据表名取实体名称
+            </summary>
+            <param name="table"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XTemplate.Common.IncludeFile(System.String,System.Collections.Generic.IList{System.String})">
+            <summary>
+            将生成的文件添加到项目
+            </summary>
+            <param name="directory">csproj路径</param>
+            <param name="names">文件列表</param>
+        </member>
+        <member name="M:XTemplate.Common.GetCSharpVariableType(SchemaExplorer.ColumnSchema)">
+            <summary>
+            获取对应的CSHARP变量类型
+            </summary>
+            <param name="column"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XTemplate.Common.GetCSharpVariableType(SchemaExplorer.ParameterSchema)">
+            <summary>
+            获取对应的CSHARP变量类型
+            </summary>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

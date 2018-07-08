@@ -1,0 +1,2161 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>XFramework.DataAccess</name>
+    </assembly>
+    <members>
+        <member name="T:XFramework.DataAccess.DataSource">
+            <summary>
+            Information about a data source.
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.IDataSource">
+            <summary>
+            IDataSource
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDataSource.DbProviderName">
+            <summary>
+            DbProvider Name
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDataSource.Name">
+            <summary>
+            DataSource Name.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDataSource.ConnectionString">
+            <summary>
+            Connection string used to create connections.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDataSource.DbProvider">
+            <summary>
+            The data provider.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDataSource.CommandTimeout">
+            <summary>
+            comand timeout
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.DataSource.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.DataSource.ToString">
+            <summary>
+            ToString implementation.
+            </summary>
+            <returns>A string that describes the data source</returns>
+        </member>
+        <member name="P:XFramework.DataAccess.DataSource.ConnectionString">
+            <summary>
+            The connection string.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.DataSource.Name">
+            <summary>
+            DataSource Name
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.DataSource.DbProviderName">
+            <summary>
+            DbProvider Name
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.DataSource.DbProvider">
+            <summary>
+            The provider to use for this data source.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.DataSource.CommandTimeout">
+            <summary>
+            ConnectionTimeout
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.DbProvider">
+            <summary>
+            Information about a data provider.
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.IDbProvider">
+            <summary>
+            Factory interface to create provider specific ado.net objects.
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.IDbProvider.CreateConnection">
+            <summary>
+            Create a connection object for this provider.
+            </summary>
+            <returns>An 'IDbConnection' object.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.IDbProvider.CreateCommand">
+            <summary>
+            Create a command object for this provider.
+            </summary>
+            <returns>An 'IDbCommand' object.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.IDbProvider.CreateDataAdapter">
+            <summary>
+            Create a dataAdapter object for this provider.
+            </summary>
+            <returns>An 'IDbDataAdapter' object.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.IDbProvider.CreateDataParameter">
+            <summary>
+            Create a IDataParameter object for this provider.
+            </summary>
+            <returns>An 'IDbDataParameter' object.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.IDbProvider.FormatNameForSql(System.String)">
+            <summary>
+            Change the parameterName into the correct format IDbCommand.CommandText
+            for the ConnectionProvider
+            </summary>
+            <param name="parameterName">The unformatted name of the parameter</param>
+            <returns>A parameter formatted for an IDbCommand.CommandText</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.IDbProvider.FormatNameForParameter(System.String)">
+            <summary>
+            Changes the parameterName into the correct format for an IDbParameter
+            for the Driver.
+            </summary>
+            <remarks>
+            For SqlServerConnectionProvider it will change <c>id</c> to <c>@id</c>
+            </remarks>
+            <param name="parameterName">The unformatted name of the parameter</param>
+            <returns>A parameter formatted for an IDbParameter.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.IDbProvider.Initialize">
+            <summary>
+            Init the provider.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.AssemblyName">
+            <summary>
+            The name of the assembly which conatins the definition of the provider.
+            </summary>
+            <example>Examples : "System.Data", "Microsoft.Data.Odbc"</example>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.IsDefault">
+            <summary>
+            Tell us if it is the default data source.
+            Default false.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.IsEnabled">
+            <summary>
+            Tell us if this provider is enabled.
+            Default true.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.AllowMARS">
+            <summary>
+            Tell us if this provider allows having multiple open <see cref="T:System.Data.IDataReader"/> with
+            the same <see cref="T:System.Data.IDbConnection"/>.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.DbConnectionClass">
+            <summary>
+            The connection class name to use.
+            </summary>
+            <example>
+            "System.Data.OleDb.OleDbConnection", 
+            "System.Data.SqlClient.SqlConnection", 
+            "Microsoft.Data.Odbc.OdbcConnection"
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.UseParameterPrefixInSql">
+            <summary>
+            Does this ConnectionProvider require the use of a Named Prefix in the SQL 
+            statement. 
+            </summary>
+            <remarks>
+            The OLE DB/ODBC .NET Provider does not support named parameters for 
+            passing parameters to an SQL Statement or a stored procedure called 
+            by an IDbCommand when CommandType is set to Text.
+            
+            For example, SqlClient requires select * from simple where simple_id = @simple_id
+            If this is false, like with the OleDb or Obdc provider, then it is assumed that 
+            the ? can be a placeholder for the parameter in the SQL statement when CommandType 
+            is set to Text.		
+            </remarks>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.UseParameterPrefixInParameter">
+            <summary>
+            Does this ConnectionProvider require the use of the Named Prefix when trying
+            to reference the Parameter in the Command's Parameter collection. 
+            </summary>
+            <remarks>
+            This is really only useful when the UseParameterPrefixInSql = true. 
+            When this is true the code will look like IDbParameter param = cmd.Parameters["@paramName"], 
+            if this is false the code will be IDbParameter param = cmd.Parameters["paramName"] - ie - Oracle.
+            </remarks>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.UsePositionalParameters">
+            <summary>
+            The OLE DB/OBDC .NET Provider uses positional parameters that are marked with a 
+            question mark (?) instead of named parameters.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.SetDbParameterSize">
+            <summary>
+            Used to indicate whether or not the provider 
+            supports parameter size.
+            </summary>
+            <remarks>
+            See JIRA-49 about SQLite.Net provider not supporting parameter size.
+            </remarks>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.SetDbParameterPrecision">
+            <summary>
+            Used to indicate whether or not the provider 
+            supports parameter precision.
+            </summary>
+            <remarks>
+            See JIRA-49 about SQLite.Net provider not supporting parameter precision.
+            </remarks>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.SetDbParameterScale">
+            <summary>
+            Used to indicate whether or not the provider 
+            supports a parameter scale.
+            </summary>
+            <remarks>
+            See JIRA-49 about SQLite.Net provider not supporting parameter scale.
+            </remarks>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.UseDeriveParameters">
+            <summary>
+            Used to indicate whether or not the provider 
+            supports DeriveParameters method for procedure.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.DbCommandClass">
+            <summary>
+            The command class name to use.
+            </summary>
+            <example>
+            "System.Data.SqlClient.SqlCommand"
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.ParameterDbTypeClass">
+            <summary>
+            The ParameterDbType class name to use.
+            </summary>			
+            <example>
+            "System.Data.SqlDbType"
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.ParameterDbTypeProperty">
+            <summary>
+            The ParameterDbTypeProperty class name to use.
+            </summary>
+            <example >
+            SqlDbType in SqlParamater.SqlDbType, 
+            OracleType in OracleParameter.OracleType.
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.DataAdapterClass">
+            <summary>
+            The dataAdapter class name to use.
+            </summary>
+            <example >
+            "System.Data.SqlDbType"
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.CommandBuilderClass">
+            <summary>
+            The commandBuilder class name to use.
+            </summary>
+            <example >
+            "System.Data.OleDb.OleDbCommandBuilder", 
+            "System.Data.SqlClient.SqlCommandBuilder", 
+            "Microsoft.Data.Odbc.OdbcCommandBuilder"
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.Name">
+            <summary>
+            Name used to identify the provider amongst the others.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.Description">
+            <summary>
+            Description.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.ParameterPrefix">
+            <summary>
+            Parameter prefix use in store procedure.
+            </summary>
+            <example> @ for Sql Server.</example>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.IsObdc">
+            <summary>
+            Check if this provider is Odbc ?
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.CommandBuilderType">
+            <summary>
+            Create the CommandBuilder Type for this provider.
+            </summary>
+            <returns>An object.</returns>
+        </member>
+        <member name="P:XFramework.DataAccess.IDbProvider.ParameterDbType">
+            <summary>
+            Get the ParameterDb Type for this provider.
+            </summary>
+            <returns>An object.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.DbProvider.#ctor">
+            <summary>
+            Do not use direclty, only for serialization.
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.DbProvider.Initialize">
+            <summary>
+            Init the provider.
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.DbProvider.CreateConnection">
+            <summary>
+            Create a connection object for this provider.
+            </summary>
+            <returns>An 'IDbConnection' object.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.DbProvider.CreateCommand">
+            <summary>
+            Create a command object for this provider.
+            </summary>
+            <returns>An 'IDbCommand' object.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.DbProvider.CreateDataAdapter">
+            <summary>
+            Create a dataAdapter object for this provider.
+            </summary>
+            <returns>An 'IDbDataAdapter' object.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.DbProvider.CreateDataParameter">
+            <summary>
+            Create a IDbDataParameter object for this provider.
+            </summary>
+            <returns>An 'IDbDataParameter' object.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.DbProvider.FormatNameForSql(System.String)">
+            <summary>
+            Change the parameterName into the correct format IDbCommand.CommandText
+            for the ConnectionProvider
+            </summary>
+            <param name="parameterName">The unformatted name of the parameter</param>
+            <returns>A parameter formatted for an IDbCommand.CommandText</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.DbProvider.FormatNameForParameter(System.String)">
+            <summary>
+            Changes the parameterName into the correct format for an IDbParameter
+            for the Driver.
+            </summary>
+            <remarks>
+            For SqlServerConnectionProvider it will change <c>id</c> to <c>@id</c>
+            </remarks>
+            <param name="parameterName">The unformatted name of the parameter</param>
+            <returns>A parameter formatted for an IDbParameter.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.DbProvider.Equals(System.Object)">
+            <summary>
+            Equals implemantation.
+            </summary>
+            <param name="obj">The test object.</param>
+            <returns>A boolean.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.DbProvider.GetHashCode">
+            <summary>
+            A hashcode for the provider.
+            </summary>
+            <returns>An integer.</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.DbProvider.ToString">
+            <summary>
+            ToString implementation.
+            </summary>
+            <returns>A string that describes the provider.</returns>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.AssemblyName">
+            <summary>
+            The name of the assembly which conatins the definition of the provider.
+            </summary>
+            <example>Examples : "System.Data", "Microsoft.Data.Odbc"</example>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.IsDefault">
+            <summary>
+            Tell us if it is the default data source.
+            Default false.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.IsEnabled">
+            <summary>
+            Tell us if this provider is enabled.
+            Default true.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.AllowMARS">
+            <summary>
+            Tell us if this provider allows having multiple open <see cref="T:System.Data.IDataReader"/> with
+            the same <see cref="T:System.Data.IDbConnection"/>.
+            </summary>
+            <remarks>
+            It's a new feature in ADO.NET 2.0 and Sql Server 2005 that allows for multiple forward only read only result sets (MARS).
+            Some databases have supported this functionality for a long time :
+            Not Supported : DB2, MySql.Data, OLE DB provider [except Sql Server 2005 when using MDAC 9], SQLite, Obdc 
+            Supported :  Sql Server 2005, Npgsql
+            </remarks>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.DbConnectionClass">
+            <summary>
+            The connection class name to use.
+            </summary>
+            <example>
+            "System.Data.OleDb.OleDbConnection", 
+            "System.Data.SqlClient.SqlConnection", 
+            "Microsoft.Data.Odbc.OdbcConnection"
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.UseParameterPrefixInSql">
+            <summary>
+            Does this ConnectionProvider require the use of a Named Prefix in the SQL 
+            statement. 
+            </summary>
+            <remarks>
+            The OLE DB/ODBC .NET Provider does not support named parameters for 
+            passing parameters to an SQL Statement or a stored procedure called 
+            by an IDbCommand when CommandType is set to Text.
+            
+            For example, SqlClient requires select * from simple where simple_id = @simple_id
+            If this is false, like with the OleDb or Obdc provider, then it is assumed that 
+            the ? can be a placeholder for the parameter in the SQL statement when CommandType 
+            is set to Text.		
+            </remarks>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.UseParameterPrefixInParameter">
+            <summary>
+            Does this ConnectionProvider require the use of the Named Prefix when trying
+            to reference the Parameter in the Command's Parameter collection. 
+            </summary>
+            <remarks>
+            This is really only useful when the UseParameterPrefixInSql = true. 
+            When this is true the code will look like IDbParameter param = cmd.Parameters["@paramName"], 
+            if this is false the code will be IDbParameter param = cmd.Parameters["paramName"] - ie - Oracle.
+            </remarks>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.UsePositionalParameters">
+            <summary>
+            The OLE DB/OBDC .NET Provider uses positional parameters that are marked with a 
+            question mark (?) instead of named parameters.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.SetDbParameterSize">
+            <summary>
+            Used to indicate whether or not the provider 
+            supports parameter size.
+            </summary>
+            <remarks>
+            See JIRA-49 about SQLite.Net provider not supporting parameter size.
+            </remarks>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.SetDbParameterPrecision">
+            <summary>
+            Used to indicate whether or not the provider 
+            supports parameter precision.
+            </summary>
+            <remarks>
+            See JIRA-49 about SQLite.Net provider not supporting parameter precision.
+            </remarks>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.SetDbParameterScale">
+            <summary>
+            Used to indicate whether or not the provider 
+            supports a parameter scale.
+            </summary>
+            <remarks>
+            See JIRA-49 about SQLite.Net provider not supporting parameter scale.
+            </remarks>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.UseDeriveParameters">
+            <summary>
+            Used to indicate whether or not the provider 
+            supports DeriveParameters method for procedure.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.DbCommandClass">
+            <summary>
+            The command class name to use.
+            </summary>
+            <example>
+            "System.Data.SqlClient.SqlCommand"
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.ParameterDbTypeClass">
+            <summary>
+            The ParameterDbType class name to use.
+            </summary>			
+            <example>
+            "System.Data.SqlDbType"
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.ParameterDbTypeProperty">
+            <summary>
+            The ParameterDbTypeProperty class name to use.
+            </summary>
+            <example >
+            SqlDbType in SqlParamater.SqlDbType, 
+            OracleType in OracleParameter.OracleType.
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.DataAdapterClass">
+            <summary>
+            The dataAdapter class name to use.
+            </summary>
+            <example >
+            "System.Data.SqlDbType"
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.CommandBuilderClass">
+            <summary>
+            The commandBuilder class name to use.
+            </summary>
+            <example >
+            "System.Data.OleDb.OleDbCommandBuilder", 
+            "System.Data.SqlClient.SqlCommandBuilder", 
+            "Microsoft.Data.Odbc.OdbcCommandBuilder"
+            </example>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.Name">
+            <summary>
+            Name used to identify the provider amongst the others.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.Description">
+            <summary>
+            Description.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.ParameterPrefix">
+            <summary>
+            Parameter prefix use in store procedure.
+            </summary>
+            <example> @ for Sql Server.</example>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.IsObdc">
+            <summary>
+            Check if this provider is Odbc ?
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.CommandBuilderType">
+            <summary>
+            Get the CommandBuilder Type for this provider.
+            </summary>
+            <returns>An object.</returns>
+        </member>
+        <member name="P:XFramework.DataAccess.DbProvider.ParameterDbType">
+            <summary>
+            Get the ParameterDb Type for this provider.
+            </summary>
+            <returns>An object.</returns>
+        </member>
+        <member name="T:XFramework.DataAccess.IDalSession">
+            <summary>
+            A template for a session in the iBATIS.NET framwork.
+            Holds the connection, the transaction ...
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.IDalSession.Complete">
+            <summary>
+            Complete (commit) a transsaction
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.IDalSession.OpenConnection">
+            <summary>
+            Open a connection.
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.IDalSession.CloseConnection">
+            <summary>
+            close a connection
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.IDalSession.BeginTransaction">
+            <summary>
+            Open a connection and begin a transaction
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.IDalSession.BeginTransaction(System.Data.IsolationLevel)">
+            <summary>
+            Open a connection and begin a transaction at the data source 
+            with the specified IsolationLevel value.
+            </summary>
+            <param name="isolationLevel">The transaction isolation level for this connection.</param>
+        </member>
+        <member name="M:XFramework.DataAccess.IDalSession.CommitTransaction">
+            <summary>
+            Commit a transaction and close the associated connection
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.IDalSession.CommitTransaction(System.Boolean)">
+            <summary>
+            Commits the database transaction.
+            </summary>
+            <param name="closeConnection">Close the connection</param>
+        </member>
+        <member name="M:XFramework.DataAccess.IDalSession.RollBackTransaction">
+            <summary>
+            Rollbak a transaction and close the associated connection
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.IDalSession.RollBackTransaction(System.Boolean)">
+            <summary>
+            Rolls back a transaction from a pending state.
+            </summary>
+            <param name="closeConnection">Close the connection</param>
+        </member>
+        <member name="P:XFramework.DataAccess.IDalSession.DataSource">
+            <summary>
+            The data source use by the session.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDalSession.Connection">
+            <summary>
+            The Connection use by the session.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDalSession.Transaction">
+            <summary>
+            The Transaction use by the session.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.IDalSession.IsOpenTran">
+            <summary>
+            Indicates if a transaction is open  on
+            the session.
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.RepositoryBase">
+            <summary>
+            仓储模式基类，提供单个实体的操作
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Insert``1(``0)">
+            <summary>
+            插入记录
+            </summary>
+            <param name="TEntity">实体</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Update``1(``0)">
+            <summary>
+            更新记录
+            </summary>
+            <param name="TEntity">实体</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Update``1(System.Linq.Expressions.Expression{System.Func{``0,``0}},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            更新记录 x=>new T{}
+            </summary>
+            <param name="updater">更新表达式</param>
+            <param name="predicate">筛选谓词</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Delete``1(``0)">
+            <summary>
+            删除记录
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="TEntity">实体</param>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Delete``1(System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            删除记录
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="predicate">筛选谓词</param>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Query``1(System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            查询记录
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="predicate">筛选谓词</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Query``1(XFramework.DataAccess.PageInfo,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            查询记录
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="page">分页信息</param>
+            <param name="predicate">筛选谓词</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Query``1(System.String,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},XFramework.DataAccess.Dapper.DynamicParameters)">
+            <summary>
+            查询记录
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="cmdName">查询脚本</param>
+            <param name="predicate">筛选谓词</param>
+            <param name="dynParameters">命令参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Query``1(System.String,System.String,System.String,XFramework.DataAccess.Dapper.DynamicParameters)">
+            <summary>
+            执行脚本，返回影响行数
+            </summary>
+            <param name="typeFullName">命令键值</param>
+            <param name="cmdName">查询脚本</param>
+            <param name="condition">查询条件 FieldName = @p1</param>
+            <param name="dynParameters">命令参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Query``1(System.String,XFramework.DataAccess.Dapper.DynamicParameters,System.Nullable{System.Data.CommandType})">
+            <summary>
+            执行脚本，返回影响行数
+            </summary>
+            <param name="command">查询脚本</param>
+            <param name="dynParameters">命令参数</param>
+            <param name="commandType">指定如何解释命令字符串</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.QueryMultiple``1(System.String,XFramework.DataAccess.Dapper.DynamicParameters,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            查询记录
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="cmdName">查询脚本</param>
+            <param name="dynParameters">命令参数</param>
+            <param name="predicate">筛选谓词</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.QueryMultiple(System.String,System.String,System.String,XFramework.DataAccess.Dapper.DynamicParameters)">
+            <summary>
+            查询记录
+            </summary>
+            <param name="typeFullName">命令键值</param>
+            <param name="cmdName">查询脚本</param>
+            <param name="condition">查询条件 FieldName = @p1</param>
+            <param name="dynParameters">命令参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.QueryMultiple(System.String,XFramework.DataAccess.Dapper.DynamicParameters,System.Nullable{System.Data.CommandType})">
+            <summary>
+            查询记录
+            </summary>
+            <param name="command">查询脚本</param>
+            <param name="dynParameters">命令参数</param>
+            <param name="commandType">指定如何解释命令字符串</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.QueryDataSet``1(System.String,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},XFramework.DataAccess.Dapper.DynamicParameters)">
+            <summary>
+            查询记录
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="cmdName">查询脚本</param>
+            <param name="predicate">筛选谓词</param>
+            <param name="dynParameters">命令参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.QueryDataSet(System.String,System.String,System.String,XFramework.DataAccess.Dapper.DynamicParameters)">
+            <summary>
+            查询记录
+            </summary>
+            <param name="typeFullName">命令键值</param>
+            <param name="cmdName">查询脚本</param>
+            <param name="condition">查询条件 FieldName = @p1</param>
+            <param name="dynParameters">命令参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.QueryDataSet(System.String,XFramework.DataAccess.Dapper.DynamicParameters,System.Nullable{System.Data.CommandType})">
+            <summary>
+            查询记录
+            </summary>
+            <param name="command">查询脚本</param>
+            <param name="dynParameters">命令参数</param>
+            <param name="commandType">指定如何解释命令字符串</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.QueryDataTable``1(System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            查询记录
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="predicate">筛选谓词</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.QueryDataTable``1(XFramework.DataAccess.PageInfo,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            查询记录
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="page">分页信息</param>
+            <param name="predicate">筛选谓词</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.QueryDataTable``1(System.String,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},XFramework.DataAccess.Dapper.DynamicParameters)">
+            <summary>
+            查询记录
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="cmdName">查询脚本</param>
+            <param name="predicate">筛选谓词</param>
+            <param name="dynParameters">命令参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.QueryDataTable(System.String,System.String,System.String,XFramework.DataAccess.Dapper.DynamicParameters)">
+            <summary>
+            查询记录
+            </summary>
+            <param name="typeFullName">命令键值</param>
+            <param name="cmdName">查询脚本</param>
+            <param name="condition">查询条件 FieldName = @p1</param>
+            <param name="dynParameters">命令参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.QueryDataTable(System.String,XFramework.DataAccess.Dapper.DynamicParameters,System.Nullable{System.Data.CommandType})">
+            <summary>
+            查询记录
+            </summary>
+            <param name="command">查询脚本</param>
+            <param name="dynParameters">脚本参数</param>
+            <param name="commandType">脚本类型</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Execute``1(System.String,``0,XFramework.DataAccess.Dapper.DynamicParameters)">
+            <summary>
+            执行脚本，返回影响行数
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="cmdName">查询脚本</param>
+            <param name="TEntity">实体</param>
+            <param name="dynParameters">命令参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Execute``1(System.String,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},XFramework.DataAccess.Dapper.DynamicParameters)">
+            <summary>
+            执行脚本，返回影响行数
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="cmdName">查询脚本</param>
+            <param name="predicate">筛选谓词</param>
+            <param name="dynParameters">命令参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Execute(System.String,System.String,System.String,XFramework.DataAccess.Dapper.DynamicParameters)">
+            <summary>
+            执行脚本，返回影响行数
+            </summary>
+            <param name="typeFullName">命令键值</param>
+            <param name="cmdName">查询脚本</param>
+            <param name="condition">查询条件 FieldName = @p1</param>
+            <param name="dynParameters">命令参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Execute(System.String,XFramework.DataAccess.Dapper.DynamicParameters,System.Nullable{System.Data.CommandType})">
+            <summary>
+            执行脚本，返回影响行数
+            </summary>
+            <param name="command">查询脚本</param>
+            <param name="dynParameters">命令参数</param>
+            <param name="commandType">指定如何解释命令字符串</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Execute(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            执行脚本，返回影响行数
+            </summary>
+            <param name="sqlList">查询脚本</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Dispose">
+            <summary>
+            释放资源
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Resolve``1(System.String,``0)">
+            <summary>
+            生成Dapper脚本，
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="cmdName">查询脚本</param>
+            <param name="TEntity">实体</param>
+            <returns>脚本字符串</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Resolve``1(System.String,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},XFramework.DataAccess.Dapper.DynamicParameters)">
+            <summary>
+            生成Dapper脚本，
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="cmdName">查询脚本</param>
+            <param name="predicate">筛选谓词</param>
+            <param name="dynParameters">命令参数</param>
+            <returns>脚本字符串</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Resolve``1(XFramework.DataAccess.PageInfo,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            生成Dapper脚本，
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="page">分页信息</param>
+            <param name="predicate">筛选谓词</param>
+            <returns>脚本字符串</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Resolve``1(System.Linq.Expressions.Expression{System.Func{``0,``0}},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            生成Dapper脚本，
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <param name="updater">更新表达式</param>
+            <param name="predicate">筛选谓词</param>
+            <returns>脚本字符串</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.RepositoryBase.Resolve(System.String,System.String,System.String)">
+            <summary>
+            生成Dapper脚本，
+            </summary>
+            <param name="typeFullName">命令键值</param>
+            <param name="cmdName">查询脚本</param>
+            <param name="condition">查询条件 FieldName = @p1</param>
+            <returns></returns>
+        </member>
+        <member name="P:XFramework.DataAccess.RepositoryBase.SrvDateTime">
+            <summary>
+            当前服务器时间
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.RepositoryBase.Session">
+            <summary>
+            Sql会话
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.CommandFlags">
+            <summary>
+            Additional state flags that control command behaviour
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.Dapper.CommandFlags.None">
+            <summary>
+            No additonal flags
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.Dapper.CommandFlags.Buffered">
+            <summary>
+            Should data be buffered before returning?
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.Dapper.CommandFlags.Pipelined">
+            <summary>
+            Can async queries be pipelined?
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.CommandDefinition">
+            <summary>
+            Represents the key aspects of a sql operation
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.CommandDefinition.#ctor(System.String,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},XFramework.DataAccess.Dapper.CommandFlags)">
+            <summary>
+            Initialize the command definition
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.CommandDefinition.CommandText">
+            <summary>
+            The command (sql or a stored-procedure name) to execute
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.CommandDefinition.Parameters">
+            <summary>
+            The parameters associated with the command
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.CommandDefinition.Transaction">
+            <summary>
+            The active transaction for the command
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.CommandDefinition.CommandTimeout">
+            <summary>
+            The effective timeout for the command
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.CommandDefinition.CommandType">
+            <summary>
+            The type of command that the command-text represents
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.CommandDefinition.Buffered">
+            <summary>
+            Should data be buffered before returning?
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.CommandDefinition.Flags">
+            <summary>
+            Additional state flags against this command
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.CommandDefinition.Pipelined">
+            <summary>
+            Can async queries be pipelined?
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.SqlMapper">
+            <summary>
+            Dapper, a light weight object mapper for ADO.NET
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.PurgeQueryCache">
+            <summary>
+            Purge the query cache 
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GetCachedSQLCount">
+            <summary>
+            Return a count of all the cached queries by dapper
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GetCachedSQL(System.Int32)">
+            <summary>
+            Return a list of all the queries cached by dapper
+            </summary>
+            <param name="ignoreHitCountAbove"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GetHashCollissions">
+            <summary>
+            Deep diagnostics only: find any hash collisions in the cache
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.AddTypeMap(System.Type,System.Data.DbType)">
+            <summary>
+            Configire the specified type to be mapped to a given db-type
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Execute(System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Execute parameterized SQL  
+            </summary>
+            <returns>Number of rows affected</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Execute(System.Data.IDbConnection,XFramework.DataAccess.Dapper.CommandDefinition)">
+            <summary>
+            Execute parameterized SQL  
+            </summary>
+            <returns>Number of rows affected</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.ExecuteReader(System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Execute parameterized SQL and return an <see cref="T:System.Data.IDataReader"/>
+            </summary>
+            <returns>An <see cref="T:System.Data.IDataReader"/> that can be used to iterate over the results of the SQL query.</returns>
+            <remarks>
+            This is typically used when the results of a query are not processed by Dapper, for example, used to fill a <see cref="T:System.Data.DataTable"/>
+            or <see cref="T:System.Data.DataSet"/>.
+            </remarks>
+            <example>
+            <code>
+            <![CDATA[
+            DataTable table = new DataTable("MyTable");
+            using (var reader = ExecuteReader(cnn, sql, param))
+            {
+                table.Load(reader);
+            }
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.ExecuteReader(System.Data.IDbConnection,XFramework.DataAccess.Dapper.CommandDefinition)">
+            <summary>
+            Execute parameterized SQL and return an <see cref="T:System.Data.IDataReader"/>
+            </summary>
+            <returns>An <see cref="T:System.Data.IDataReader"/> that can be used to iterate over the results of the SQL query.</returns>
+            <remarks>
+            This is typically used when the results of a query are not processed by Dapper, for example, used to fill a <see cref="T:System.Data.DataTable"/>
+            or <see cref="T:System.Data.DataSet"/>.
+            </remarks>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Query(System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Boolean,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Return a list of dynamic objects, reader is closed after the call
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Query``1(System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Boolean,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Executes a query, returning the data typed as per T
+            </summary>
+            <remarks>the dynamic param may seem a bit odd, but this works around a major usability issue in vs, if it is Object vs completion gets annoying. Eg type new [space] get new object</remarks>
+            <returns>A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+            created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+            </returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Query``1(System.Data.IDbConnection,XFramework.DataAccess.Dapper.CommandDefinition)">
+            <summary>
+            Executes a query, returning the data typed as per T
+            </summary>
+            <remarks>the dynamic param may seem a bit odd, but this works around a major usability issue in vs, if it is Object vs completion gets annoying. Eg type new [space] get new object</remarks>
+            <returns>A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+            created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+            </returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.QueryMultiple(System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Execute a command that returns multiple result sets, and access each in turn
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.QueryMultiple(System.Data.IDbConnection,XFramework.DataAccess.Dapper.CommandDefinition)">
+            <summary>
+            Execute a command that returns multiple result sets, and access each in turn
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Query``3(System.Data.IDbConnection,System.String,System.Func{``0,``1,``2},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Maps a query to objects
+            </summary>
+            <typeparam name="TFirst">The first type in the recordset</typeparam>
+            <typeparam name="TSecond">The second type in the recordset</typeparam>
+            <typeparam name="TReturn">The return type</typeparam>
+            <param name="cnn"></param>
+            <param name="sql"></param>
+            <param name="map"></param>
+            <param name="param"></param>
+            <param name="transaction"></param>
+            <param name="buffered"></param>
+            <param name="splitOn">The Field we should split and read the second object from (default: id)</param>
+            <param name="commandTimeout">Number of seconds before command execution timeout</param>
+            <param name="commandType">Is it a stored proc or a batch?</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Query``4(System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Maps a query to objects
+            </summary>
+            <typeparam name="TFirst"></typeparam>
+            <typeparam name="TSecond"></typeparam>
+            <typeparam name="TThird"></typeparam>
+            <typeparam name="TReturn"></typeparam>
+            <param name="cnn"></param>
+            <param name="sql"></param>
+            <param name="map"></param>
+            <param name="param"></param>
+            <param name="transaction"></param>
+            <param name="buffered"></param>
+            <param name="splitOn">The Field we should split and read the second object from (default: id)</param>
+            <param name="commandTimeout">Number of seconds before command execution timeout</param>
+            <param name="commandType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Query``5(System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Perform a multi mapping query with 4 input parameters
+            </summary>
+            <typeparam name="TFirst"></typeparam>
+            <typeparam name="TSecond"></typeparam>
+            <typeparam name="TThird"></typeparam>
+            <typeparam name="TFourth"></typeparam>
+            <typeparam name="TReturn"></typeparam>
+            <param name="cnn"></param>
+            <param name="sql"></param>
+            <param name="map"></param>
+            <param name="param"></param>
+            <param name="transaction"></param>
+            <param name="buffered"></param>
+            <param name="splitOn"></param>
+            <param name="commandTimeout"></param>
+            <param name="commandType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Query``6(System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4,``5},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Perform a multi mapping query with 5 input parameters
+            </summary>
+            <typeparam name="TFirst"></typeparam>
+            <typeparam name="TSecond"></typeparam>
+            <typeparam name="TThird"></typeparam>
+            <typeparam name="TFourth"></typeparam>
+            <typeparam name="TFifth"></typeparam>
+            <typeparam name="TReturn"></typeparam>
+            <param name="cnn"></param>
+            <param name="sql"></param>
+            <param name="map"></param>
+            <param name="param"></param>
+            <param name="transaction"></param>
+            <param name="buffered"></param>
+            <param name="splitOn"></param>
+            <param name="commandTimeout"></param>
+            <param name="commandType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Query``7(System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4,``5,``6},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Perform a multi mapping query with 6 input parameters
+            </summary>
+            <typeparam name="TFirst"></typeparam>
+            <typeparam name="TSecond"></typeparam>
+            <typeparam name="TThird"></typeparam>
+            <typeparam name="TFourth"></typeparam>
+            <typeparam name="TFifth"></typeparam>
+            <typeparam name="TSixth"></typeparam>
+            <typeparam name="TReturn"></typeparam>
+            <param name="cnn"></param>
+            <param name="sql"></param>
+            <param name="map"></param>
+            <param name="param"></param>
+            <param name="transaction"></param>
+            <param name="buffered"></param>
+            <param name="splitOn"></param>
+            <param name="commandTimeout"></param>
+            <param name="commandType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Query``8(System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4,``5,``6,``7},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Perform a multi mapping query with 7 input parameters
+            </summary>
+            <typeparam name="TFirst"></typeparam>
+            <typeparam name="TSecond"></typeparam>
+            <typeparam name="TThird"></typeparam>
+            <typeparam name="TFourth"></typeparam>
+            <typeparam name="TFifth"></typeparam>
+            <typeparam name="TSixth"></typeparam>
+            <typeparam name="TSeventh"></typeparam>
+            <typeparam name="TReturn"></typeparam>
+            <param name="cnn"></param>
+            <param name="sql"></param>
+            <param name="map"></param>
+            <param name="param"></param>
+            <param name="transaction"></param>
+            <param name="buffered"></param>
+            <param name="splitOn"></param>
+            <param name="commandTimeout"></param>
+            <param name="commandType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.ReadChar(System.Object)">
+            <summary>
+            Internal use only
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.ReadNullableChar(System.Object)">
+            <summary>
+            Internal use only
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.FindOrAddParameter(System.Data.IDataParameterCollection,System.Data.IDbCommand,System.String)">
+            <summary>
+            Internal use only
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.PackListParameters(System.Data.IDbCommand,System.String,System.Object)">
+            <summary>
+            Internal use only
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.ReplaceLiterals(XFramework.DataAccess.Dapper.SqlMapper.IParameterLookup,System.Data.IDbCommand)">
+            <summary>
+            Replace all literal tokens with their text form
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Format(System.Object)">
+            <summary>
+            Convert numeric values to their string form for SQL literal purposes
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.CreateParamInfoGenerator(XFramework.DataAccess.Dapper.SqlMapper.Identity,System.Boolean,System.Boolean)">
+            <summary>
+            Internal use only
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GetTypeMap(System.Type)">
+            <summary>
+            Gets type-map for the given type
+            </summary>
+            <returns>Type map implementation, DefaultTypeMap instance if no override present</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.SetTypeMap(System.Type,XFramework.DataAccess.Dapper.SqlMapper.ITypeMap)">
+            <summary>
+            Set custom mapping for type deserializers
+            </summary>
+            <param name="type">Entity type to override</param>
+            <param name="map">Mapping rules impementation, null to remove custom map</param>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GetTypeDeserializer(System.Type,System.Data.IDataReader,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Internal use only
+            IDataReader translate to Entity
+            </summary>
+            <param name="type"></param>
+            <param name="reader"></param>
+            <param name="startBound"></param>
+            <param name="length"></param>
+            <param name="returnNullIfFirstMissing"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.ThrowDataException(System.Exception,System.Int32,System.Data.IDataReader)">
+            <summary>
+            Throws a data exception, only used internally
+            </summary>
+            <param name="ex"></param>
+            <param name="index"></param>
+            <param name="reader"></param>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.AsTableValuedParameter(System.Data.DataTable,System.String)">
+            <summary>
+            Used to pass a DataTable as a TableValuedParameter
+            </summary>
+        </member>
+        <member name="E:XFramework.DataAccess.Dapper.SqlMapper.QueryCachePurged">
+            <summary>
+            Called if the query cache is purged via PurgeQueryCache
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SqlMapper.ConnectionStringComparer">
+            <summary>
+            How should connection strings be compared for equivalence? Defaults to StringComparer.Ordinal.
+            Providing a custom implementation can be useful for allowing multi-tenancy databases with identical
+            schema to share startegies. Note that usual equivalence rules apply: any equivalent connection strings
+            <b>MUST</b> yield the same hash-code.
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.SqlMapper.IDynamicParameters">
+            <summary>
+            Implement this interface to pass an arbitrary db specific set of parameters to Dapper
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.IDynamicParameters.AddParameters(System.Data.IDbCommand,XFramework.DataAccess.Dapper.SqlMapper.Identity)">
+            <summary>
+            Add all the parameters needed to the command just before it executes
+            </summary>
+            <param name="command">The raw command prior to execution</param>
+            <param name="identity">Information about the query</param>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.SqlMapper.IParameterLookup">
+            <summary>
+            Extends IDynamicParameters providing by-name lookup of parameter values
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SqlMapper.IParameterLookup.Item(System.String)">
+            <summary>
+            Get the value of the specified parameter (return null if not found)
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.SqlMapper.ICustomQueryParameter">
+            <summary>
+            Implement this interface to pass an arbitrary db specific parameter to Dapper
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.ICustomQueryParameter.AddParameter(System.Data.IDbCommand,System.String)">
+            <summary>
+            Add the parameter needed to the command before it executes
+            </summary>
+            <param name="command">The raw command prior to execution</param>
+            <param name="name">Parameter name</param>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.SqlMapper.ITypeMap">
+            <summary>
+            Implement this interface to change default mapping of reader columns to type memebers
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.ITypeMap.FindConstructor(System.String[],System.Type[])">
+            <summary>
+            Finds best constructor
+            </summary>
+            <param name="names">DataReader column names</param>
+            <param name="types">DataReader column types</param>
+            <returns>Matching constructor or default one</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.ITypeMap.GetConstructorParameter(System.Reflection.ConstructorInfo,System.String)">
+            <summary>
+            Gets mapping for constructor parameter
+            </summary>
+            <param name="constructor">Constructor to resolve</param>
+            <param name="columnName">DataReader column name</param>
+            <returns>Mapping implementation</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.ITypeMap.GetMember(System.String)">
+            <summary>
+            Gets member mapping for column
+            </summary>
+            <param name="columnName">DataReader column name</param>
+            <returns>Mapping implementation</returns>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.SqlMapper.IMemberMap">
+            <summary>
+            Implements this interface to provide custom member mapping
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SqlMapper.IMemberMap.ColumnName">
+            <summary>
+            Source DataReader column name
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SqlMapper.IMemberMap.MemberType">
+            <summary>
+             Target member type
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SqlMapper.IMemberMap.Property">
+            <summary>
+            Target property
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SqlMapper.IMemberMap.Field">
+            <summary>
+            Target field
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SqlMapper.IMemberMap.Parameter">
+            <summary>
+            Target constructor parameter
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.SqlMapper.Link`2">
+            <summary>
+            This is a micro-cache; suitable when the number of terms is controllable (a few hundred, for example),
+            and strictly append-only; you cannot change existing values. All key matches are on **REFERENCE**
+            equality. The type is fully thread-safe.
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.SqlMapper.Identity">
+            <summary>
+            Identity of a cached query in Dapper, used for extensability
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Identity.ForDynamicParameters(System.Type)">
+            <summary>
+            Create an identity for use with DynamicParameters, internal use only
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Identity.Equals(System.Object)">
+            <summary>
+            
+            </summary>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
+        <member name="F:XFramework.DataAccess.Dapper.SqlMapper.Identity.sql">
+            <summary>
+            The sql
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.Dapper.SqlMapper.Identity.commandType">
+            <summary>
+            The command type 
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.Dapper.SqlMapper.Identity.hashCode">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.Dapper.SqlMapper.Identity.gridIndex">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.Dapper.SqlMapper.Identity.type">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.Dapper.SqlMapper.Identity.connectionString">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.Dapper.SqlMapper.Identity.parametersType">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Identity.GetHashCode">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.Identity.Equals(XFramework.DataAccess.Dapper.SqlMapper.Identity)">
+            <summary>
+            Compare 2 Identity objects
+            </summary>
+            <param name="other"></param>
+            <returns></returns>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.SqlMapper.LiteralToken">
+            <summary>
+            Represents a placeholder for a value that should be replaced as a literal value in the resulting sql
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SqlMapper.LiteralToken.Token">
+            <summary>
+            The text in the original command that should be replaced
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SqlMapper.LiteralToken.Member">
+            <summary>
+            The name of the member referred to by the token
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.SqlMapper.GridReader">
+            <summary>
+            The grid reader provides interfaces for reading multiple result sets from a Dapper query 
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GridReader.Read(System.Boolean)">
+            <summary>
+            Read the next grid of results, returned as a dynamic object
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GridReader.Read``1(System.Boolean)">
+            <summary>
+            Read the next grid of results
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GridReader.Read``3(System.Func{``0,``1,``2},System.String,System.Boolean)">
+            <summary>
+            Read multiple objects from a single recordset on the grid
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GridReader.Read``4(System.Func{``0,``1,``2,``3},System.String,System.Boolean)">
+            <summary>
+            Read multiple objects from a single recordset on the grid
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GridReader.Read``5(System.Func{``0,``1,``2,``3,``4},System.String,System.Boolean)">
+            <summary>
+            Read multiple objects from a single record set on the grid
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GridReader.Read``6(System.Func{``0,``1,``2,``3,``4,``5},System.String,System.Boolean)">
+            <summary>
+            Read multiple objects from a single record set on the grid
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GridReader.Read``7(System.Func{``0,``1,``2,``3,``4,``5,``6},System.String,System.Boolean)">
+            <summary>
+            Read multiple objects from a single record set on the grid
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GridReader.Read``8(System.Func{``0,``1,``2,``3,``4,``5,``6,``7},System.String,System.Boolean)">
+            <summary>
+            Read multiple objects from a single record set on the grid
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SqlMapper.GridReader.Dispose">
+            <summary>
+            Dispose the grid, closing and disposing both the underlying reader and command.
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.DynamicParameters">
+            <summary>
+            A bag of parameters that can be passed to the Dapper Query and Execute methods
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DynamicParameters.#ctor">
+            <summary>
+            construct a dynamic parameter bag
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DynamicParameters.#ctor(System.Object)">
+            <summary>
+            construct a dynamic parameter bag
+            </summary>
+            <param name="template">can be an anonymous type or a DynamicParameters bag</param>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DynamicParameters.AddDynamicParams(System.Object)">
+            <summary>
+            Append a whole object full of params to the dynamic
+            EG: AddDynamicParams(new {A = 1, B = 2}) // will add property A and B to the dynamic
+            </summary>
+            <param name="param"></param>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DynamicParameters.Add(System.String,System.Object,System.Nullable{System.Data.DbType},System.Nullable{System.Data.ParameterDirection},System.Nullable{System.Int32})">
+            <summary>
+            Add a parameter to this dynamic parameter list
+            </summary>
+            <param name="name"></param>
+            <param name="value"></param>
+            <param name="dbType"></param>
+            <param name="direction"></param>
+            <param name="size"></param>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DynamicParameters.AddParameters(System.Data.IDbCommand,XFramework.DataAccess.Dapper.SqlMapper.Identity)">
+            <summary>
+            Add all the parameters needed to the command just before it executes
+            </summary>
+            <param name="command">The raw command prior to execution</param>
+            <param name="identity">Information about the query</param>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DynamicParameters.Get``1(System.String)">
+            <summary>
+            Get the value of a parameter
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="name"></param>
+            <returns>The value, note DBNull.Value is not returned, instead the value is returned as null</returns>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.DynamicParameters.RemoveUnused">
+            <summary>
+            If true, the command-text is inspected and only values that are clearly used are included on the connection
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.DynamicParameters.ParameterNames">
+            <summary>
+            All the names of the param in the bag, use Get to yank them out
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.TableValuedParameter">
+            <summary>
+            Used to pass a DataTable as a TableValuedParameter
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.TableValuedParameter.#ctor(System.Data.DataTable)">
+            <summary>
+            Create a new instance of TableValuedParameter
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.TableValuedParameter.#ctor(System.Data.DataTable,System.String)">
+            <summary>
+            Create a new instance of TableValuedParameter
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.DbString">
+            <summary>
+            This class represents a SQL string, it can be used if you need to denote your parameter is a Char vs VarChar vs nVarChar vs nChar
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DbString.#ctor">
+            <summary>
+            Create a new DbString
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DbString.AddParameter(System.Data.IDbCommand,System.String)">
+            <summary>
+            Add the parameter to the command... internal use only
+            </summary>
+            <param name="command"></param>
+            <param name="name"></param>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.DbString.IsAnsi">
+            <summary>
+            Ansi vs Unicode 
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.DbString.IsFixedLength">
+            <summary>
+            Fixed length 
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.DbString.Length">
+            <summary>
+            Length of the string -1 for max
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.DbString.Value">
+            <summary>
+            The value of the string
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.FeatureSupport">
+            <summary>
+            Handles variances in features per DBMS
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.Dapper.FeatureSupport.FeatureList">
+            <summary>
+            Dictionary of supported features index by connection type name
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.FeatureSupport.Get(System.Data.IDbConnection)">
+            <summary>
+            Gets the featureset based on the passed connection
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.FeatureSupport.Arrays">
+            <summary>
+            True if the db supports array columns e.g. Postgresql
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.SimpleMemberMap">
+            <summary>
+            Represents simple memeber map for one of target parameter or property or field to source DataReader column
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SimpleMemberMap.#ctor(System.String,System.Reflection.PropertyInfo)">
+            <summary>
+            Creates instance for simple property mapping
+            </summary>
+            <param name="columnName">DataReader column name</param>
+            <param name="property">Target property</param>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SimpleMemberMap.#ctor(System.String,System.Reflection.FieldInfo)">
+            <summary>
+            Creates instance for simple field mapping
+            </summary>
+            <param name="columnName">DataReader column name</param>
+            <param name="field">Target property</param>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.SimpleMemberMap.#ctor(System.String,System.Reflection.ParameterInfo)">
+            <summary>
+            Creates instance for simple constructor parameter mapping
+            </summary>
+            <param name="columnName">DataReader column name</param>
+            <param name="parameter">Target constructor parameter</param>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SimpleMemberMap.ColumnName">
+            <summary>
+            DataReader column name
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SimpleMemberMap.MemberType">
+            <summary>
+            Target member type
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SimpleMemberMap.Property">
+            <summary>
+            Target property
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SimpleMemberMap.Field">
+            <summary>
+            Target field
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Dapper.SimpleMemberMap.Parameter">
+            <summary>
+            Target constructor parameter
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.DefaultTypeMap">
+            <summary>
+            Represents default type mapping strategy used by Dapper
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DefaultTypeMap.#ctor(System.Type)">
+            <summary>
+            Creates default type map
+            </summary>
+            <param name="type">Entity type</param>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DefaultTypeMap.FindConstructor(System.String[],System.Type[])">
+            <summary>
+            Finds best constructor
+            </summary>
+            <param name="names">DataReader column names</param>
+            <param name="types">DataReader column types</param>
+            <returns>Matching constructor or default one</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DefaultTypeMap.GetConstructorParameter(System.Reflection.ConstructorInfo,System.String)">
+            <summary>
+            Gets mapping for constructor parameter
+            </summary>
+            <param name="constructor">Constructor to resolve</param>
+            <param name="columnName">DataReader column name</param>
+            <returns>Mapping implementation</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.DefaultTypeMap.GetMember(System.String)">
+            <summary>
+            Gets member mapping for column
+            </summary>
+            <param name="columnName">DataReader column name</param>
+            <returns>Mapping implementation</returns>
+        </member>
+        <member name="T:XFramework.DataAccess.Dapper.CustomPropertyTypeMap">
+            <summary>
+            Implements custom property mapping by user provided criteria (usually presence of some custom attribute with column to member mapping)
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.CustomPropertyTypeMap.#ctor(System.Type,System.Func{System.Type,System.String,System.Reflection.PropertyInfo})">
+            <summary>
+            Creates custom property mapping
+            </summary>
+            <param name="type">Target entity type</param>
+            <param name="propertySelector">Property selector based on target type and DataReader column name</param>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.CustomPropertyTypeMap.FindConstructor(System.String[],System.Type[])">
+            <summary>
+            Always returns default constructor
+            </summary>
+            <param name="names">DataReader column names</param>
+            <param name="types">DataReader column types</param>
+            <returns>Default constructor</returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.CustomPropertyTypeMap.GetConstructorParameter(System.Reflection.ConstructorInfo,System.String)">
+            <summary>
+            Not impelmeneted as far as default constructor used for all cases
+            </summary>
+            <param name="constructor"></param>
+            <param name="columnName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.Dapper.CustomPropertyTypeMap.GetMember(System.String)">
+            <summary>
+            Returns property based on selector strategy
+            </summary>
+            <param name="columnName">DataReader column name</param>
+            <returns>Poperty member map</returns>
+        </member>
+        <member name="T:XFramework.DataAccess.SqlMapSession">
+            <summary>
+            A template for a session in the ETL framwork.
+            Holds the connection, the transaction 4 mssql ...
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.SqlMapSession.CreateConnection">
+            <summary>
+            Create the connection
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.SqlMapSession.OpenConnection">
+            <summary>
+            Open a connection.
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.SqlMapSession.CloseConnection">
+            <summary>
+            close a connection
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.SqlMapSession.BeginTransaction">
+            <summary>
+            Open a connection and begin a transaction
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.SqlMapSession.BeginTransaction(System.Data.IsolationLevel)">
+            <summary>
+            Open a connection and begin a transaction at the data source 
+            with the specified IsolationLevel value.
+            </summary>
+            <param name="isolationLevel">The transaction isolation level for this connection.</param>
+        </member>
+        <member name="M:XFramework.DataAccess.SqlMapSession.CommitTransaction">
+            <summary>
+            Commit a transaction and close the associated connection
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.SqlMapSession.CommitTransaction(System.Boolean)">
+            <summary>
+            Commits the database transaction.
+            </summary>
+            <param name="closeConnection">Close the connection</param>
+        </member>
+        <member name="M:XFramework.DataAccess.SqlMapSession.RollBackTransaction">
+            <summary>
+            Rolls back a transaction from a pending state.
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.SqlMapSession.RollBackTransaction(System.Boolean)">
+            <summary>
+            Rolls back a transaction from a pending state.
+            </summary>
+            <param name="closeConnection">Close the connection</param>
+        </member>
+        <member name="M:XFramework.DataAccess.SqlMapSession.Dispose">
+            <summary>
+            Releasing, or resetting resources, for using
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.SqlMapSession.Complete">
+            <summary>
+            Complete (commit) a transsaction
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.SqlMapSession.DataSource">
+            <summary>
+            The data source use by the session.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.SqlMapSession.Connection">
+            <summary>
+            The Connection use by the session.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.SqlMapSession.Transaction">
+            <summary>
+            The Transaction use by the session.
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.SqlMapSession.IsOpenTran">
+            <summary>
+            Indicates if a transaction is open  on
+            the session.
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.XLoadAdapter">
+            <summary>
+            数据适配器，扩展Fill方法
+            .NET的DataSet.Load方法，底层调用DataAdapter.Fill(DataTable[], IDataReader, int, int)
+            Dapper想要返回DataSet，需要重写Load方法，不必传入DataTable[]，因为数组长度不确定
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.XDataSet">
+            <summary>
+            扩展Load方法
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Command.Key">
+            <summary>
+            SQL键
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Command.CommandType">
+            <summary>
+            指定如何解释命令字符串
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Command.Text">
+            <summary>
+            SQL脚本
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Command.Parameters">
+            <summary>
+            SQL参数
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Command.ByteArray">
+            <summary>
+            映射文件
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.Command.Mapper">
+            <summary>
+            映射文件
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.CommandBuilder">
+            <summary>
+            生成SQL脚本类
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.CommandBuilder.Delete">
+            <summary>
+            删除键
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.CommandBuilder.DeleteByKey">
+            <summary>
+            删除键
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.CommandBuilder.Update">
+            <summary>
+            更新键
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.CommandBuilder.UpdateByKey">
+            <summary>
+            更新键
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.CommandBuilder.UpdateByExpr">
+            <summary>
+            更新键
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.CommandBuilder.Insert">
+            <summary>
+            插入键
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.CommandBuilder.Select">
+            <summary>
+            选取键
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.CommandBuilder.SelectByKey">
+            <summary>
+            选取键
+            </summary>
+        </member>
+        <member name="F:XFramework.DataAccess.CommandBuilder.SelectByPaging">
+            <summary>
+            选取键
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.CommandBuilder.Build``1(System.String,``0)">
+            <summary>
+            生成命令（适用新增/按主键修改/按主键删除）
+            </summary>
+            <typeparam name="T">实体</typeparam>
+            <param name="cmdName">脚本键值</param>
+            <param name="TEntity">实体</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.CommandBuilder.Build``1(System.String,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            生成命令（适用查询/批量删除/批量修改）
+            </summary>
+            <typeparam name="T">实体</typeparam>
+            <param name="cmdName">脚本键值</param>
+            <param name="predicate">筛选谓词</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.CommandBuilder.Build(System.String,System.String,System.String)">
+            <summary>
+            生成命令（自定义脚本）
+            </summary>
+            <param name="typeFullName">命令键值</param>
+            <param name="cmdName">查询脚本</param>
+            <param name="conidtion">WHERE</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.CommandBuilder.Build``1(System.Linq.Expressions.Expression{System.Func{``0,``0}},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            生成命令（适用批量更新）
+            </summary>
+            <param name="updater">更新表达式</param>
+            <param name="predicate">筛选谓词</param>
+        </member>
+        <member name="M:XFramework.DataAccess.CommandBuilder.Build``1(XFramework.DataAccess.PageInfo,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            生成命令（适用分页）
+            </summary>
+            <param name="page">分页对象</param>
+            <param name="predicate">筛选谓词</param>
+        </member>
+        <member name="M:XFramework.DataAccess.CommandBuilder.Resolve(XFramework.DataAccess.Command)">
+            <summary>
+            生成命令
+            </summary>
+            <param name="cmd">脚本命令</param>
+            <remarks>适用批量执行多个脚本</remarks>
+        </member>
+        <member name="M:XFramework.DataAccess.CommandBuilder.GetCommand(System.Type,System.String)">
+            <summary>
+            查找脚本命令
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.CommandBuilder.GetCommand(System.String,System.String)">
+            <summary>
+            查找脚本命令
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.CommandBuilder.GetCommand(XFramework.DataAccess.EntityMapper,System.String)">
+            <summary>
+            查找脚本命令
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.CommandBuilder.ParameterPrefix">
+            <summary>
+            参数查询前缀
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.ConditionBuilder">
+            <summary>
+            查询条件构造器，可解析WHERE查询条件，也可解析存储过程参数
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.ConditionBuilder.Build(System.Linq.Expressions.Expression)">
+            <summary>
+            解析脚本条件
+            </summary>
+            <param name="expression">条件表达式</param>
+        </member>
+        <member name="P:XFramework.DataAccess.ConditionBuilder.Condition">
+            <summary>
+            过滤条件 
+            文本脚本解析成 MemberName = @p1 AND MemberName = @p2，
+            存储过程解析成 MemberName = @MemberName AND MemberName1 = @MemberName1
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.ConditionBuilder.Parameters">
+            <summary>
+            参数键值对
+            文本脚本解析成 >@p1,值>
+            存储过程解析成 >MemberName,值>
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.ConditionBuilder.ParameterMembers">
+            <summary>
+            参数名和字段名对应表
+            参数名@p0
+            字段名MemberName
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.ConditionBuilder.ParameterPrefix">
+            <summary>
+            脚本参数的前缀
+            </summary>
+        </member>
+        <member name="T:XFramework.DataAccess.ConfigHelper">
+            <summary>
+            配置助手类
+            </summary>
+        </member>
+        <member name="M:XFramework.DataAccess.ConfigHelper.GetMapper(System.Type)">
+            <summary>
+            取指定类型的映射器
+            </summary>
+            <param name="tableType">实体类型</param>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.ConfigHelper.GetMapper(System.String)">
+            <summary>
+            取指定键值的映射器
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:XFramework.DataAccess.ConfigHelper.GetProvider(System.String)">
+            <summary>
+            获取指定的provider
+            </summary>
+            <param name="providerName"></param>
+            <returns></returns>
+        </member>
+        <member name="P:XFramework.DataAccess.ConfigHelper.DataSource">
+            <summary>
+            数据源
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.EntityMapper.TableType">
+            <summary>
+            表
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.EntityMapper.Properties">
+            <summary>
+            字段
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.EntityMapper.Keys">
+            <summary>
+            主键
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.EntityMapper.Identity">
+            <summary>
+            自增列
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.EntityMapper.Commands">
+            <summary>
+            SQL
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.PageInfo.PageSize">
+            <summary>
+            页长
+            </summary>
+        </member>
+        <member name="P:XFramework.DataAccess.PageInfo.CurrentPage">
+            <summary>
+            当前面
+            </summary>
+        </member>
+    </members>
+</doc>

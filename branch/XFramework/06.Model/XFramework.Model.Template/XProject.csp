@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<codeSmith xmlns="http://www.codesmithtools.com/schema/csp.xsd">
+  <variables>
+    <add key="ConnectionString4" value="Data Source=PC-TANZAME\DEVSQL;Initial Catalog=HK_ERP_ZJ;Persist Security Info=True;User ID=sa;Password=123456" />
+    <add key="ConnectionString5" value="Data Source=PC-MEIZHIYUAN;Initial Catalog=HK_ERP_ZJ;Persist Security Info=True;User ID=sa;Password=123456" />
+  </variables>
+  <propertySets>
+    <propertySet name="main" template="main.cst">
+      <property name="NameSpace">XFramework.Model</property>
+      <property name="EntityDirectory">D:\软件项目\源码\XFramework\06.Model\XFramework.Model\g</property>
+      <property name="TableCollection">
+        <connectionString>$(ConnectionString5)</connectionString>
+        <providerType>SchemaExplorer.SqlSchemaProvider,SchemaExplorer.SqlSchemaProvider</providerType>
+        <tableList>
+      <table>
+        <owner>dbo</owner>
+        <name>Bas_Bank</name>
+      </table>
+      <table>
+        <owner>dbo</owner>
+        <name>Bas_Company</name>
+      </table>
+    </tableList>
+      </property>
+      <property name="MapperDirectory">D:\软件项目\源码\XFramework\09.Presentation\XFramework.UnitTest\bin\Debug\MapFile</property>
+    </propertySet>
+  </propertySets>
+</codeSmith>

@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <ProjectType>local</ProjectType>
+    <ProjectVersion>7.10.377</ProjectVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C3BB06E0-C870-4A22-A9E0-C1242F1457C4}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <AssemblyName>MySql.Data</AssemblyName>
+    <OutputType>Library</OutputType>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\01.Bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\01.Bin\MySql.Data.XML</DocumentationFile>
+    <NoWarn>1591;0108;0414</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>MySql.Data</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\..\01.Bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>..\..\01.Bin\MySql.Data.XML</DocumentationFile>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>..\..\Library\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration.Install" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Global.cs" />
+    <Compile Include="MySql\Data\Common\Cache!2.cs" />
+    <Compile Include="zlib\zlibConst.cs" />
+    <Compile Include="zlib\Tree.cs" />
+    <Compile Include="zlib\SupportClass.cs" />
+    <Compile Include="MySql\Data\Types\IMySqlValue.cs" />
+    <Compile Include="MySql\Data\Types\MySqlDecimal.cs" />
+    <Compile Include="MySql\Data\Common\DBVersion.cs" />
+    <Compile Include="MySql\Data\MySqlClient\Driver.cs" />
+    <Compile Include="MySql\Data\MySqlClient\NativeDriver.cs" />
+    <Compile Include="MySql\Data\MySqlClient\ClientFlags.cs" />
+    <Compile Include="MySql\Data\MySqlClient\ServerStatusFlags.cs" />
+    <Compile Include="MySql\Data\MySqlClient\DBCmd.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlDbType.cs" />
+    <Compile Include="MySql\Data\MySqlClient\Field_Type.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlConnectionProtocol.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlDriverType.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="MySql\Data\MySqlClient\MySqlInfoMessageEventHandler.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlInfoMessageEventArgs.cs" />
+    <Compile Include="MySql\Data\MySqlClient\CompressedStream.cs" />
+    <Compile Include="zlib\Inflate.cs" />
+    <Compile Include="zlib\InfBlocks.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlParameterCollection.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlPromotableTransaction.cs" />
+    <Compile Include="MySql\Data\MySqlClient\DriverTransactionManager.cs" />
+    <Compile Include="MySql\Data\Common\Platform.cs" />
+    <Compile Include="MySql\Data\Common\SqlTokenizer.cs" />
+    <Compile Include="zlib\ZStreamException.cs" />
+    <Compile Include="zlib\StaticTree.cs" />
+    <Compile Include="MySql\Data\Types\MySqlDouble.cs" />
+    <Compile Include="MySql\Data\MySqlClient\Statement.cs" />
+    <Compile Include="MySql\Data\MySqlClient\PreparableStatement.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlParameter.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlParameterConverter.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="MySql\Data\MySqlClient\CharSetMap.cs" />
+    <Compile Include="MySql\Data\MySqlClient\CharacterSet.cs" />
+    <Compile Include="MySql\Data\Types\MySqlUByte.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlConnectionStringBuilder.cs" />
+    <Compile Include="MySql\Data\MySqlClient\ConnectionProtocolDescriptor.cs" />
+    <Compile Include="MySql\Data\MySqlClient\Keyword.cs" />
+    <Compile Include="MySql\Data\MySqlClient\Logger.cs" />
+    <Compile Include="MySql\Data\MySqlClient\SchemaProvider.cs" />
+    <Compile Include="MySql\Data\MySqlClient\ISSchemaProvider.cs" />
+    <Compile Include="MySql\Data\MySqlClient\Resources.cs" />
+    <Compile Include="MySql\Data\Types\MySqlConversionException.cs" />
+    <Compile Include="MySql\Data\MySqlClient\ColumnFlags.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlField.cs" />
+    <Compile Include="MySql\Data\Types\MySqlString.cs" />
+    <Compile Include="MySql\Data\Types\MySqlBinary.cs" />
+    <Compile Include="MySql\Data\Types\MetaData.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlClientFactory.cs" />
+    <Compile Include="MySql\Data\Common\SHA1Hash.cs" />
+    <Compile Include="zlib\ZInputStream.cs" />
+    <Compile Include="MySql\Data\Types\MySqlSingle.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlDataReader.cs" />
+    <Compile Include="MySql\Data\Common\StreamCreator.cs" />
+    <Compile Include="zlib\Deflate.cs" />
+    <Compile Include="MySql\Data\Types\MySqlByte.cs" />
+    <Compile Include="zlib\ZStream.cs" />
+    <Compile Include="zlib\InfTree.cs" />
+    <Compile Include="MySql\Data\Types\MySqlUInt16.cs" />
+    <Compile Include="MySql\Data\Types\MySqlInt16.cs" />
+    <Compile Include="MySql\Data\MySqlClient\PerformanceMonitor.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlException.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlCommandBuilder.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="MySql\Data\Types\MySqlDateTime.cs" />
+    <Compile Include="MySql\Data\Types\MySqlBit.cs" />
+    <Compile Include="MySql\Data\MySqlClient\StoredProcedure.cs" />
+    <Compile Include="MySql\Data\Common\NativeMethods.cs" />
+    <Compile Include="MySql\Data\MySqlClient\Crypt.cs" />
+    <Compile Include="MySql\Data\Common\ContextString.cs" />
+    <Compile Include="zlib\InfCodes.cs" />
+    <Compile Include="MySql\Data\Types\MySqlTimeSpan.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlHelper.cs" />
+    <Compile Include="zlib\ZOutputStream.cs" />
+    <Compile Include="zlib\Adler32.cs" />
+    <Compile Include="MySql\Data\MySqlClient\ProcedureCache.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlPoolManager.cs" />
+    <Compile Include="MySql\Data\MySqlClient\CustomInstaller.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="MySql\Data\Common\NamedPipeStream.cs" />
+    <Compile Include="MySql\Data\Types\MySqlUInt32.cs" />
+    <Compile Include="MySql\Data\Types\MySqlInt32.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlStream.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlPool.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlDataAdapter.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="MySql\Data\MySqlClient\MySqlRowUpdatingEventHandler.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlRowUpdatedEventHandler.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlRowUpdatingEventArgs.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlRowUpdatedEventArgs.cs" />
+    <Compile Include="MySql\Data\MySqlClient\UsageAdvisor.cs" />
+    <Compile Include="MySql\Data\Types\MySqlUInt64.cs" />
+    <Compile Include="MySql\Data\Types\MySqlInt64.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlTransaction.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlError.cs" />
+    <Compile Include="MySql\Data\MySqlClient\MySqlErrorCode.cs" />
+    <Compile Include="MySql\Data\Common\SharedMemoryStream.cs" />
+    <EmbeddedResource Include="MySql.Data.MySqlClient.Properties.ReservedWords.txt" />
+    <EmbeddedResource Include="MySql.Data.MySqlClient.Properties.Resources.resources" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+</Project>

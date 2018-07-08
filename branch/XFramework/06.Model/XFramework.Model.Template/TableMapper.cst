@@ -1,0 +1,290 @@
+﻿<%@ CodeTemplate Language="C#" TargetLanguage="C#"  ResponseEncoding="UTF-8" Description="映射文件" %>
+
+<%@ Property Name="NameSpace" Type="System.String" Category="Context" Description="实体命名空间" Optional="True" %>
+<%@ Property Name="SourceTable" Type="SchemaExplorer.TableSchema" Category="Context" Description="表" %>
+
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Assembly Src="Common.cs" %>
+
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System.Text" %>
+<%@ Import Namespace="System.Collections.Generic" %>
+<%@ Import Namespace="SchemaExplorer" %>
+<%@ Import Namespace="XTemplate" %>
+
+<?xml version="1.0" encoding="utf-8" ?>
+<EntityMapper  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<TableType>
+		<TableName><%= SourceTable.Name %></TableName>
+		<TypeFullName><%= string.Concat(NameSpace,".",Common.GetEntityName(SourceTable)) %></TypeFullName>
+	</TableType>
+	<Properties>
+	<%foreach(ColumnSchema column in SourceTable.Columns){%>
+		<Property>
+			<Name><%= column.Name%></Name>
+			<DbType><%= column.DataType %></DbType>
+			<NativeType><%= column.NativeType %></NativeType>
+			<Precision><%= column.Precision %></Precision>
+			<Scale><%= column.Scale %></Scale>
+			<Size><%= column.Size %></Size>
+		</Property>
+	<%} %>
+	</Properties>
+	<Keys>
+	<%if(SourceTable.HasPrimaryKey){%>
+	<%foreach(MemberColumnSchema column in SourceTable.PrimaryKey.MemberColumns){%>
+		<Property>
+			<Name><%= column.Name%></Name>
+			<DbType><%= column.DataType %></DbType>
+			<NativeType><%= column.NativeType %></NativeType>
+			<Precision><%= column.Precision %></Precision>
+			<Scale><%= column.Scale %></Scale>
+			<Size><%= column.Size %></Size>
+		</Property>
+	<%} %>
+	<%} %>
+	</Keys>
+	<%foreach(ColumnSchema column in SourceTable.Columns){%>
+	<%if(((bool)column.ExtendedProperties["CS_IsIdentity"].Value)) {%>
+	<Identity>
+			<Name><%= column.Name%></Name>
+			<DbType><%= column.DataType %></DbType>
+			<NativeType><%= column.NativeType %></NativeType>
+			<Precision><%= column.Precision %></Precision>
+			<Scale><%= column.Scale %></Scale>
+			<Size><%= column.Size %></Size>
+	</Identity>
+    <% break;}%>
+	<% }%>            
+	<Commands>
+		<Command>
+			<Key>Select</Key>
+			<CommandType>Text</CommandType>
+			<Text>
+ 			SELECT 
+            <%for(int i=0;i<SourceTable.Columns.Count;i++){%>
+            [<%= SourceTable.Columns[i].Name %>]<%if(i<SourceTable.Columns.Count-1){%>,<%}%>
+            <%} %>
+			FROM [<%= SourceTable.Name %>]
+			WHERE 1=1 #WHERE#
+			</Text>
+		</Command>
+		<Command>
+			<Key>SelectByPaging</Key>
+			<CommandType>Text</CommandType>
+			<Text>
+			SELECT
+				<%for(int i=0;i<SourceTable.Columns.Count;i++){%>
+				[<%= SourceTable.Columns[i].Name %>],
+				<%} %>
+				[XRecordCount],
+				[XRowNum]
+			FROM(
+				SELECT 
+					<%for(int i=0;i<SourceTable.Columns.Count;i++){%>
+					[<%= SourceTable.Columns[i].Name %>],
+					<%} %>
+					Count(*) Over() as [XRecordCount],
+					Row_Number() Over(Order By <%= FilterOrderBy(SourceTable) %>) as [XRowNum]
+				FROM [<%= SourceTable.Name %>]
+				WHERE 1=1 #WHERE#
+			) a WHERE [XRowNum] BETWEEN #BETWEEN#
+			</Text>
+		</Command>
+		<%if(SourceTable.HasPrimaryKey){%>
+		<Command>
+			<Key>SelectByKey</Key>
+			<CommandType>Text</CommandType>
+			<Text>
+ 			SELECT 
+            <%for(int i=0;i<SourceTable.Columns.Count;i++){%>
+            [<%= SourceTable.Columns[i].Name %>]<%if(i<SourceTable.Columns.Count-1){%>,<%}%>
+            <%} %>
+			FROM [<%= SourceTable.Name %>]
+			WHERE 1=1 		
+            <%foreach(MemberColumnSchema column in SourceTable.PrimaryKey.MemberColumns){%>
+            And [<%= column.Name %>]=@<%= column.Name %>
+			<%} %>
+			</Text>
+			<Parameters>			
+			<%foreach(MemberColumnSchema column in SourceTable.PrimaryKey.MemberColumns){%>
+				<Parameter>
+					<Name><%= column.Name%></Name>
+					<DbType><%= column.DataType %></DbType>
+					<NativeType><%= column.NativeType %></NativeType>
+					<Precision><%= column.Precision %></Precision>
+					<Scale><%= column.Scale %></Scale>
+					<Size><%= column.Size %></Size>
+				</Parameter>
+			<%} %>
+			</Parameters>
+		</Command>
+		<%} %>
+		<Command>
+			<Key>Update</Key>
+			<CommandType>Text</CommandType>
+			<Text>
+			UPDATE [<%= SourceTable.Name %>] SET
+			<% for (int i = 0; i < SourceTable.NonPrimaryKeyColumns.Count; i++) { %>
+					[<%= SourceTable.NonPrimaryKeyColumns[i].Name %>] = @<%= SourceTable.NonPrimaryKeyColumns[i].Name %><% if (i < SourceTable.NonPrimaryKeyColumns.Count - 1) { %>,<% } %>
+			<% } %>
+			WHERE 1=1  #WHERE#
+			</Text>
+			<Parameters>
+			<% for (int i = 0; i < SourceTable.NonPrimaryKeyColumns.Count; i++) { %>
+				<Parameter>
+					<Name><%= SourceTable.NonPrimaryKeyColumns[i].Name %></Name>
+					<DbType><%= SourceTable.NonPrimaryKeyColumns[i].DataType %></DbType>
+					<NativeType><%= SourceTable.NonPrimaryKeyColumns[i].NativeType %></NativeType>
+					<Precision><%= SourceTable.NonPrimaryKeyColumns[i].Precision %></Precision>
+					<Scale><%= SourceTable.NonPrimaryKeyColumns[i].Scale %></Scale>
+					<Size><%= SourceTable.NonPrimaryKeyColumns[i].Size %></Size>
+				</Parameter>
+			<% } %>
+			</Parameters>
+		</Command>
+		<%if(SourceTable.HasPrimaryKey){%>
+		<Command>
+			<Key>UpdateByKey</Key>
+			<CommandType>Text</CommandType>
+			<Text>
+			UPDATE [<%= SourceTable.Name %>] SET
+			<% for (int i = 0; i < SourceTable.NonPrimaryKeyColumns.Count; i++) { %>
+					[<%= SourceTable.NonPrimaryKeyColumns[i].Name %>] = @<%= SourceTable.NonPrimaryKeyColumns[i].Name %><% if (i < SourceTable.NonPrimaryKeyColumns.Count - 1) { %>,<% } %>
+			<% } %>
+			WHERE 1=1 		
+			<%foreach(MemberColumnSchema column in SourceTable.PrimaryKey.MemberColumns){%>
+			And [<%= column.Name %>]=@<%= column.Name %> 
+			<%} %>
+			</Text>
+			<Parameters>
+			<% for (int i = 0; i < SourceTable.NonPrimaryKeyColumns.Count; i++) { %>
+				<Parameter>
+					<Name><%= SourceTable.NonPrimaryKeyColumns[i].Name %></Name>
+					<DbType><%= SourceTable.NonPrimaryKeyColumns[i].DataType %></DbType>
+					<NativeType><%= SourceTable.NonPrimaryKeyColumns[i].NativeType %></NativeType>
+					<Precision><%= SourceTable.NonPrimaryKeyColumns[i].Precision %></Precision>
+					<Scale><%= SourceTable.NonPrimaryKeyColumns[i].Scale %></Scale>
+					<Size><%= SourceTable.NonPrimaryKeyColumns[i].Size %></Size>
+				</Parameter>
+			<% } %>
+			<%foreach(MemberColumnSchema column in SourceTable.PrimaryKey.MemberColumns){%>
+				<Parameter>
+					<Name><%= column.Name%></Name>
+					<DbType><%= column.DataType %></DbType>
+					<NativeType><%= column.NativeType %></NativeType>
+					<Precision><%= column.Precision %></Precision>
+					<Scale><%= column.Scale %></Scale>
+					<Size><%= column.Size %></Size>
+				</Parameter>
+			<%} %>
+    		</Parameters>
+		</Command>
+		<%} %>
+		<Command>
+			<Key>UpdateByExpr</Key>
+			<CommandType>Text</CommandType>
+			<Text>
+			UPDATE [<%= SourceTable.Name %>] SET
+			#SET#
+			WHERE 1=1  #WHERE#
+			</Text>
+		</Command>
+		<Command>
+			<Key>Insert</Key>
+			<CommandType>Text</CommandType>
+			<Text>            
+			<% List<ColumnSchema> sqlList = new List<ColumnSchema>();ColumnSchema c_Identity = null;; %>
+			<%foreach(ColumnSchema column in SourceTable.Columns){%>
+			<%if(!((bool)column.ExtendedProperties["CS_IsIdentity"].Value)){ sqlList.Add(column); }else{ c_Identity = column; } %>
+			<% }%>            
+			INSERT INTO [<%= SourceTable.Name %>](
+			<%for(int i=0;i<sqlList.Count;i++){%>
+					[<%= sqlList[i].Name %>]<% if (i < sqlList.Count - 1) { %>,<% } %>
+			<%}%>
+			) VALUES(
+			<%for(int i=0;i<sqlList.Count;i++){%>
+					@<%= sqlList[i].Name %><% if (i < sqlList.Count - 1) { %>,<% } %>
+			<%}%>
+			)
+			<%if(c_Identity != null ){%>SET @<%= c_Identity.Name %> = @@IDENTITY <%} %>
+			</Text>
+			<Parameters>
+			<%for(int i=0;i<sqlList.Count;i++){%>
+				<Parameter>
+					<Name><%= sqlList[i].Name %></Name>
+					<DbType><%= sqlList[i].DataType %></DbType>
+					<NativeType><%= sqlList[i].NativeType %></NativeType>
+					<Precision><%= sqlList[i].Precision %></Precision>
+					<Scale><%= sqlList[i].Scale %></Scale>
+					<Size><%= sqlList[i].Size %></Size>
+				</Parameter>
+			<%}%>
+			<%if(c_Identity != null){%>
+				<Parameter>
+					<Name><%= c_Identity.Name %></Name>
+					<DbType><%= c_Identity.DataType %></DbType>
+					<NativeType><%= c_Identity.NativeType %></NativeType>
+					<Precision><%= c_Identity.Precision %></Precision>
+					<Scale><%= c_Identity.Scale %></Scale>
+					<Size><%= 0 %></Size>
+					<Direction><%= "Output" %></Direction>
+				</Parameter>
+			<%} %>
+			</Parameters>
+		</Command>
+		<Command>
+			<Key>Delete</Key>
+			<CommandType>Text</CommandType>
+			<Text>
+			DELETE FROM [<%= SourceTable.Name %>]
+			WHERE 1=1  #WHERE#
+			</Text>
+		</Command>
+		<%if(SourceTable.HasPrimaryKey){%>
+		<Command>
+			<Key>DeleteByKey</Key>
+			<CommandType>Text</CommandType>
+			<Text>
+			DELETE FROM [<%= SourceTable.Name %>]
+			WHERE 1=1 
+			<%foreach(MemberColumnSchema column in SourceTable.PrimaryKey.MemberColumns){%>
+			And [<%= column.Name %>]=@<%= column.Name %> 
+			<%} %>
+			</Text>
+			<Parameters>		
+			<%foreach(MemberColumnSchema column in SourceTable.PrimaryKey.MemberColumns){%>
+				<Parameter>
+					<Name><%= column.Name %></Name>
+					<DbType><%= column.DataType %></DbType>
+					<NativeType><%= column.NativeType %></NativeType>
+					<Precision><%= column.Precision %></Precision>
+					<Scale><%= column.Scale %></Scale>
+					<Size><%= column.Size %></Size>
+				</Parameter>
+			<%} %>
+			</Parameters>
+		</Command>
+		<%} %>
+	</Commands>
+</EntityMapper>
+
+
+<script runat="template">
+        
+    //ORDER BY 不能比较或排序 text、ntext 和 image 数据类型，除非使用 IS NULL 或 LIKE 运算符。
+    public string FilterOrderBy(TableSchema table){
+        string filter="text|ntext|image|";
+        StringBuilder builder = new StringBuilder();
+        
+        for(int i=0;i<table.Columns.Count;i++){
+            string nativeType = table.Columns[i].NativeType ?? "";
+            if(filter.IndexOf(nativeType) < 0) {
+                builder.AppendFormat("[{0}],",table.Columns[i].Name);
+            }            
+        }
+        
+       return  builder.ToString().TrimEnd(',');
+    }
+        
+</script>

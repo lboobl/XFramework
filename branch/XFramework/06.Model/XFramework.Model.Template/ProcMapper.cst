@@ -1,0 +1,53 @@
+﻿<%@ CodeTemplate Language="C#" TargetLanguage="C#"  ResponseEncoding="UTF-8" Description="映射文件" %>
+
+<%@ Property Name="NameSpace" Type="System.String" Category="Context" Description="命名空间" Optional="True" %>
+<%@ Property Name="SourceCommand" Type="SchemaExplorer.CommandSchema" Optional="True" Category="" Description="存储过程" %>
+
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Assembly Src="Common.cs" %>
+
+<%@ Import Namespace="SchemaExplorer" %>
+<%@ Import Namespace="XTemplate" %>
+
+<?xml version="1.0" encoding="utf-8" ?>
+<EntityMapper  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<TableType>
+		<TableName><%= SourceCommand.Name %></TableName>
+		<TypeFullName><%= string.Concat(NameSpace,".Proc") %></TypeFullName>
+	</TableType>
+	<Properties>
+	<%foreach(ParameterSchema param in SourceCommand.Parameters){%>
+		<Property>
+			<Name><%= param.Name.Substring(1,param.Name.Length-1)%></Name>
+			<DbType><%= param.DataType %></DbType>
+			<NativeType><%= param.NativeType %></NativeType>
+			<Precision><%= param.Precision %></Precision>
+			<Scale><%= param.Scale %></Scale>
+			<Size><%= param.Size %></Size>
+		</Property>
+    <%} %>
+	</Properties>
+	<Keys>	
+	</Keys>
+	<Commands>
+    	<Command>
+    		<Key><%= SourceCommand.Name %></Key>
+    		<CommandType>StoredProcedure</CommandType>
+    		<Text><%= SourceCommand.Name %></Text>
+    		<Parameters>
+    		<%foreach(ParameterSchema param in SourceCommand.Parameters){%>
+            <%if(param.Name.Substring(1,param.Name.Length-1) == "RETURN_VALUE") continue; %>
+    			<Parameter>
+    				<Name><%= param.Name.Substring(1,param.Name.Length-1) %></Name>
+    				<DbType><%= param.DataType %></DbType>
+    				<NativeType><%= param.NativeType %></NativeType>
+    				<Precision><%= param.Precision %></Precision>
+    				<Scale><%= param.Scale %></Scale>
+    				<Direction><%= param.Direction %></Direction>
+    				<Size><%= param.Size %></Size>
+    			</Parameter>
+			<%} %>
+    		</Parameters>
+    	</Command>
+	</Commands>
+</EntityMapper>

@@ -1,0 +1,107 @@
+﻿<%@ CodeTemplate Language="C#" TargetLanguage="Text" Debug="True" %>
+<%--<%@ Property Name="SourceDatabase" Type="SchemaExplorer.DatabaseSchema" Optional="True" Default="" Category="" Description="数据库" %>--%>
+<%@ Property Name="TableCollection" Type="SchemaExplorer.TableSchemaCollection" Optional="True" Category="" Description="表集合" %><%--Filter="SourceTable"--%>
+<%--<%@ Property Name="CommandCollection" Type="SchemaExplorer.CommandSchemaCollection" Optional="True" Category="" Description="存储过程集合" %>--%>
+<%@ Property Name="NameSpace" Type="System.String" Default="HKERP.ETL.Model" Optional="False" Category="" Description="实体命名空间" %>
+<%@ Property Name="EntityDirectory" Type="System.String" Default="" Optional="True" Category="" Description="实体输出路径" Editor="System.Windows.Forms.Design.FolderNameEditor" EditorBase="System.Drawing.Design.UITypeEditor" %>
+<%@ Property Name="MapperDirectory" Type="System.String" Default="" Optional="True" Category="" Description="文件输出路径" Editor="System.Windows.Forms.Design.FolderNameEditor" EditorBase="System.Drawing.Design.UITypeEditor" %>
+
+<%@ Assembly Src="Common.cs" %>
+
+<%@ Import Namespace="System.IO" %>
+<%@ Import Namespace="System.Collections.Generic" %>
+<%@ Import Namespace="SchemaExplorer" %>
+<%@ Import Namespace="XTemplate" %>
+
+<%@ Register Name="TableModel" Template="TableModel.cst" %>
+<%@ Register Name="ProcModel" Template="ProcModel.cst" %>
+<%@ Register Name="TableMapper" Template="TableMapper.cst" %>
+<%@ Register Name="ProcMapper" Template="ProcMapper.cst" %>
+
+<%     
+    if(TableCollection != null){    
+        
+        List<string> names = new List<string>();
+        //输出表结构映射
+        foreach(TableSchema table in TableCollection){
+            RenderTableEntity(table);
+            RenderTableMapper(table);
+            names.Add(Common.GetEntityName(table));
+        }
+        
+        //添加到项目
+        DirectoryInfo d = new DirectoryInfo(EntityDirectory);
+        if(d.Parent!=null) Common.IncludeFile(d.Parent.FullName,names);
+    }
+    
+//    if(CommandCollection != null){    
+//        //输出表结构映射
+//        foreach(CommandSchema command in CommandCollection){
+//            //RenderProcEntity(command);
+//            RenderProcMapper(command);
+//        }
+//    }
+%>
+
+<script runat="template">
+    
+    //输出表结构实体类
+    public void RenderTableEntity(TableSchema table) {
+        
+        string path = string.Format(@"{0}\Table",EntityDirectory);
+        if(!Directory.Exists(path)) Directory.CreateDirectory(path);        
+        string fileName = string.Format(@"{0}\{1}.cs",path, Common.GetEntityName(table));
+        
+    	TableModel template = this.Create<TableModel>();
+    	template.NameSpace = NameSpace;
+    	template.SourceTable = table;
+    	template.RenderToFile(fileName, true);       
+        
+        Console.WriteLine(string.Format("已经完成 表 {0}  的 Entity 输出",table.Name));	
+    }
+    
+    //输出表结构映射文件
+    public void RenderTableMapper(TableSchema table) {
+        
+        string path = string.Format(@"{0}\Table",MapperDirectory);
+        if(!Directory.Exists(path)) Directory.CreateDirectory(path);        
+        string fileName = string.Format(@"{0}\{1}.xml",path, Common.GetEntityName(table));
+        
+    	TableMapper template = this.Create<TableMapper>();
+    	template.NameSpace = NameSpace;
+    	template.SourceTable = table;
+    	template.RenderToFile(fileName, true);
+        
+        Console.WriteLine(string.Format("已经完成 表 {0}  的 Mapper 输出",table.Name));	
+    }
+    
+//    //输出存储过程实体类
+//    public void RenderProcEntity(CommandSchema command) {
+//        
+//        string path = string.Format(@"{0}\Entity\Proc",OutputDirectory);
+//        if(!Directory.Exists(path)) Directory.CreateDirectory(path);        
+//        string fileName = string.Format(@"{0}\{1}.cs",path, command.Name);
+//        
+//    	ProcModel template = this.Create<ProcModel>();
+//    	template.NameSpace = NameSpace;
+//    	template.SourceCommand = command;
+//    	template.RenderToFile(fileName, true);
+//        Console.WriteLine(string.Format("已经完成 存储过程 {0}  的 Entity 输出",command.Name));	
+//    }
+    
+//    //输出存储过程映射文件
+//    public void RenderProcMapper(CommandSchema command) {
+//        
+//        string path = string.Format(@"{0}\Proc",MapperDirectory);
+//        if(!Directory.Exists(path)) Directory.CreateDirectory(path);        
+//        string fileName = string.Format(@"{0}\{1}.xml",path,command.Name);
+//        
+//    	ProcMapper template = this.Create<ProcMapper>();
+//    	template.NameSpace = NameSpace;
+//    	template.SourceCommand = command;
+//    	template.RenderToFile(fileName, true);
+//        
+//        Console.WriteLine(string.Format("已经完成 表 {0}  的 Mapper 输出",command.Name));	
+//    }
+    
+</script>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TXEnterprise.MediaInfo</name>
+    </assembly>
+    <members>
+        <member name="M:MediaInfoNET.MediaInfo_Stream_Video.Capture(System.String,System.String,System.String,System.String)">
+            <summary>
+            视频截图
+            </summary>
+            <param name="vImageFullName">输出图片路径</param>
+            <param name="vffmpeg">ffmpeg.exe完全路径</param>
+            <param name="size">输出尺寸</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
