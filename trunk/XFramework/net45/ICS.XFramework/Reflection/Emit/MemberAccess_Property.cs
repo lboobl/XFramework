@@ -53,8 +53,8 @@ namespace ICS.XFramework.Reflection.Emit
         private static Func<object, object> InitializeGetter(PropertyInfo pi)
         {
             MethodInfo mi = pi.GetGetMethod(true);
-            DynamicMethod method = new DynamicMethod(mi.Name, typeof(object), new Type[] { typeof(object) }, mi.Module);
-            ILGenerator g = method.GetILGenerator();
+            DynamicMethod dynamicMethod = new DynamicMethod(mi.Name, typeof(object), new Type[] { typeof(object) }, mi.Module);
+            ILGenerator g = dynamicMethod.GetILGenerator();
 
             if (!mi.IsStatic)
             {
@@ -66,15 +66,15 @@ namespace ICS.XFramework.Reflection.Emit
                 g.Emit(OpCodes.Box, mi.ReturnType); //Box if necessary
             g.Emit(OpCodes.Ret);
 
-            return method.CreateDelegate(typeof(Func<object, object>)) as Func<object, object>;
+            return dynamicMethod.CreateDelegate(typeof(Func<object, object>)) as Func<object, object>;
         }
 
         // 初始化 Set 动态方法
         private static Action<object, object> InitializeSetter(PropertyInfo property)
         {
             MethodInfo mi = property.GetSetMethod(true);
-            DynamicMethod method = new DynamicMethod(mi.Name, null, new Type[] { typeof(object), typeof(object) }, mi.Module);
-            ILGenerator g = method.GetILGenerator();
+            DynamicMethod dynamicMethod = new DynamicMethod(mi.Name, null, new Type[] { typeof(object), typeof(object) }, mi.Module);
+            ILGenerator g = dynamicMethod.GetILGenerator();
             Type paramType = mi.GetParameters()[0].ParameterType;
 
             if (!mi.IsStatic)
@@ -87,7 +87,7 @@ namespace ICS.XFramework.Reflection.Emit
             g.EmitCall(mi.IsVirtual ? OpCodes.Callvirt : OpCodes.Call, mi, null); //Set the property value
             g.Emit(OpCodes.Ret);
 
-            return method.CreateDelegate(typeof(Action<object, object>)) as Action<object, object>;
+            return dynamicMethod.CreateDelegate(typeof(Action<object, object>)) as Action<object, object>;
         }
     }
 }

@@ -17,6 +17,9 @@ namespace ICS.XFramework.UnitTest
 
         public static void Run()
         {
+            Inte_CRM.Account account = new Inte_CRM.Account();
+            List<Inte_CRM.Account> accounts = new List<Inte_CRM.Account>();
+            accounts.Add(account);
             //            AllowusedState state = AllowusedState.Enabled;
             //            //
             //            var context = new DataContext();

@@ -413,9 +413,9 @@ namespace ICS.XFramework.Data
         {
             // CRM_SaleOrder.Client 
             // Client.AccountList
-            Type pType = model.GetType();
-            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(pType);
-            if (string.IsNullOrEmpty(typeName)) typeName = pType.Name;
+            Type type = model.GetType();
+            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
+            if (string.IsNullOrEmpty(typeName)) typeName = type.Name;
 
             foreach (var kvp in _define.NavigationDescriptors)
             {
@@ -462,12 +462,13 @@ namespace ICS.XFramework.Data
                 }
                 else
                 {
-                    var addWrapper = navRuntime.GetWrapper("Add");
-                    if (addWrapper == null)
-                    {
-                        //navRuntime.Wrappers.Add();
-                    }
 
+                    //MethodInfo m = navType.GetMethod("Add", BindingFlags.Public | BindingFlags.Instance);
+                    //m.Invoke(list,new[] { navModel });
+                    //var m1 = new MemberAccess_Method(m);
+                    //m1.Invoke(list, navModel);
+                    var listRuntime = Reflection.TypeRuntimeInfoCache.GetRuntimeInfo(navType);
+                    var addWrapper = listRuntime.GetWrapper("Add");
                     addWrapper.Invoke(list, navModel);
                 }
 
@@ -478,8 +479,8 @@ namespace ICS.XFramework.Data
         private static Func<IDataRecord, object> GetDeserializer(Type modelType, IDataRecord reader, IDictionary<string, Column> columns = null, int start = 0, int? end = null)
         {
             string methodName = Guid.NewGuid().ToString();
-            DynamicMethod dm = new DynamicMethod(methodName, typeof(object), new[] { typeof(IDataRecord) }, true);
-            ILGenerator g = dm.GetILGenerator();
+            DynamicMethod dynamicMethod = new DynamicMethod(methodName, typeof(object), new[] { typeof(IDataRecord) }, true);
+            ILGenerator g = dynamicMethod.GetILGenerator();
             TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(modelType);
 
             var model = g.DeclareLocal(modelType);
@@ -543,7 +544,7 @@ namespace ICS.XFramework.Data
             g.Emit(OpCodes.Ldloc, model);
             g.Emit(OpCodes.Ret);
 
-            var func = (Func<IDataRecord, object>)dm.CreateDelegate(typeof(Func<IDataRecord, object>));
+            var func = (Func<IDataRecord, object>)dynamicMethod.CreateDelegate(typeof(Func<IDataRecord, object>));
             return func;
         }
 

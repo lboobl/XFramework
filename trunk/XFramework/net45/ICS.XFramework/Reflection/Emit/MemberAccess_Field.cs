@@ -51,8 +51,8 @@ namespace ICS.XFramework.Reflection.Emit
         {
             Type rpType = typeof(object);
             Type declaringType = fi.DeclaringType;
-            DynamicMethod method = new DynamicMethod(string.Empty, rpType, new Type[] { rpType }, declaringType);
-            ILGenerator g = method.GetILGenerator();
+            DynamicMethod dynamicMethod = new DynamicMethod(string.Empty, rpType, new Type[] { rpType }, declaringType);
+            ILGenerator g = dynamicMethod.GetILGenerator();
 
             // We need a reference to the current instance (stored in local argument index 1) 
             // so Ldfld can load from the correct instance (this one).
@@ -65,7 +65,7 @@ namespace ICS.XFramework.Reflection.Emit
                 g.Emit(OpCodes.Box, fi.FieldType);
             g.Emit(OpCodes.Ret);
 
-            return method.CreateDelegate(typeof(Func<object, object>)) as Func<object, object>;
+            return dynamicMethod.CreateDelegate(typeof(Func<object, object>)) as Func<object, object>;
         }
 
 

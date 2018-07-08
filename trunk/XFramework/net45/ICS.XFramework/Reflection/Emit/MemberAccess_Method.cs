@@ -38,31 +38,31 @@ namespace ICS.XFramework.Reflection.Emit
         // 初始化方法调用器
         private static Func<object, object[], object> InitializeInvoker(MethodInfo mi)
         {
-            DynamicMethod dm = mi.IsPublic
+            DynamicMethod dynamicMethod = mi.IsPublic
                 ? new DynamicMethod(mi.Name, typeof(object), new Type[2] { typeof(object), typeof(object[]) }, mi.Module)
                 : new DynamicMethod(mi.Name, typeof(object), new Type[2] { typeof(object), typeof(object[]) }, mi.DeclaringType);
 
-            ILGenerator g = dm.GetILGenerator();
+            ILGenerator g = dynamicMethod.GetILGenerator();
             ParameterInfo[] parameters = mi.GetParameters();
-            Type[] typeArray = new Type[parameters.Length + (!mi.IsStatic ? 1 : 0)];
+            Type[] parameterTypes = new Type[parameters.Length + (!mi.IsStatic ? 1 : 0)];
 
-            for (int index = 0; index < typeArray.Length; ++index)
+            for (int index = 0; index < parameterTypes.Length; ++index)
             {
-                typeArray[index] = index == parameters.Length
+                parameterTypes[index] = index == parameters.Length
                     ? mi.DeclaringType
                     : (parameters[index].ParameterType.IsByRef ? parameters[index].ParameterType.GetElementType() : parameters[index].ParameterType);
             }
-            LocalBuilder[] local = new LocalBuilder[typeArray.Length];
-            for (int index = 0; index < typeArray.Length; ++index)
+            LocalBuilder[] local = new LocalBuilder[parameterTypes.Length];
+            for (int index = 0; index < parameterTypes.Length; ++index)
             {
-                local[index] = g.DeclareLocal(typeArray[index], true);
+                local[index] = g.DeclareLocal(parameterTypes[index], true);
             }
             for (int index = 0; index < parameters.Length; ++index)
             {
                 g.Emit(OpCodes.Ldarg_1);
                 g.EmitInt(index);
                 g.Emit(OpCodes.Ldelem_Ref);
-                g.EmitCast(typeArray[index]);
+                g.EmitCast(parameterTypes[index]);
                 g.Emit(OpCodes.Stloc, local[index]);
             }
 
@@ -107,7 +107,29 @@ namespace ICS.XFramework.Reflection.Emit
             }
             g.Emit(OpCodes.Ret);
 
-            return dm.CreateDelegate(typeof(Func<object, object[], object>)) as Func<object, object[], object>;
+            return dynamicMethod.CreateDelegate(typeof(Func<object, object[], object>)) as Func<object, object[], object>;
         }
     }
 }
+
+
+
+
+//// 0x0FFC: 00
+//IL_0000: nop
+//// 0x0FFD: 73 A8 00 00 06
+//IL_0001: newobj instance void ICS.XFramework.UnitTest.Inte_CRM/Account::.ctor()
+//// 0x1002: 0A
+//IL_0006: stloc.0
+//    // 0x1003: 73 38 00 00 0A
+//IL_0007: newobj instance void class [mscorlib] System.Collections.Generic.List`1<class ICS.XFramework.UnitTest.Inte_CRM/Account>::.ctor()
+//    // 0x1008: 0B
+//IL_000c: stloc.1
+//	// 0x1009: 07
+//	IL_000d: ldloc.1
+//	// 0x100A: 06
+//	IL_000e: ldloc.0
+//	// 0x100B: 6F 39 00 00 0A
+//	IL_000f: callvirt instance void class [mscorlib] System.Collections.Generic.List`1<class ICS.XFramework.UnitTest.Inte_CRM/Account>::Add(!0)
+//    // 0x1010: 00
+//IL_0014: nop
