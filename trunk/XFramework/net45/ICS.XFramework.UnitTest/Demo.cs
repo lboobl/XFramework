@@ -17,26 +17,6 @@ namespace ICS.XFramework.UnitTest
 
         public static void Run()
         {
-            Inte_CRM.Account account = new Inte_CRM.Account();
-            List<Inte_CRM.Account> accounts = new List<Inte_CRM.Account>();
-            accounts.Add(account);
-            //            AllowusedState state = AllowusedState.Enabled;
-            //            //
-            //            var context = new DataContext();
-
-            //            System.Linq.Expressions.Expression<Func<Inte_CRM.CRM_SaleOrder, bool>> predicate = a =>
-            //                a.ClientId == 19432 && a.State == (byte)OrderState.WaitActive && a.PayDate != null && a.Allowused == (byte)state;
-
-            //            var sales = context.GetTable<Inte_CRM.CRM_SaleOrder>().Where(predicate).ToList();
-
-            //            string sql = @"
-            //            SELECT 
-            //            t0.[DemoId] AS [DemoId],
-            //            1 As Editable
-            //            FROM [Sys_Demo] t0";
-            //            var r1 = context.Provider.ExecuteList<Inte_CRM.Demo>(sql);
-            //
-
             // include 
             var context = new DataContext();
             var query7 =
@@ -891,5 +871,11 @@ namespace ICS.XFramework.UnitTest
             Console.ReadLine();
 
         }
+
+        public int Run2(int r)
+        {
+            return r;
+        }
+
     }
 }

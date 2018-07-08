@@ -38,10 +38,12 @@ namespace ICS.XFramework.Reflection.Emit
         // 初始化方法调用器
         private static Func<object, object[], object> InitializeInvoker(MethodInfo mi)
         {
-            DynamicMethod dynamicMethod = mi.IsPublic
-                ? new DynamicMethod(mi.Name, typeof(object), new Type[2] { typeof(object), typeof(object[]) }, mi.Module)
-                : new DynamicMethod(mi.Name, typeof(object), new Type[2] { typeof(object), typeof(object[]) }, mi.DeclaringType);
+            //DynamicMethod dynamicMethod = mi.IsPublic
+            //    ? new DynamicMethod(mi.Name, typeof(object), new Type[2] { typeof(object), typeof(object[]) }, typeof(TypeRuntimeInfoCache),true) //mi.Module)
+            //    : new DynamicMethod(mi.Name, typeof(object), new Type[2] { typeof(object), typeof(object[]) }, typeof(TypeRuntimeInfoCache), true);
 
+            // TypeDeserializer`1 动态调用List的方法
+            DynamicMethod dynamicMethod = new DynamicMethod(mi.Name, typeof(object), new Type[2] { typeof(object), typeof(object[]) }, typeof(TypeRuntimeInfoCache), true);
             ILGenerator g = dynamicMethod.GetILGenerator();
             ParameterInfo[] parameters = mi.GetParameters();
             Type[] parameterTypes = new Type[parameters.Length + (!mi.IsStatic ? 1 : 0)];

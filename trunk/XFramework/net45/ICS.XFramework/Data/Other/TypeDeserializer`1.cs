@@ -459,14 +459,11 @@ namespace ICS.XFramework.Data
                 if (list == null)
                 {
                     navWrapper.Set(model, navModel);
+                    //
+                    //
                 }
                 else
                 {
-
-                    //MethodInfo m = navType.GetMethod("Add", BindingFlags.Public | BindingFlags.Instance);
-                    //m.Invoke(list,new[] { navModel });
-                    //var m1 = new MemberAccess_Method(m);
-                    //m1.Invoke(list, navModel);
                     var listRuntime = Reflection.TypeRuntimeInfoCache.GetRuntimeInfo(navType);
                     var addWrapper = listRuntime.GetWrapper("Add");
                     addWrapper.Invoke(list, navModel);
