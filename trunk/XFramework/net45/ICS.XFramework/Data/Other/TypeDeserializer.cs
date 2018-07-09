@@ -256,8 +256,12 @@ namespace ICS.XFramework.Data
                                 // 取最后一个记录
                                 var wrapper1 = navTypeRuntime.GetWrapper("get_Count");
                                 int count = Convert.ToInt32(wrapper1.Invoke(pModel));
-                                var wrapper2 = navTypeRuntime.GetWrapper("get_Item");
-                                pModel = wrapper2.Invoke(pModel, count - 1);
+                                if (count > 0)
+                                {
+                                    var wrapper2 = navTypeRuntime.GetWrapper("get_Item");
+                                    pModel = wrapper2.Invoke(pModel, count - 1);
+                                }
+                                if (pModel == null) break;
                             }
 
                             pTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(pModel.GetType());
@@ -281,6 +285,9 @@ namespace ICS.XFramework.Data
                                 }
                                 else
                                 {
+                                    //
+                                    //
+                                    //
                                     break;
                                 }
                             }
