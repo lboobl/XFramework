@@ -30,7 +30,7 @@ namespace ICS.XFramework.UnitTest
                 select new Inte_CRM.CRM_SaleOrder
                 {
                     // OrderId = a.OrderId,
-                    //ClientId = a.ClientId,
+                    //ClientId = a.ClientId, 
                     Client = new Inte_CRM.Client
                     {
                         //AccountList = a.Client.AccountList,
