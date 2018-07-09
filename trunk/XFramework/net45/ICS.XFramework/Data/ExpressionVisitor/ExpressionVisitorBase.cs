@@ -377,8 +377,8 @@ namespace ICS.XFramework.Data
                 if (stack == null) stack = new Stack<KeyValuePair<string, MemberExpression>>();
                 MemberExpression memberExpression = node as MemberExpression;
 
-                var runtime = TypeRuntimeInfoCache.GetRuntimeInfo(memberExpression.Expression.Type);
-                ForeignKeyAttribute attribute = runtime.GetWrapperAttribute<ForeignKeyAttribute>(memberExpression.Member.Name);
+                TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(memberExpression.Expression.Type);
+                ForeignKeyAttribute attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(memberExpression.Member.Name);
                 if (attribute == null) break;
 
                 string key = memberExpression.GetKeyWidthoutAnonymous();
@@ -396,9 +396,9 @@ namespace ICS.XFramework.Data
                     Type type = m.Type;
                     if (type.IsGenericType) type = type.GetGenericArguments()[0];
 
-                    var runtime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
+                    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
                     // 检查查询表达式是否显示指定该表关联
-                    string alias = _aliases.GetJoinTableAlias(runtime.TableName);
+                    string alias = _aliases.GetJoinTableAlias(typeRuntime.TableName);
                     if (string.IsNullOrEmpty(alias))
                     {
                         // 如果没有，则使用导航属性别名

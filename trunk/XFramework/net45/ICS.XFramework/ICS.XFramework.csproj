@@ -129,6 +129,7 @@
     <Compile Include="Data\Other\NavigationDescriptorCollection.cs" />
     <Compile Include="Data\Other\Null.cs" />
     <Compile Include="Data\Other\SqlMethod.cs" />
+    <Compile Include="Data\Other\TypeDeserializer.cs" />
     <Compile Include="Data\Other\TypeDeserializer`1.cs" />
     <Compile Include="Data\SqlBuilder.cs" />
     <Compile Include="Data\SqlClient\DbQueryProvider.cs" />

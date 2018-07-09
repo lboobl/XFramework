@@ -391,7 +391,7 @@ namespace ICS.XFramework.Data.SqlClient
         protected override CommandBase ParseInsertCommand<T>(DbQueryableInfo_Insert<T> qInsert)
         {
             SqlBuilder builder = new SqlBuilder(this);
-            var rInfo = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
             TableAliasCache aliases = new TableAliasCache();
 
             if (qInsert.Entity != null)
@@ -400,7 +400,7 @@ namespace ICS.XFramework.Data.SqlClient
                 SqlBuilder columns = new SqlBuilder(this);
                 SqlBuilder values = new SqlBuilder(this);
 
-                foreach (var kv in rInfo.Wrappers)
+                foreach (var kv in typeRuntime.Wrappers)
                 {
                     var wrapper = kv.Value as MemberAccessWrapper;
                     var column = wrapper.Column;
@@ -424,7 +424,7 @@ namespace ICS.XFramework.Data.SqlClient
                 if (qInsert.Bulk == null || !qInsert.Bulk.OnlyValue)
                 {
                     builder.Append("INSERT INTO ");
-                    builder.AppendMember(rInfo.TableName);
+                    builder.AppendMember(typeRuntime.TableName);
                     builder.AppendNewLine();
                     builder.Append('(');
                     builder.Append(columns);
@@ -448,7 +448,7 @@ namespace ICS.XFramework.Data.SqlClient
             else if (qInsert.SelectInfo != null)
             {
                 builder.Append("INSERT INTO ");
-                builder.AppendMember(rInfo.TableName);
+                builder.AppendMember(typeRuntime.TableName);
                 builder.Append('(');
 
                 CommandDefinition sc = this.ParseSelectCommand(qInsert.SelectInfo) as CommandDefinition;
@@ -477,12 +477,12 @@ namespace ICS.XFramework.Data.SqlClient
         // 创建 DELETE 命令
         protected override CommandBase ParseDeleteCommand<T>(DbQueryableInfo_Delete<T> qDelete)
         {
-            var rInfo = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
             SqlBuilder builder = new SqlBuilder(this);
             bool useKey = false;
 
             builder.Append("DELETE t0 FROM ");
-            builder.AppendMember(rInfo.TableName);
+            builder.AppendMember(typeRuntime.TableName);
             builder.Append(" t0 ");
 
             if (qDelete.Entity != null)
@@ -492,7 +492,7 @@ namespace ICS.XFramework.Data.SqlClient
                 builder.AppendNewLine();
                 builder.Append("WHERE ");
 
-                foreach (var kv in rInfo.Wrappers)
+                foreach (var kv in typeRuntime.Wrappers)
                 {
                     var wrapper = kv.Value as MemberAccessWrapper;
                     var column = wrapper.Column;
@@ -534,7 +534,7 @@ namespace ICS.XFramework.Data.SqlClient
         protected override CommandBase ParseUpdateCommand<T>(DbQueryableInfo_Update<T> qUpdate)
         {
             SqlBuilder builder = new SqlBuilder(this);
-            var rInfo = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+            var typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
 
             builder.Append("UPDATE t0 SET");
             builder.AppendNewLine();
@@ -546,7 +546,7 @@ namespace ICS.XFramework.Data.SqlClient
                 bool useKey = false;
                 int length = 0;
 
-                foreach (var kv in rInfo.Wrappers)
+                foreach (var kv in typeRuntime.Wrappers)
                 {
                     var wrapper = kv.Value as MemberAccessWrapper;
                     var column = wrapper.Column;
@@ -581,7 +581,7 @@ namespace ICS.XFramework.Data.SqlClient
 
                 builder.AppendNewLine();
                 builder.Append("FROM ");
-                builder.AppendMember(rInfo.TableName);
+                builder.AppendMember(typeRuntime.TableName);
                 builder.Append(" t0");
 
 
@@ -599,7 +599,7 @@ namespace ICS.XFramework.Data.SqlClient
 
                 builder.AppendNewLine();
                 builder.Append("FROM ");
-                builder.AppendMember(rInfo.TableName);
+                builder.AppendMember(typeRuntime.TableName);
                 builder.AppendAs("t0");
 
                 var sc = new CommandDefinition.CommandBuilder(this, aliases);

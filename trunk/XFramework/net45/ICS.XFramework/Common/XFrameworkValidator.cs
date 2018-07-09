@@ -29,8 +29,8 @@ namespace ICS.XFramework
         private static IDictionary<ValidationContext, object> GetPropertyValues(object instance, ValidationContext context)
         {
             IDictionary<ValidationContext, object> result = new Dictionary<ValidationContext, object>();
-            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(instance.GetType());
-            foreach (var kv in runtime.Wrappers)
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(instance.GetType());
+            foreach (var kv in typeRuntime.Wrappers)
             {
                 var wrapper = kv.Value;
                 if (wrapper.PropertyInfo != null)

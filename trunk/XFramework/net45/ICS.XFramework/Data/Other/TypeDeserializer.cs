@@ -10,10 +10,44 @@ using ICS.XFramework.Reflection.Emit;
 
 namespace ICS.XFramework.Data
 {
+    public class TypeDeserializer
+    {
+        private IDataReader _reader = null;
+        private CommandDefinition _define = null;
+        private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
+        private Func<IDataRecord, object> _modelDeserializer = null;
+
+        public TypeDeserializer(IDataReader reader, CommandDefinition define)
+        {
+            _define = define;
+            _reader = reader;
+            _deserializers = new Dictionary<string, Func<IDataRecord, object>>(8);
+        }
+
+        /// <summary>
+        /// 反序列化单个实体
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T Deserialize<T>()
+        {
+            T prevModel = default(T);
+            List<T> collection = new List<T>();
+            TypeDeserializer<T> deserializer = new TypeDeserializer<T>(_reader, _define as CommandDefinition);
+            while (_reader.Read())
+            {
+                T model = deserializer.Deserialize();
+                if (_define == null || _define.NavigationDescriptors == null || _define.NavigationDescriptors.Count == 0) return model;
+            }
+
+            return prevModel;
+        }
+    }
+
     /// <summary>
     /// 单个实体反序列化
     /// </summary>
-    public class TypeDeserializer<T>
+    public class TypeDeserializer1<T>
     {
         static MethodInfo _isDBNull = typeof(IDataRecord).GetMethod("IsDBNull", new Type[] { typeof(int) });
         static MethodInfo _getFieldType = typeof(IDataRecord).GetMethod("GetFieldType", new Type[] { typeof(int) });
@@ -36,7 +70,7 @@ namespace ICS.XFramework.Data
         private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
         private Func<IDataRecord, object> _modelDeserializer = null;
 
-        public TypeDeserializer(IDataReader reader, CommandDefinition define)
+        public TypeDeserializer1(IDataReader reader, CommandDefinition define)
         {
             _define = define;
             _reader = reader;
@@ -79,9 +113,9 @@ namespace ICS.XFramework.Data
 
             #region 匿名类型
 
-            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
-            ICS.XFramework.Reflection.Emit.ConstructorInvoker ctor = runtime.ConstructInvoker;
-            if (runtime.IsAnonymousType)
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+            ConstructorInvoker ctor = typeRuntime.ConstructInvoker;
+            if (typeRuntime.IsAnonymousType)
             {
                 object[] values = new object[_reader.FieldCount];
                 _reader.GetValues(values);
@@ -104,7 +138,7 @@ namespace ICS.XFramework.Data
                 model = (T)_modelDeserializer(_reader);
             }
             else if (_define.NavigationDescriptors != null && _define.NavigationDescriptors.Count == 0)
-            {
+            {                
                 // 直接跑SQL,则不解析导航属性
                 if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader, _define.Columns, 0);
                 model = (T)_modelDeserializer(_reader);
@@ -116,7 +150,8 @@ namespace ICS.XFramework.Data
                 model = (T)_modelDeserializer(_reader);
 
                 // 递归导航属性
-                this.Deserialize_Navigation(model, string.Empty);
+                List<TypeRuntimeInfo> typeRuntimes = new List<TypeRuntimeInfo>();
+                this.Deserialize_Navigation(model, typeRuntimes);
             }
 
             return model;
@@ -125,13 +160,13 @@ namespace ICS.XFramework.Data
         }
 
         // 导航属性
-        private void Deserialize_Navigation(object model, string typeName)
+        private void Deserialize_Navigation(object model, List<TypeRuntimeInfo> typeRuntimes)//, string typeName)
         {
             // CRM_SaleOrder.Client 
             // Client.AccountList
             Type type = model.GetType();
-            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
-            if (string.IsNullOrEmpty(typeName)) typeName = type.Name;
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
+            if (typeRuntimes.Count == 0) typeRuntimes.Add(typeRuntime);
 
             foreach (var kvp in _define.NavigationDescriptors)
             {
@@ -144,16 +179,18 @@ namespace ICS.XFramework.Data
                     end = descriptor.Start + descriptor.FieldCount;
                 }
 
-                string keyName = typeName + "." + descriptor.Name;
+                string keyName = string.Join(".", typeRuntimes.Select(x => x.Type.Name)) + "." + descriptor.Name;
                 if (keyName != kvp.Key) continue;
 
-                var navWrapper = runtime.GetWrapper(descriptor.Name);
+                var navWrapper = typeRuntime.GetWrapper(descriptor.Name);
                 if (navWrapper == null) continue;
 
                 Type navType = navWrapper.DataType;
-                Func<IDataRecord, object> deserializer = null;
                 TypeRuntimeInfo navRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navType);
+                typeRuntimes.Add(navRuntime);
+
                 object list = null;
+                Func<IDataRecord, object> deserializer = null;
                 if (navType.IsGenericType && navType.Name == "List`1")
                 {
                     // 1：n关系，导航属性为 List<T>
@@ -185,7 +222,7 @@ namespace ICS.XFramework.Data
                     addWrapper.Invoke(list, navModel);
                 }
 
-                if (navRuntime.NavWrappers.Count > 0) Deserialize_Navigation(navModel, keyName);
+                if (navRuntime.NavWrappers.Count > 0) Deserialize_Navigation(navModel, typeRuntimes);
             }
         }
 
@@ -194,10 +231,10 @@ namespace ICS.XFramework.Data
             string methodName = Guid.NewGuid().ToString();
             DynamicMethod dynamicMethod = new DynamicMethod(methodName, typeof(object), new[] { typeof(IDataRecord) }, true);
             ILGenerator g = dynamicMethod.GetILGenerator();
-            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(modelType);
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(modelType);
 
             var model = g.DeclareLocal(modelType);
-            g.Emit(OpCodes.Newobj, runtime.ConstructInvoker.Constructor);
+            g.Emit(OpCodes.Newobj, typeRuntime.ConstructInvoker.Constructor);
             g.Emit(OpCodes.Stloc, model);
 
             if (end == null) end = reader.FieldCount;
@@ -211,7 +248,7 @@ namespace ICS.XFramework.Data
                     keyName = column != null ? column.Name : string.Empty;
                 }
 
-                var wrapper = runtime.GetWrapper(keyName);// as MemberAccessWrapper;
+                var wrapper = typeRuntime.GetWrapper(keyName);// as MemberAccessWrapper;
                 if (wrapper == null) continue;
 
                 var isDBNullLabel = g.DefineLabel();
@@ -304,5 +341,5 @@ namespace ICS.XFramework.Data
             //uniqueidentifier	Guid
             //Variant	Object
         }
-    }
+    } 
 }

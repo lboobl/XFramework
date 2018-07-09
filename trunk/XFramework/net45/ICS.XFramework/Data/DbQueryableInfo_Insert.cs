@@ -44,8 +44,8 @@ namespace ICS.XFramework.Data
         // 初始化自增列信息
         private void InitializeIdentity()
         {
-            var rInfo = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
-            _autoIncrement = rInfo.Wrappers.FirstOrDefault(x =>
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+            _autoIncrement = typeRuntime.Wrappers.FirstOrDefault(x =>
             {
                 var column = (x.Value as MemberAccessWrapper).Column;
                 return column != null && column.IsIdentity;

@@ -389,8 +389,8 @@ namespace ICS.XFramework.Data
         // 选择所有的字段
         private Expression VisitAllMember(Type type, string alias, Expression node = null)
         {
-            TypeRuntimeInfo runtimeInfo = TypeRuntimeInfoCache.GetRuntimeInfo(type);
-            Dictionary<string, ICS.XFramework.Reflection.MemberAccessWrapper> wrappers = runtimeInfo.Wrappers;
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
+            Dictionary<string, Reflection.MemberAccessWrapper> wrappers = typeRuntime.Wrappers;
 
             //Fixed issue# 匿名类的字段不能Set
             //runtimeInfo.IsAnonymousType
@@ -458,8 +458,8 @@ namespace ICS.XFramework.Data
                 while (memberExpression != null)
                 {
                     // a.Client 要求 <Client> 必须标明 ForeignKeyAttribute
-                    var runtime = TypeRuntimeInfoCache.GetRuntimeInfo(memberExpression.Expression.Type);
-                    ForeignKeyAttribute attribute = runtime.GetWrapperAttribute<ForeignKeyAttribute>(memberExpression.Member.Name);
+                    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(memberExpression.Expression.Type);
+                    ForeignKeyAttribute attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(memberExpression.Member.Name);
                     if (attribute == null) throw new XFrameworkException("Include member {{{0}}} must mark ForeignKeyAttribute.", memberExpression);
 
                     chain.Add(memberExpression);

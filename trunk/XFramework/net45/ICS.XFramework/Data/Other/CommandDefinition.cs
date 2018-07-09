@@ -154,8 +154,8 @@ namespace ICS.XFramework.Data
                 {
                     string key = kvp.Key;
                     MemberExpression m = kvp.Value;
-                    var runtime = TypeRuntimeInfoCache.GetRuntimeInfo(m.Expression.Type);
-                    ForeignKeyAttribute attribute = runtime.GetWrapperAttribute<ForeignKeyAttribute>(m.Member.Name);
+                    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(m.Expression.Type);
+                    ForeignKeyAttribute attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(m.Member.Name);
 
                     string innerKey = string.Empty;
                     string outerKey = key;
@@ -186,10 +186,9 @@ namespace ICS.XFramework.Data
 
                     builder.AppendNewLine();
                     builder.Append("LEFT JOIN ");
-                    Type pType = m.Type;
-                    //不实现一对多映射
-                    if (pType.IsGenericType) pType = pType.GetGenericArguments()[0];
-                    builder.AppendMember(TypeRuntimeInfoCache.GetRuntimeInfo(pType).TableName);
+                    Type type = m.Type;
+                    if (type.IsGenericType) type = type.GetGenericArguments()[0];
+                    builder.AppendMember(TypeRuntimeInfoCache.GetRuntimeInfo(type).TableName);
                     builder.Append(" ");
                     builder.Append(alias2);
                     builder.Append(" ON ");
