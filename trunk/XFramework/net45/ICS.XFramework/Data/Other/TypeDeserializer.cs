@@ -294,15 +294,15 @@ namespace ICS.XFramework.Data
             }
         }
 
-        private static Func<IDataRecord, object> GetDeserializer(Type modelType, IDataRecord reader, IDictionary<string, Column> columns = null, int start = 0, int? end = null)
+        static Func<IDataRecord, object> GetDeserializer(Type type, IDataRecord reader, IDictionary<string, Column> columns = null, int start = 0, int? end = null)
         {
             string methodName = Guid.NewGuid().ToString();
             DynamicMethod dynamicMethod = new DynamicMethod(methodName, typeof(object), new[] { typeof(IDataRecord) }, true);
             ILGenerator g = dynamicMethod.GetILGenerator();
-            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(modelType);
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
 
-            var model = g.DeclareLocal(modelType);
-            g.Emit(OpCodes.Newobj, runtime.ConstructInvoker.Constructor);
+            var model = g.DeclareLocal(type);
+            g.Emit(OpCodes.Newobj, typeRuntime.ConstructInvoker.Constructor);
             g.Emit(OpCodes.Stloc, model);
 
             if (end == null) end = reader.FieldCount;
@@ -316,7 +316,7 @@ namespace ICS.XFramework.Data
                     keyName = column != null ? column.Name : string.Empty;
                 }
 
-                var wrapper = runtime.GetWrapper(keyName);// as MemberAccessWrapper;
+                var wrapper = typeRuntime.GetWrapper(keyName);
                 if (wrapper == null) continue;
 
                 var isDBNullLabel = g.DefineLabel();
@@ -325,19 +325,21 @@ namespace ICS.XFramework.Data
                 g.Emit(OpCodes.Callvirt, _isDBNull);
                 g.Emit(OpCodes.Brtrue, isDBNullLabel);
 
+
+
                 // member的类型可能与数据库中查出来的数据类型不一样
                 // 如 boolean，数据库类型 是int
-                var m_method = GetReaderMethod(reader.GetFieldType(index));
+                var method = GetReaderMethod(reader.GetFieldType(index));
                 g.Emit(OpCodes.Ldloc, model);
                 g.Emit(OpCodes.Ldarg_0);
                 g.Emit(OpCodes.Ldc_I4, index);
-                g.Emit(OpCodes.Callvirt, m_method);
+                g.Emit(OpCodes.Callvirt, method);
 
                 Type memberType = wrapper.DataType;
                 Type nullUnderlyingType = memberType.IsGenericType ? Nullable.GetUnderlyingType(memberType) : null;
                 Type unboxType = nullUnderlyingType != null ? nullUnderlyingType : memberType;
 
-                if (unboxType == typeof(byte[]) || (m_method == _getValue && memberType != typeof(object)))
+                if (unboxType == typeof(byte[]) || (method == _getValue && memberType != typeof(object)))
                 {
                     g.Emit(OpCodes.Castclass, memberType);
                 }
