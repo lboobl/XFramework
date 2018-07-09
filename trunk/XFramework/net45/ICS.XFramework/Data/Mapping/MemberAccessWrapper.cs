@@ -31,7 +31,7 @@ namespace ICS.XFramework.Data
         }
 
         /// <summary>
-        /// 列特性
+        /// 外键列特性
         /// </summary>
         public ForeignKeyAttribute ForeignKey
         {

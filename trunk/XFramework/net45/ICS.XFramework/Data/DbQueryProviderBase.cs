@@ -408,8 +408,10 @@ namespace ICS.XFramework.Data
             {
                 reader = this.ExecuteReader(cmd);
                 conn = cmd != null ? cmd.Connection : null;
-                TypeDeserializer<T> deserializer = new TypeDeserializer<T>(reader, define as CommandDefinition);
-                if (reader.Read()) TResult = deserializer.Deserialize();
+                TypeDeserializer deserializer = new TypeDeserializer(reader, define as CommandDefinition);
+                TResult = deserializer.Deserialize<T>();
+                //TypeDeserializer<T> deserializer = new TypeDeserializer<T>(reader, define as CommandDefinition);
+                //if (reader.Read()) TResult = deserializer.Deserialize();
                 return TResult;
             }
             finally

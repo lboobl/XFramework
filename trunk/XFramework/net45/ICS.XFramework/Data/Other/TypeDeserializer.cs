@@ -10,12 +10,14 @@ using ICS.XFramework.Reflection.Emit;
 
 namespace ICS.XFramework.Data
 {
+    /// <summary>
+    /// <see cref="IDataReader"/> 转实体反序列化器
+    /// </summary>
     public class TypeDeserializer
     {
         private IDataReader _reader = null;
         private CommandDefinition _define = null;
         private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
-        private Func<IDataRecord, object> _modelDeserializer = null;
 
         public TypeDeserializer(IDataReader reader, CommandDefinition define)
         {
@@ -27,27 +29,34 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 反序列化单个实体
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
         public T Deserialize<T>()
         {
-            T prevModel = default(T);
+            bool isLine = false;
+            object prevLine = null;
             List<T> collection = new List<T>();
-            TypeDeserializer<T> deserializer = new TypeDeserializer<T>(_reader, _define as CommandDefinition);
+            TypeDeserializer1<T> deserializer = new TypeDeserializer1<T>(_reader, _define as CommandDefinition);
             while (_reader.Read())
             {
-                T model = deserializer.Deserialize();
-                if (_define == null || _define.NavigationDescriptors == null || _define.NavigationDescriptors.Count == 0) return model;
+                T model = deserializer.Deserialize(prevLine, out isLine);
+                if (_define == null || _define.NavigationDescriptors == null || _define.NavigationDescriptors.Count == 0)
+                {
+                    // 不需要加载导航属性
+                    return model;
+                }
+
+                if (!isLine && prevLine != null) break;
+                else collection.Add(model);
+                prevLine = model;
             }
 
-            return prevModel;
+            return collection.FirstOrDefault<T>();
         }
     }
 
     /// <summary>
     /// 单个实体反序列化
     /// </summary>
-    public class TypeDeserializer1<T>
+    internal class TypeDeserializer1<T>
     {
         static MethodInfo _isDBNull = typeof(IDataRecord).GetMethod("IsDBNull", new Type[] { typeof(int) });
         static MethodInfo _getFieldType = typeof(IDataRecord).GetMethod("GetFieldType", new Type[] { typeof(int) });
@@ -70,19 +79,21 @@ namespace ICS.XFramework.Data
         private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
         private Func<IDataRecord, object> _modelDeserializer = null;
 
-        public TypeDeserializer1(IDataReader reader, CommandDefinition define)
+        internal TypeDeserializer1(IDataReader reader, CommandDefinition define)
         {
-            _define = define;
             _reader = reader;
+            _define = define;
             _deserializers = new Dictionary<string, Func<IDataRecord, object>>(8);
         }
 
         /// <summary>
         /// 将 <see cref="IDataRecord"/> 上的当前行反序列化为实体
         /// </summary>
-        /// <returns></returns>
-        public T Deserialize()
+        /// <param name="prevModel">前一行数据</param>
+        public T Deserialize(object prevModel, out bool isLine)
         {
+            isLine = false;
+
             #region 基元类型
 
             if (Reflection.TypeUtils.IsPrimitive(typeof(T)))
@@ -113,9 +124,9 @@ namespace ICS.XFramework.Data
 
             #region 匿名类型
 
-            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
-            ConstructorInvoker ctor = typeRuntime.ConstructInvoker;
-            if (typeRuntime.IsAnonymousType)
+            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+            ICS.XFramework.Reflection.Emit.ConstructorInvoker ctor = runtime.ConstructInvoker;
+            if (runtime.IsAnonymousType)
             {
                 object[] values = new object[_reader.FieldCount];
                 _reader.GetValues(values);
@@ -138,7 +149,7 @@ namespace ICS.XFramework.Data
                 model = (T)_modelDeserializer(_reader);
             }
             else if (_define.NavigationDescriptors != null && _define.NavigationDescriptors.Count == 0)
-            {                
+            {
                 // 直接跑SQL,则不解析导航属性
                 if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader, _define.Columns, 0);
                 model = (T)_modelDeserializer(_reader);
@@ -150,8 +161,7 @@ namespace ICS.XFramework.Data
                 model = (T)_modelDeserializer(_reader);
 
                 // 递归导航属性
-                List<TypeRuntimeInfo> typeRuntimes = new List<TypeRuntimeInfo>();
-                this.Deserialize_Navigation(model, typeRuntimes);
+                this.Deserialize_Navigation(prevModel, model, string.Empty, out isLine);
             }
 
             return model;
@@ -160,13 +170,16 @@ namespace ICS.XFramework.Data
         }
 
         // 导航属性
-        private void Deserialize_Navigation(object model, List<TypeRuntimeInfo> typeRuntimes)//, string typeName)
+        // @prevLine 前一行数据
+        // @isLine   是否同一行数据<同一父级>
+        private void Deserialize_Navigation(object prevModel, object model, string typeName, out bool isLine)
         {
             // CRM_SaleOrder.Client 
-            // Client.AccountList
+            // CRM_SaleOrder.Client.AccountList
+            isLine = false;
             Type type = model.GetType();
             TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
-            if (typeRuntimes.Count == 0) typeRuntimes.Add(typeRuntime);
+            if (string.IsNullOrEmpty(typeName)) typeName = type.Name;
 
             foreach (var kvp in _define.NavigationDescriptors)
             {
@@ -179,25 +192,23 @@ namespace ICS.XFramework.Data
                     end = descriptor.Start + descriptor.FieldCount;
                 }
 
-                string keyName = string.Join(".", typeRuntimes.Select(x => x.Type.Name)) + "." + descriptor.Name;
+                string keyName = typeName + "." + descriptor.Name;
                 if (keyName != kvp.Key) continue;
 
                 var navWrapper = typeRuntime.GetWrapper(descriptor.Name);
                 if (navWrapper == null) continue;
 
                 Type navType = navWrapper.DataType;
-                TypeRuntimeInfo navRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navType);
-                typeRuntimes.Add(navRuntime);
-
-                object list = null;
                 Func<IDataRecord, object> deserializer = null;
+                TypeRuntimeInfo navTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navType);
+                object list = null;
                 if (navType.IsGenericType && navType.Name == "List`1")
                 {
                     // 1：n关系，导航属性为 List<T>
                     list = navWrapper.Get(model);
                     if (list == null)
                     {
-                        list = navRuntime.ConstructInvoker.Invoke();
+                        list = navTypeRuntime.ConstructInvoker.Invoke();
                         navWrapper.Set(model, list);
                     }
                 }
@@ -214,15 +225,72 @@ namespace ICS.XFramework.Data
                     navWrapper.Set(model, navModel);
                     //
                     //
+                    // 
                 }
                 else
                 {
-                    var listRuntime = Reflection.TypeRuntimeInfoCache.GetRuntimeInfo(navType);
-                    var addWrapper = listRuntime.GetWrapper("Add");
-                    addWrapper.Invoke(list, navModel);
+                    var method = navTypeRuntime.GetWrapper("Add");
+                    TypeRuntimeInfo itemTypeRuntimeInfo = TypeRuntimeInfoCache.GetRuntimeInfo(navModel.GetType());
+
+                    method.Invoke(list, navModel);
+
+                    #region 合并列表
+
+                    // 合并列表 
+                    if (prevModel != null)
+                    {
+                        // 例：CRM_SaleOrder.Client.AccountList
+                        string[] keys = keyName.Split('.');
+                        TypeRuntimeInfo pTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+                        Reflection.MemberAccessWrapper pWrapper = null;
+                        object pModel = prevModel;
+                        object prevList = null;
+
+                        for (int i = 1; i < keys.Length; i++)
+                        {
+                            pWrapper = pTypeRuntime.GetWrapper(keys[i]);
+                            pModel = pWrapper.Get(pModel);
+                            if (i == keys.Length - 1) prevList = pModel;
+                            if (pModel.GetType().Name == "List`1")
+                            {
+                                // 取最后一个记录
+                                var wrapper1 = navTypeRuntime.GetWrapper("get_Count");
+                                int count = Convert.ToInt32(wrapper1.Invoke(pModel));
+                                var wrapper2 = navTypeRuntime.GetWrapper("get_Item");
+                                pModel = wrapper2.Invoke(pModel, count - 1);
+                            }
+
+                            pTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(pModel.GetType());
+                        }
+
+                        var foreignKey = (navWrapper as MemberAccessWrapper).ForeignKey;
+                        if (foreignKey != null && pModel != null)
+                        {
+                            bool isLine1 = true;
+                            for (int i = 0; i < foreignKey.InnerKeys.Length; i++)
+                            {
+                                object innerKey = pTypeRuntime.Get(pModel, foreignKey.InnerKeys[i]);
+                                object outerKey = pTypeRuntime.Get(navModel, foreignKey.OuterKeys[i]);
+                                isLine1 = isLine1 && innerKey.Equals(outerKey);
+                                if (isLine1)
+                                {
+                                    // 如果属于同一个父级，则添加到上一行的相同导航列表中去
+                                    method = navTypeRuntime.GetWrapper("Add");
+                                    method.Invoke(prevList, navModel);
+                                    isLine = isLine1;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    #endregion
                 }
 
-                if (navRuntime.NavWrappers.Count > 0) Deserialize_Navigation(navModel, typeRuntimes);
+                if (navTypeRuntime.NavWrappers.Count > 0) Deserialize_Navigation(prevModel, navModel, keyName, out isLine);
             }
         }
 
@@ -231,10 +299,10 @@ namespace ICS.XFramework.Data
             string methodName = Guid.NewGuid().ToString();
             DynamicMethod dynamicMethod = new DynamicMethod(methodName, typeof(object), new[] { typeof(IDataRecord) }, true);
             ILGenerator g = dynamicMethod.GetILGenerator();
-            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(modelType);
+            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(modelType);
 
             var model = g.DeclareLocal(modelType);
-            g.Emit(OpCodes.Newobj, typeRuntime.ConstructInvoker.Constructor);
+            g.Emit(OpCodes.Newobj, runtime.ConstructInvoker.Constructor);
             g.Emit(OpCodes.Stloc, model);
 
             if (end == null) end = reader.FieldCount;
@@ -248,7 +316,7 @@ namespace ICS.XFramework.Data
                     keyName = column != null ? column.Name : string.Empty;
                 }
 
-                var wrapper = typeRuntime.GetWrapper(keyName);// as MemberAccessWrapper;
+                var wrapper = runtime.GetWrapper(keyName);// as MemberAccessWrapper;
                 if (wrapper == null) continue;
 
                 var isDBNullLabel = g.DefineLabel();
@@ -341,5 +409,5 @@ namespace ICS.XFramework.Data
             //uniqueidentifier	Guid
             //Variant	Object
         }
-    } 
+    }
 }

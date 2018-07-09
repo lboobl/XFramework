@@ -99,7 +99,7 @@ namespace ICS.XFramework.Data
 
                     case DbExpressionType.First:
                     case DbExpressionType.FirstOrDefault:
-                        take = 1;
+                       // take = 1;
                         if (curExp.Expressions != null) where.Add(curExp.Expressions[0]);
                         continue;
 
@@ -127,7 +127,7 @@ namespace ICS.XFramework.Data
 
                     case DbExpressionType.Single:
                     case DbExpressionType.SingleOrDefault:
-                        take = 1;
+                       // take = 1;
                         if (curExp.Expressions != null) where.Add(curExp.Expressions[0]);
                         continue;
 
@@ -238,7 +238,7 @@ namespace ICS.XFramework.Data
                 }
                 else
                 {
-                    qOuter.Subquery = qQuery;
+                    qOuter.NestedQuery = qQuery;
                     return qOuter; 
                 }
             }

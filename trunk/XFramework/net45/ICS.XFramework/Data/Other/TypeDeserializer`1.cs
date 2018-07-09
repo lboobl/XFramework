@@ -180,8 +180,7 @@ namespace ICS.XFramework.Data
                 }
                 else
                 {
-                    var listRuntime = Reflection.TypeRuntimeInfoCache.GetRuntimeInfo(navType);
-                    var addWrapper = listRuntime.GetWrapper("Add");
+                    var addWrapper = navRuntime.GetWrapper("Add");
                     addWrapper.Invoke(list, navModel);
                 }
 

@@ -251,6 +251,9 @@
     <Compile Include="..\..\net45\ICS.XFramework\Data\Other\SqlMethod.cs">
       <Link>Data\Other\SqlMethod.cs</Link>
     </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Other\TypeDeserializer.cs">
+      <Link>Data\Other\TypeDeserializer.cs</Link>
+    </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\Other\TypeDeserializer`1.cs">
       <Link>Data\Other\TypeDeserializer`1.cs</Link>
     </Compile>

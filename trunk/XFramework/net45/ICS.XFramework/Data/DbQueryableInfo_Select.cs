@@ -96,10 +96,10 @@ namespace ICS.XFramework.Data
         public DbExpression Statis { get; set; }
 
         /// <summary>
-        /// 子查询语义
+        /// 嵌套查询语义
         /// 注意，T 可能不是 参数T 所表示的类型
         /// </summary>
-        public override IDbQueryableInfo<T> Subquery { get; set; }
+        public override IDbQueryableInfo<T> NestedQuery { get; set; }
 
         /// <summary>
         /// 并集

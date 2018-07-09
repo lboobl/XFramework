@@ -226,11 +226,11 @@ namespace ICS.XFramework.Data.SqlClient
             // FROM 子句
             jf.AppendNewLine();
             jf.Append("FROM ");
-            if (qQuery.Subquery != null)
+            if (qQuery.NestedQuery != null)
             {
                 // 子查询
                 jf.Append("(");
-                CommandBase define = this.ParseSelectCommand<T>(qQuery.Subquery as DbQueryableInfo_Select<T>, indent + 1);
+                CommandBase define = this.ParseSelectCommand<T>(qQuery.NestedQuery as DbQueryableInfo_Select<T>, indent + 1);
                 jf.Append(define.CommandText);
                 jf.AppendNewLine();
                 jf.Append(")");
@@ -406,6 +406,7 @@ namespace ICS.XFramework.Data.SqlClient
                     var column = wrapper.Column;
                     if (column != null && column.NoMapped) continue;
                     if (wrapper.ForeignKey != null) continue;
+                    if (wrapper.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
 
                     if (wrapper != qInsert.AutoIncrement)
                     {
@@ -553,6 +554,7 @@ namespace ICS.XFramework.Data.SqlClient
                     if (column != null && column.IsIdentity) continue;
                     if (column != null && column.NoMapped) continue;
                     if (wrapper.ForeignKey != null) continue;
+                    if (wrapper.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
 
                     builder.AppendMember("t0", wrapper.Member.Name);
                     builder.Append(" = ");

@@ -59,7 +59,7 @@ namespace ICS.XFramework.Data
         {
             get
             {
-                var w = this.Wrappers;
+                var wrappers = this.Wrappers;
                 return _fieldCount;
             }
         }
@@ -104,7 +104,10 @@ namespace ICS.XFramework.Data
         {
             // fix issue#多线程下导致 FieldCount 不正确
             // 单个实例只初始化一次
-            
+
+            //Fixed issue#匿名类的属性不可写
+            //匿名类：new{ClientId=a.ClientId}
+
             if (!isInitialize)
             {
                 lock (_lock)
@@ -112,32 +115,25 @@ namespace ICS.XFramework.Data
                     if (!isInitialize)
                     {
                         _wrappers = new Dictionary<string, Reflection.MemberAccessWrapper>();
+                        Func<MemberInfo, bool> predicate = x => x.MemberType == MemberTypes.Method || x.MemberType == MemberTypes.Field ||
+                            (x.MemberType == MemberTypes.Property && (x as PropertyInfo).CanRead && (this.IsAnonymousType ? true : (x as PropertyInfo).CanWrite));
                         IEnumerable<MemberAccessWrapper> members =
                             type
-                            .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                            //Fixed issue#匿名类的属性不可写
-                            //匿名类：new{ClientId=a.ClientId}
-                            .Where(p => p.CanRead && (this.IsAnonymousType ? true : p.CanWrite))
+                            //.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                            .GetMembers(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
+                            //.Where(p => p.CanRead && (this.IsAnonymousType ? true : p.CanWrite))
+                            .Where(predicate)
                             .Select(p => new MemberAccessWrapper(p));
 
                         foreach (MemberAccessWrapper m in members)
                         {
-                            _wrappers.Add(m.Member.Name, m);
-                            if (!(m.Column != null && m.Column.NoMapped || m.ForeignKey != null)) _fieldCount += 1;
+                            if(!_wrappers.ContainsKey(m.Member.Name)) _wrappers.Add(m.Member.Name, m);
+                            if (!(m.Column != null && m.Column.NoMapped || m.ForeignKey != null || m.Member.MemberType == MemberTypes.Method)) _fieldCount += 1;
                         }
                         isInitialize = true;
                     }
-                    //else
-                    //{
-
-                    //    return _wrappers;
-                    //}
                 }
             }
-            //else
-            //{
-            //    return _wrappers;
-            //}
 
 
             return _wrappers;

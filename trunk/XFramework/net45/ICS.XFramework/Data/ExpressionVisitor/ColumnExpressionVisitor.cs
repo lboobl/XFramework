@@ -403,6 +403,7 @@ namespace ICS.XFramework.Data
                 var mapper = wrapper as MemberAccessWrapper;
                 if (mapper != null && mapper.Column != null && mapper.Column.NoMapped) continue;
                 if (mapper != null && mapper.ForeignKey != null) continue; // 不加载导航属性
+                if (wrapper.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
 
                 _builder.AppendMember(alias, wrapper.Member.Name);
 
