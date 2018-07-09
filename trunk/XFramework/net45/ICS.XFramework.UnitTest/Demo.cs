@@ -23,8 +23,9 @@ namespace ICS.XFramework.UnitTest
                 from a in context
                     .GetTable<Inte_CRM.CRM_SaleOrder>()
                     .Include(a => a.Client.AccountList)
-                //join b in context.GetTable<Inte_CRM.CloudServer>() on a.ClientId equals b.CloudServerId into u_b
-                //from b in u_b.DefaultIfEmpty()
+                    .Include(a => a.HeavyBuyer.AccountList)
+                    //join b in context.GetTable<Inte_CRM.CloudServer>() on a.ClientId equals b.CloudServerId into u_b
+                    //from b in u_b.DefaultIfEmpty()
                 select new Inte_CRM.CRM_SaleOrder
                 {
                     ClientId = a.ClientId,

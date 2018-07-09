@@ -10,11 +10,44 @@ using ICS.XFramework.Reflection.Emit;
 
 namespace ICS.XFramework.Data
 {
-    // TODO Include 语法带来的分页问题
-    /// <summary>
-    /// 类型序列化器
-    /// </summary>
     public class TypeDeserializer
+    {
+        private IDataReader _reader = null;
+        private CommandDefinition _define = null;
+        private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
+        private Func<IDataRecord, object> _modelDeserializer = null;
+
+        public TypeDeserializer(IDataReader reader, CommandDefinition define)
+        {
+            _define = define;
+            _reader = reader;
+            _deserializers = new Dictionary<string, Func<IDataRecord, object>>(8);
+        }
+
+        /// <summary>
+        /// 反序列化单个实体
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T Deserialize<T>()
+        {
+            T prevModel = default(T);
+            List<T> collection = new List<T>();
+            TypeDeserializer<T> deserializer = new TypeDeserializer<T>(_reader, _define as CommandDefinition);
+            while (_reader.Read())
+            {
+                T model = deserializer.Deserialize();
+                if (_define == null || _define.NavigationDescriptors == null || _define.NavigationDescriptors.Count == 0) return model;
+            }
+
+            return prevModel;
+        }
+    }
+
+    /// <summary>
+    /// 单个实体反序列化
+    /// </summary>
+    public class TypeDeserializer1<T>
     {
         static MethodInfo _isDBNull = typeof(IDataRecord).GetMethod("IsDBNull", new Type[] { typeof(int) });
         static MethodInfo _getFieldType = typeof(IDataRecord).GetMethod("GetFieldType", new Type[] { typeof(int) });
@@ -37,7 +70,7 @@ namespace ICS.XFramework.Data
         private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
         private Func<IDataRecord, object> _modelDeserializer = null;
 
-        public TypeDeserializer(IDataReader reader, CommandDefinition define)
+        public TypeDeserializer1(IDataReader reader, CommandDefinition define)
         {
             _define = define;
             _reader = reader;
@@ -48,101 +81,91 @@ namespace ICS.XFramework.Data
         /// 将 <see cref="IDataRecord"/> 上的当前行反序列化为实体
         /// </summary>
         /// <returns></returns>
-        public T Deserialize<T>()
+        public T Deserialize()
         {
-            T model = default(T);
-            while (_reader.Read())
+            #region 基元类型
+
+            if (Reflection.TypeUtils.IsPrimitive(typeof(T)))
             {
-                #region 基元类型
+                if (_reader.IsDBNull(0)) return default(T);
 
-                if (Reflection.TypeUtils.IsPrimitive(typeof(T)))
+                var obj = _reader.GetValue(0);
+                if (obj.GetType() != typeof(T))
                 {
-                    if (_reader.IsDBNull(0)) return default(T);
-
-                    var obj = _reader.GetValue(0);
-                    if (obj.GetType() != typeof(T))
+                    // fix#Nullable<T> issue
+                    if (!typeof(T).IsGenericType)
                     {
-                        // fix#Nullable<T> issue
-                        if (!typeof(T).IsGenericType)
-                        {
-                            obj = Convert.ChangeType(obj, typeof(T));
-                        }
-                        else
-                        {
-                            Type g = typeof(T).GetGenericTypeDefinition();
-                            if (g != typeof(Nullable<>)) throw new NotSupportedException(string.Format("type {0} not suppored.", g.FullName));
-
-                            obj = Convert.ChangeType(obj, Nullable.GetUnderlyingType(typeof(T)));
-                        }
+                        obj = Convert.ChangeType(obj, typeof(T));
                     }
-
-                    return (T)obj;
-                }
-
-                #endregion
-
-                #region 匿名类型
-
-                TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
-                ICS.XFramework.Reflection.Emit.ConstructorInvoker ctor = runtime.ConstructInvoker;
-                if (runtime.IsAnonymousType)
-                {
-                    object[] values = new object[_reader.FieldCount];
-                    _reader.GetValues(values);
-                    for (int index = 0; index < values.Length; ++index)
+                    else
                     {
-                        if (values[index] is DBNull) values[index] = null;
+                        Type g = typeof(T).GetGenericTypeDefinition();
+                        if (g != typeof(Nullable<>)) throw new NotSupportedException(string.Format("type {0} not suppored.", g.FullName));
+
+                        obj = Convert.ChangeType(obj, Nullable.GetUnderlyingType(typeof(T)));
                     }
-                    return (T)ctor.Invoke(values);
                 }
 
-                #endregion
+                return (T)obj;
+            }
 
-                #region 实体类型
+            #endregion
 
-                if (_define == null)
+            #region 匿名类型
+
+            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+            ICS.XFramework.Reflection.Emit.ConstructorInvoker ctor = runtime.ConstructInvoker;
+            if (runtime.IsAnonymousType)
+            {
+                object[] values = new object[_reader.FieldCount];
+                _reader.GetValues(values);
+                for (int index = 0; index < values.Length; ++index)
                 {
-                    // 直接跑SQL,则不解析导航属性
-                    if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader);
-                    model = (T)_modelDeserializer(_reader);
+                    if (values[index] is DBNull) values[index] = null;
                 }
-                else if (_define.NavigationDescriptors != null && _define.NavigationDescriptors.Count == 0)
-                {
-                    // 直接跑SQL,则不解析导航属性
-                    if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader, _define.Columns, 0);
-                    model = (T)_modelDeserializer(_reader);
-                }
-                else
-                {
-                    // 第一层
-                    if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader, _define.Columns, 0, _define.NavigationDescriptors.MinIndex);
-                    model = (T)_modelDeserializer(_reader);
+                return (T)ctor.Invoke(values);
+            }
 
-                    // 递归导航属性
-                    this.Deserialize_Navigation(model, string.Empty);
-                }
+            #endregion
 
-                return model;
+            #region 实体类型
 
-                #endregion
+            T model = default(T);
+            if (_define == null)
+            {
+                // 直接跑SQL,则不解析导航属性
+                if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader);
+                model = (T)_modelDeserializer(_reader);
+            }
+            else if (_define.NavigationDescriptors != null && _define.NavigationDescriptors.Count == 0)
+            {
+                // 直接跑SQL,则不解析导航属性
+                if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader, _define.Columns, 0);
+                model = (T)_modelDeserializer(_reader);
+            }
+            else
+            {
+                // 第一层
+                if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader, _define.Columns, 0, _define.NavigationDescriptors.MinIndex);
+                model = (T)_modelDeserializer(_reader);
+
+                // 递归导航属性
+                this.Deserialize_Navigation(model, string.Empty);
             }
 
             return model;
-        }
 
-        T Deserialize<T>(T model)
-        {
-
-            return default(T);
+            #endregion
         }
 
         // 导航属性
         private void Deserialize_Navigation(object model, string typeName)
         {
-            // CRM_SaleOrder.Client
-            Type pType = model.GetType();
-            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(pType);
-            if (string.IsNullOrEmpty(typeName)) typeName = pType.Name;
+            // CRM_SaleOrder.Client 
+            // Client.AccountList
+            Type type = model.GetType();
+            TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
+            if (string.IsNullOrEmpty(typeName)) typeName = type.Name;
 
             foreach (var kvp in _define.NavigationDescriptors)
             {
@@ -163,16 +186,39 @@ namespace ICS.XFramework.Data
 
                 Type navType = navWrapper.DataType;
                 Func<IDataRecord, object> deserializer = null;
+                TypeRuntimeInfo navRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navType);
+                object list = null;
+                if (navType.IsGenericType && navType.Name == "List`1")
+                {
+                    // 1：n关系，导航属性为 List<T>
+                    list = navWrapper.Get(model);
+                    if (list == null)
+                    {
+                        list = navRuntime.ConstructInvoker.Invoke();
+                        navWrapper.Set(model, list);
+                    }
+                }
+
                 if (!_deserializers.TryGetValue(keyName, out deserializer))
                 {
-                    deserializer = GetDeserializer(navType, _reader, _define.Columns, start, end);
+                    deserializer = GetDeserializer(navType.IsGenericType ? navType.GetGenericArguments()[0] : navType, _reader, _define.Columns, start, end);
                     _deserializers[keyName] = deserializer;
                 }
 
                 object navModel = deserializer(_reader);
-                navWrapper.Set(model, navModel);
+                if (list == null)
+                {
+                    navWrapper.Set(model, navModel);
+                    //
+                    //
+                }
+                else
+                {
+                    var listRuntime = Reflection.TypeRuntimeInfoCache.GetRuntimeInfo(navType);
+                    var addWrapper = listRuntime.GetWrapper("Add");
+                    addWrapper.Invoke(list, navModel);
+                }
 
-                TypeRuntimeInfo navRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navType);
                 if (navRuntime.NavWrappers.Count > 0) Deserialize_Navigation(navModel, keyName);
             }
         }
@@ -180,8 +226,8 @@ namespace ICS.XFramework.Data
         private static Func<IDataRecord, object> GetDeserializer(Type modelType, IDataRecord reader, IDictionary<string, Column> columns = null, int start = 0, int? end = null)
         {
             string methodName = Guid.NewGuid().ToString();
-            DynamicMethod dm = new DynamicMethod(methodName, typeof(object), new[] { typeof(IDataRecord) }, true);
-            ILGenerator g = dm.GetILGenerator();
+            DynamicMethod dynamicMethod = new DynamicMethod(methodName, typeof(object), new[] { typeof(IDataRecord) }, true);
+            ILGenerator g = dynamicMethod.GetILGenerator();
             TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo(modelType);
 
             var model = g.DeclareLocal(modelType);
@@ -245,7 +291,7 @@ namespace ICS.XFramework.Data
             g.Emit(OpCodes.Ldloc, model);
             g.Emit(OpCodes.Ret);
 
-            var func = (Func<IDataRecord, object>)dm.CreateDelegate(typeof(Func<IDataRecord, object>));
+            var func = (Func<IDataRecord, object>)dynamicMethod.CreateDelegate(typeof(Func<IDataRecord, object>));
             return func;
         }
 
@@ -295,7 +341,7 @@ namespace ICS.XFramework.Data
     }
 
     /// <summary>
-    /// 类型序列化器
+    /// 单个实体反序列化
     /// </summary>
     public class TypeDeserializer<T>
     {
@@ -588,5 +634,5 @@ namespace ICS.XFramework.Data
             //uniqueidentifier	Guid
             //Variant	Object
         }
-    }
+    } 
 }
