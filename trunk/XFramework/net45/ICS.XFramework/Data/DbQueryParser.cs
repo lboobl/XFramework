@@ -273,6 +273,7 @@ namespace ICS.XFramework.Data
                     qOuter.Join = new List<DbExpression>();
                     qOuter.OrderBy = new List<DbExpression>();
                     qOuter.Include = new List<DbExpression>();
+                    qOuter.HaveListTypeNavigation = true;
 
                     return qOuter;
                 }

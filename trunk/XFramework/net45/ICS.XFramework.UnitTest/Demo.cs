@@ -27,7 +27,7 @@ namespace ICS.XFramework.UnitTest
                     //.Include(a => a.HeavyBuyer.AccountList)
                 //join b in context.GetTable<Inte_CRM.CloudServer>() on a.ClientId equals b.CloudServerId into u_b
                 //from b in u_b.DefaultIfEmpty()
-                where a.OrderId > 0
+                where a.OrderId >0 && a.Client.CloudServer.CloudServerCode=="ABC"
                 select new Inte_CRM.CRM_SaleOrder(a)
                 {
                     //OrderId = a.OrderId ,
@@ -46,7 +46,7 @@ namespace ICS.XFramework.UnitTest
                     //    CloudServer = a.Client.CloudServer
                     //}
                 };
-            var result = query7.FirstOrDefault();
+            var result = query7.ToList();
 
             Query();
             Join();

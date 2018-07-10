@@ -59,7 +59,7 @@ namespace ICS.XFramework.Data.SqlClient
             get
             {
                 return "'";
-            } 
+            }
         }
 
         /// <summary>
@@ -114,6 +114,14 @@ namespace ICS.XFramework.Data.SqlClient
             bool useStatis = qQuery.Statis != null;
             bool groupByPaging = qQuery.GroupBy != null && qQuery.Skip > 0;         // 分组分页      
             bool useOrderBy = (!useStatis || qQuery.Skip > 0) && !qQuery.HaveAny;   // 没有统计函数或者使用 'Skip' 子句，则解析OrderBy
+
+            if (qQuery.HaveListTypeNavigation && qQuery.NestedQuery != null && (qQuery.NestedQuery as DbQueryableInfo_Select<T>).Statis != null)
+            {
+                // 导航属性中有1:n关系，只统计主表
+                // 例：AccountList = a.Client.AccountList,
+                CommandBase command = ParseSelectCommand<T>(qQuery.NestedQuery as DbQueryableInfo_Select<T>);
+                return command;
+            }
 
             ExpressionVisitorBase visitor = null;
             TableAliasCache aliases = this.PrepareAlias<T>(qQuery);
