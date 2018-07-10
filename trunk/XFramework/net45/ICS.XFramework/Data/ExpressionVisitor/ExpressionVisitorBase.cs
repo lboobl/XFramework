@@ -108,20 +108,20 @@ namespace ICS.XFramework.Data
                 }
             }
 
-            // expression like a.Name ?? "TAN"
+            // 例： a.Name ?? "TAN"
             if (b.NodeType == ExpressionType.Coalesce) return this.VisitBinary_Coalesce(b);
 
-            // expression like a.Name == null
+            // 例： a.Name == null
             ConstantExpression constExpr = left as ConstantExpression ?? right as ConstantExpression;
             if (constExpr != null && constExpr.Value == null) return this.VisitBinary_EqualNull(b);
 
-            // expression like a.Name == a.FullName  or like a.Name == "TAN"
+            // 例： a.Name == a.FullName  or like a.Name == "TAN"
             return this.VisitBinary_Condition(b);
         }
 
         protected override Expression VisitConditional(ConditionalExpression node)
         {
-            // expression like a.Name == null ? "TAN" : a.Name => CASE WHEN a.Name IS NULL THEN 'TAN' ELSE a.Name End
+            // 例： a.Name == null ? "TAN" : a.Name => CASE WHEN a.Name IS NULL THEN 'TAN' ELSE a.Name End
 
             Expression test = this.TryMakeBinary(node.Test, true);
             Expression ifTrue = this.TryMakeBinary(node.IfTrue, true);
@@ -212,7 +212,7 @@ namespace ICS.XFramework.Data
 
         protected virtual Expression VisitBinary_Condition(BinaryExpression b)
         {
-            // expression like a.Name == a.FullName 
+            // 例： a.Name == a.FullName 
             // or like a.Name == "TAN"
 
             if (b != null)

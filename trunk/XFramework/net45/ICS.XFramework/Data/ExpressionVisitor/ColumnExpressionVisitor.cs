@@ -120,7 +120,7 @@ namespace ICS.XFramework.Data
             LambdaExpression lambda = node as LambdaExpression;
             if (lambda.Body.NodeType == ExpressionType.Parameter)
             {
-                // expression like a=> a
+                // 例： a=> a
                 Type type = lambda.Body.Type;
                 string alias = _aliases.GetTableAlias(lambda);
                 this.VisitAllMember(type, alias);
@@ -129,7 +129,7 @@ namespace ICS.XFramework.Data
 
             if (lambda.Body.NodeType == ExpressionType.MemberAccess)
             {
-                // expression like t=> t.a
+                // 例： t=> t.a
                 // => SELECT a.ClientId
                 Type type = lambda.Body.Type;
                 return TypeUtils.IsPrimitive(type)
@@ -144,8 +144,7 @@ namespace ICS.XFramework.Data
         //{new App() {Id = p.Id}} 
         protected override Expression VisitMemberInit(MemberInitExpression node)
         {
-            if (node.NewExpression != null) this.VisitAllArguments(node.NewExpression);
-
+            if (node.NewExpression != null) this.VisitNewArguments(node.NewExpression);
             if (_navChainHopper.Count == 0) _navChainHopper.Add(node.Type.Name);
 
             // TODO #对 Bindings 进行排序，保证导航属性的赋值一定要最后面#
@@ -173,35 +172,37 @@ namespace ICS.XFramework.Data
                     _builder.Append(',');
                     _builder.AppendNewLine();
 
-                    continue;
                 }
 
                 #endregion
 
                 #region 导航属性
 
-                int n = _navChainHopper.Count;
-
-                // 生成导航属性描述集合，以类名.属性名做为键值
-                string keyName = _navChainHopper.Count > 0 ? _navChainHopper[_navChainHopper.Count - 1] : string.Empty;
-                keyName = !string.IsNullOrEmpty(keyName) ? keyName + "." + binding.Member.Name : binding.Member.Name;
-                NavigationDescriptor descriptor = new NavigationDescriptor(keyName, binding.Member);
-
-                if (!_navDescriptors.ContainsKey(keyName))
+                else
                 {
-                    descriptor.Start = _columns.Count;
-                    descriptor.FieldCount = GetFieldCount(binding.Expression);
-                    _navDescriptors.Add(keyName, descriptor);
-                    _navChainHopper.Add(keyName);
+                    int n = _navChainHopper.Count;
+
+                    // 生成导航属性描述集合，以类名.属性名做为键值
+                    string keyName = _navChainHopper.Count > 0 ? _navChainHopper[_navChainHopper.Count - 1] : string.Empty;
+                    keyName = !string.IsNullOrEmpty(keyName) ? keyName + "." + binding.Member.Name : binding.Member.Name;
+                    NavigationDescriptor descriptor = new NavigationDescriptor(keyName, binding.Member);
+
+                    if (!_navDescriptors.ContainsKey(keyName))
+                    {
+                        descriptor.Start = _columns.Count;
+                        descriptor.FieldCount = GetFieldCount(binding.Expression);
+                        _navDescriptors.Add(keyName, descriptor);
+                        _navChainHopper.Add(keyName);
+                    }
+
+                    if (binding.Expression.NodeType == ExpressionType.MemberAccess) this.VisitMember_Navigation(binding.Expression as MemberExpression);
+                    else if (binding.Expression.NodeType == ExpressionType.New) this.VisitNewArguments(binding.Expression as NewExpression);
+                    else if (binding.Expression.NodeType == ExpressionType.MemberInit) this.VisitMemberInit(binding.Expression as MemberInitExpression);
+
+                    // 恢复访问链
+                    // 在访问导航属性时可能是 Client.CloudServer，这时要恢复为 Client，以保证能访问 Client 的下一个导航属性
+                    if (_navChainHopper.Count != n) _navChainHopper.RemoveAt(_navChainHopper.Count - 1);
                 }
-
-                if (binding.Expression.NodeType == ExpressionType.MemberAccess) this.VisitMember_Navigation(binding.Expression as MemberExpression);
-                else if (binding.Expression.NodeType == ExpressionType.New) this.VisitAllArguments(binding.Expression as NewExpression);
-                else if (binding.Expression.NodeType == ExpressionType.MemberInit) this.VisitMemberInit(binding.Expression as MemberInitExpression);
-
-                // 恢复访问链
-                // 在访问导航属性时可能是 Client.CloudServer，这时要恢复为 Client，以保证能访问 Client 的下一个导航属性
-                if (_navChainHopper.Count != n) _navChainHopper.RemoveAt(_navChainHopper.Count - 1);
 
                 #endregion
             }
@@ -216,6 +217,7 @@ namespace ICS.XFramework.Data
 
             if (node.IsArrivable())
             {
+                // 例： Client = a.Client.CloudServer
                 int index = 0;
                 this.VisitNavigation(node);
                 foreach (var kvp in Navigations)
@@ -229,6 +231,7 @@ namespace ICS.XFramework.Data
             }
             else
             {
+                // 例： Client = b
                 alias = _aliases.GetTableAlias(node);
                 type = node.Type;
             }
@@ -246,14 +249,14 @@ namespace ICS.XFramework.Data
             if (node != null)
             {
                 if (node.Arguments.Count == 0) throw new XFrameworkException("'NewExpression' do not have any arguments.");
-                this.VisitAllArguments(node);
+                this.VisitNewArguments(node);
             }
 
             return node;
         }
 
         //遍历New表达式的参数集
-        private Expression VisitAllArguments(NewExpression node)
+        private Expression VisitNewArguments(NewExpression node)
         {
             for (int i = 0; i < node.Arguments.Count; i++)
             {
@@ -262,7 +265,7 @@ namespace ICS.XFramework.Data
 
                 if (exp.NodeType == ExpressionType.Parameter)
                 {
-                    // new Client(a)
+                    //例： new Client(a)
                     Type type = exp.Type;
                     string alias = _aliases.GetTableAlias(exp);
                     this.VisitAllMember(type, alias);
@@ -292,10 +295,7 @@ namespace ICS.XFramework.Data
 
                 if (exp.CanEvaluate())
                 {
-                    // new Client(a)
-                    //Type type = exp.Type;
-                    //string alias = _aliases.GetTableAlias(exp);
-                    //this.VisitAllMember(type, alias);
+                    //例： new Client(a)
                     this.Visit(exp);
                     // 选择字段
                     string newName = ColumnExpressionVisitor.AddColumn(_columns, node.Members != null ? node.Members[i].Name : (exp as MemberExpression).Member.Name);

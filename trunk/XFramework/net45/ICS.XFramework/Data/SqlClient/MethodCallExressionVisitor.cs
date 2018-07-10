@@ -54,7 +54,7 @@ namespace ICS.XFramework.Data.SqlClient
         /// <returns></returns>
         public override Expression VisitCoalesce(BinaryExpression b, ExpressionVisitorBase visitor)
         {
-            // expression like a.Name ?? "TAN" => ISNULL(a.Name,'TAN')
+            // 例： a.Name ?? "TAN" => ISNULL(a.Name,'TAN')
 
             visitor.Append("ISNULL(");
             visitor.Visit(b.Left is ConstantExpression ? b.Right : b.Left);
