@@ -173,16 +173,15 @@ namespace ICS.XFramework.Data
         public async Task<T> ExecuteAsync<T>(IDbCommand cmd, CommandBase define = null)
         {
             IDataReader reader = null;
-            T TResult = default(T);
             IDbConnection conn = null;
 
             try
             {
                 reader = await this.ExecuteReaderAsync(cmd);
                 conn = cmd != null ? cmd.Connection : null;
-                TypeDeserializer<T> deserializer = new TypeDeserializer<T>(reader, define as CommandDefinition);
-                if (await (reader as DbDataReader).ReadAsync()) TResult = deserializer.Deserialize();
-                return TResult;
+                TypeDeserializer deserializer = new TypeDeserializer(reader, define as CommandDefinition);
+                List<T> result = await deserializer.DeserializeAsync<T>();
+                return result.FirstOrDefault();
             }
             finally
             {
@@ -270,13 +269,13 @@ namespace ICS.XFramework.Data
             List<T6> q6 = null;
             List<T7> q7 = null;
 
-            TypeDeserializer<T1> deserializer1 = null;
-            TypeDeserializer<T2> deserializer2 = null;
-            TypeDeserializer<T3> deserializer3 = null;
-            TypeDeserializer<T4> deserializer4 = null;
-            TypeDeserializer<T5> deserializer5 = null;
-            TypeDeserializer<T6> deserializer6 = null;
-            TypeDeserializer<T7> deserializer7 = null;
+            TypeDeserializer deserializer1 = null;
+            TypeDeserializer deserializer2 = null;
+            TypeDeserializer deserializer3 = null;
+            TypeDeserializer deserializer4 = null;
+            TypeDeserializer deserializer5 = null;
+            TypeDeserializer deserializer6 = null;
+            TypeDeserializer deserializer7 = null;
 
             try
             {
@@ -287,70 +286,53 @@ namespace ICS.XFramework.Data
                 do
                 {
                     i += 1;
-                    while (await (reader as DbDataReader).ReadAsync())
+                    switch (i)
                     {
-                        switch (i)
-                        {
-                            #region 元组赋值
+                        #region 元组赋值
 
-                            case 1:
-                                if (deserializer1 == null) deserializer1 = new TypeDeserializer<T1>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                                T1 TValue1 = deserializer1.Deserialize();
-                                if (q1 == null) q1 = new List<T1>();
-                                q1.Add(TValue1);
+                        case 1:
+                            if (deserializer1 == null) deserializer1 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
+                            q1 = await deserializer1.DeserializeAsync<T1>();
 
-                                break;
+                            break;
 
-                            case 2:
-                                if (deserializer2 == null) deserializer2 = new TypeDeserializer<T2>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                                T2 TValue2 = deserializer2.Deserialize();
-                                if (q2 == null) q2 = new List<T2>();
-                                q2.Add(TValue2);
+                        case 2:
+                            if (deserializer2 == null) deserializer2 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
+                            q2 = await deserializer1.DeserializeAsync<T2>();
 
-                                break;
+                            break;
 
-                            case 3:
-                                if (deserializer3 == null) deserializer3 = new TypeDeserializer<T3>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                                T3 TValue3 = deserializer3.Deserialize();
-                                if (q3 == null) q3 = new List<T3>();
-                                q3.Add(TValue3);
+                        case 3:
+                            if (deserializer3 == null) deserializer3 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
+                            q3 = await deserializer1.DeserializeAsync<T3>();
 
-                                break;
+                            break;
 
-                            case 4:
-                                if (deserializer4 == null) deserializer4 = new TypeDeserializer<T4>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                                T4 TValue4 = deserializer4.Deserialize();
-                                if (q4 == null) q4 = new List<T4>();
-                                q4.Add(TValue4);
+                        case 4:
+                            if (deserializer4 == null) deserializer4 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
+                            q4 = await deserializer1.DeserializeAsync<T4>();
 
-                                break;
+                            break;
 
-                            case 5:
-                                if (deserializer5 == null) deserializer5 = new TypeDeserializer<T5>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                                T5 TValue5 = deserializer5.Deserialize();
-                                if (q5 == null) q5 = new List<T5>();
-                                q5.Add(TValue5);
+                        case 5:
+                            if (deserializer5 == null) deserializer5 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
+                            q5 = await deserializer1.DeserializeAsync<T5>();
 
-                                break;
+                            break;
 
-                            case 6:
-                                if (deserializer6 == null) deserializer6 = new TypeDeserializer<T6>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                                T6 TValue6 = deserializer6.Deserialize();
-                                if (q6 == null) q6 = new List<T6>();
-                                q6.Add(TValue6);
+                        case 6:
+                            if (deserializer6 == null) deserializer6 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
+                            q6 = await deserializer1.DeserializeAsync<T6>();
 
-                                break;
+                            break;
 
-                            case 7:
-                                if (deserializer7 == null) deserializer7 = new TypeDeserializer<T7>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                                T7 TValue7 = deserializer7.Deserialize();
-                                if (q7 == null) q7 = new List<T7>();
-                                q7.Add(TValue7);
+                        case 7:
+                            if (deserializer7 == null) deserializer7 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
+                            q7 = await deserializer1.DeserializeAsync<T7>();
 
-                                break;
+                            break;
 
                             #endregion
-                        }
                     }
                 }
                 while (reader.NextResult());
@@ -408,17 +390,8 @@ namespace ICS.XFramework.Data
             {
                 reader = await this.ExecuteReaderAsync(cmd);
                 conn = cmd != null ? cmd.Connection : null;
-                DbDataReader dbReader = reader as DbDataReader;
-                TypeDeserializer<T> deserializer = new TypeDeserializer<T>(reader, define as CommandDefinition);
-
-                while (true)
-                {
-                    bool flag = await dbReader.ReadAsync();
-                    if (flag)
-                        objList.Add(deserializer.Deserialize());
-                    else
-                        break;
-                }
+                TypeDeserializer deserializer = new TypeDeserializer(reader, define as CommandDefinition);
+                objList = await deserializer.DeserializeAsync<T>();
             }
             finally
             {

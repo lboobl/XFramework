@@ -34,10 +34,11 @@ namespace ICS.XFramework.Data
                 Func<IDbCommand, Task<object>> func = async p =>
                 {
                     reader = await provider.ExecuteReaderAsync(p);
-                    TypeDeserializer<int> deserializer = new TypeDeserializer<int>(reader, null);
+                    TypeDeserializer deserializer = new TypeDeserializer(reader, null);
                     do
                     {
-                        if (reader.Read()) identitys.Add(deserializer.Deserialize());
+                        var result = await deserializer.DeserializeAsync<int>();
+                        identitys.AddRange(result);
                     }
                     while (reader.NextResult());
 

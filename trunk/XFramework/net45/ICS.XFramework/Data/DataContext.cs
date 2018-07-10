@@ -242,10 +242,12 @@ namespace ICS.XFramework.Data
                 Func<IDbCommand, object> func = p =>
                 {
                     reader = provider.ExecuteReader(p);
-                    TypeDeserializer<int> deserializer = new TypeDeserializer<int>(reader, null);
+                    TypeDeserializer deserializer = new TypeDeserializer(reader, null);
                     do
                     {
-                        if (reader.Read()) identitys.Add(deserializer.Deserialize());
+                        var result = deserializer.Deserialize<int>();
+                        identitys.AddRange(result);
+                        //if (reader.Read()) identitys.Add(deserializer.Deserialize());
                     }
                     while (reader.NextResult());
 

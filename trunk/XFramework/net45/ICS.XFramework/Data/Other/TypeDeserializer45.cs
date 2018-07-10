@@ -17,27 +17,16 @@ namespace ICS.XFramework.Data
     /// </summary>
     public partial class TypeDeserializer
     {
-        private IDataReader _reader = null;
-        private CommandDefinition _define = null;
-        private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
-
-        public TypeDeserializer(IDataReader reader, CommandDefinition define)
-        {
-            _define = define;
-            _reader = reader;
-            _deserializers = new Dictionary<string, Func<IDataRecord, object>>(8);
-        }
-
         /// <summary>
-        /// 反序列化实体集合
+        /// 异步反序列化实体集合
         /// </summary>
-        public List<T> Deserialize<T>()
+        public async Task<List<T>> DeserializeAsync<T>()
         {
             bool isLine = false;
             object prevLine = null;
             List<T> collection = new List<T>();
             TypeDeserializer<T> deserializer = new TypeDeserializer<T>(_reader, _define as CommandDefinition);
-            while (_reader.Read())
+            while (await (_reader as DbDataReader).ReadAsync())
             {
                 T model = deserializer.Deserialize(prevLine, out isLine);
                 if (!isLine) collection.Add(model);
