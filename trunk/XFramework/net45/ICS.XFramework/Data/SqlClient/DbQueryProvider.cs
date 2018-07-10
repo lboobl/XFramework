@@ -110,18 +110,17 @@ namespace ICS.XFramework.Data.SqlClient
             // 4.分组再分页时需要使用嵌套查询，此时子查询不需要 'OrderBy' 子句，但最外层则需要
             // 5.'Skip' 'Take' 子句视为语义结束符，在其之后的子句将使用嵌套查询
 
+
+            // 导航属性中有1:n关系，只统计主表
+            // 例：AccountList = a.Client.AccountList,
+            DbQueryableInfo_Select<T> nQuery = qQuery.NestedQuery as DbQueryableInfo_Select<T>;
+            if (qQuery.HaveListTypeNavigation && nQuery != null && nQuery.Statis != null) qQuery = nQuery;
+
             bool willNest = qQuery.HaveDistinct || qQuery.GroupBy != null || qQuery.Skip > 0 || qQuery.Take > 0;
             bool useStatis = qQuery.Statis != null;
             bool groupByPaging = qQuery.GroupBy != null && qQuery.Skip > 0;         // 分组分页      
             bool useOrderBy = (!useStatis || qQuery.Skip > 0) && !qQuery.HaveAny;   // 没有统计函数或者使用 'Skip' 子句，则解析OrderBy
-
-            if (qQuery.HaveListTypeNavigation && qQuery.NestedQuery != null && (qQuery.NestedQuery as DbQueryableInfo_Select<T>).Statis != null)
-            {
-                // 导航属性中有1:n关系，只统计主表
-                // 例：AccountList = a.Client.AccountList,
-                CommandBase command = ParseSelectCommand<T>(qQuery.NestedQuery as DbQueryableInfo_Select<T>);
-                return command;
-            }
+            //if (useOrderBy) useOrderBy = useOrderBy && (qQuery.HaveListTypeNavigation && nQuery != null && (nQuery.Take > 0 || nQuery.Skip > 0));
 
             ExpressionVisitorBase visitor = null;
             TableAliasCache aliases = this.PrepareAlias<T>(qQuery);
@@ -364,6 +363,16 @@ namespace ICS.XFramework.Data.SqlClient
                         jf.Append(" ROWS ONLY ");
                     }
                 }
+            }
+
+            #endregion
+
+            #region 导航排序
+
+            if (qQuery.OrderBy.Count > 0 && !useOrderBy && nQuery != null)
+            {
+                visitor = new OrderByExpressionVisitor(this, aliases, qQuery.OrderBy, null, "t0");
+                visitor.Write(jf);
             }
 
             #endregion

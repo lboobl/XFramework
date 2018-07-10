@@ -28,6 +28,7 @@ namespace ICS.XFramework.UnitTest
                 //join b in context.GetTable<Inte_CRM.CloudServer>() on a.ClientId equals b.CloudServerId into u_b
                 //from b in u_b.DefaultIfEmpty()
                 where a.OrderId >0 //&& a.Client.CloudServer.CloudServerCode=="ABC"
+                orderby a.OrderId
                 select new Inte_CRM.CRM_SaleOrder(a)
                 {
                     //OrderId = a.OrderId ,
