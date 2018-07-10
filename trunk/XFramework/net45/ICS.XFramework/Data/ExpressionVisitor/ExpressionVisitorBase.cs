@@ -164,7 +164,7 @@ namespace ICS.XFramework.Data
             if (Reflection.TypeUtils.IsPrimitive(node.Expression.Type)) return _provider.MethodVisitor.VisitMemberMember(node, this);
             // => <>h__3.b.ClientName
             if (!node.Expression.IsArrivable()) return _builder.AppendMember(node, _aliases);
-            // => b.Client.Address.AddressName            
+            // => b.Client.Address.AddressName
             this.VisitNavigation(node.Expression, node.Member.Name);
 
             return node;
@@ -365,11 +365,12 @@ namespace ICS.XFramework.Data
             return this.GetPriority(expression) < this.GetPriority(subExp);
         }
 
-        protected virtual void VisitNavigation(Expression expression, string memberName = null)
-        { 
+        protected virtual string VisitNavigation(Expression expression, string memberName = null)
+        {
             // 表达式 => b.Client.Address.AddressName
             Expression node = expression;
             Stack<KeyValuePair<string, MemberExpression>> stack = null;
+            string alias = string.Empty;
             while (node != null && node.IsArrivable())
             {
                 if (node.NodeType != ExpressionType.MemberAccess) break;
@@ -398,7 +399,7 @@ namespace ICS.XFramework.Data
 
                     TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
                     // 检查查询表达式是否显示指定该表关联
-                    string alias = _aliases.GetJoinTableAlias(typeRuntime.TableName);
+                    alias = _aliases.GetJoinTableAlias(typeRuntime.TableName);
                     if (string.IsNullOrEmpty(alias))
                     {
                         // 如果没有，则使用导航属性别名
@@ -406,17 +407,19 @@ namespace ICS.XFramework.Data
                         if (!_navigations.ContainsKey(kvp.Key)) _navigations.Add(kvp);
                     }
 
+                    // 例： a.Client.ClientId
                     if (stack.Count == 0 && !string.IsNullOrEmpty(memberName)) _builder.AppendMember(alias, memberName);
                 }
             }
             else
             {
                 // => SelectMany 也会产生类似 'b.Client.Address.AddressName' 这样的表达式
-                string alias = _aliases.GetTableAlias(expression);
+                alias = _aliases.GetTableAlias(expression);
                 _builder.AppendMember(alias, memberName);
             }
 
-            //return f;
+            // fix issue# Join 表达式显式指定导航属性时时，alias 为空
+            return alias;
         }
 
         protected int GetPriority(Expression expression)

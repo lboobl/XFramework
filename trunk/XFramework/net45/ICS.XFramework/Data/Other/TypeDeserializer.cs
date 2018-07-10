@@ -220,6 +220,9 @@ namespace ICS.XFramework.Data
                 }
 
                 object navModel = deserializer(_reader);
+                // 如果整个导航链中某一个导航属性为空，则跳出递归
+                if (navModel == null) break; 
+
                 if (list == null)
                 {
                     navWrapper.Set(model, navModel);
@@ -308,7 +311,9 @@ namespace ICS.XFramework.Data
             ILGenerator g = dynamicMethod.GetILGenerator();
             TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
 
-            var model = g.DeclareLocal(type);
+            LocalBuilder model = g.DeclareLocal(type);
+            Label exitLabel = g.DefineLabel();
+            Label loadNullLabel = g.DefineLabel();
             g.Emit(OpCodes.Newobj, typeRuntime.ConstructInvoker.Constructor);
             g.Emit(OpCodes.Stloc, model);
 
@@ -323,6 +328,14 @@ namespace ICS.XFramework.Data
                     keyName = column != null ? column.Name : string.Empty;
                 }
 
+                if (keyName == ColumnExpressionVisitor.NullFieldName)
+                {
+                    g.Emit(OpCodes.Ldarg_0);
+                    g.Emit(OpCodes.Ldc_I4, index);
+                    g.Emit(OpCodes.Callvirt, _isDBNull);
+                    g.Emit(OpCodes.Brtrue, loadNullLabel);
+                }
+
                 var wrapper = typeRuntime.GetWrapper(keyName);
                 if (wrapper == null) continue;
 
@@ -331,8 +344,6 @@ namespace ICS.XFramework.Data
                 g.Emit(OpCodes.Ldc_I4, index);
                 g.Emit(OpCodes.Callvirt, _isDBNull);
                 g.Emit(OpCodes.Brtrue, isDBNullLabel);
-
-
 
                 // member的类型可能与数据库中查出来的数据类型不一样
                 // 如 boolean，数据库类型 是int
@@ -368,6 +379,16 @@ namespace ICS.XFramework.Data
                 g.MarkLabel(isDBNullLabel);
             }
 
+            // 直接跳到结束标签返回实体
+            g.Emit(OpCodes.Br, exitLabel);
+
+            // 将 null 赋值给实体
+            g.MarkLabel(loadNullLabel);
+            g.Emit(OpCodes.Ldnull);
+            g.Emit(OpCodes.Stloc, model);
+
+            // 结束
+            g.MarkLabel(exitLabel);
             g.Emit(OpCodes.Ldloc, model);
             g.Emit(OpCodes.Ret);
 

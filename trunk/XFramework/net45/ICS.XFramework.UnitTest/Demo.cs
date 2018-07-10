@@ -22,18 +22,24 @@ namespace ICS.XFramework.UnitTest
             var query7 =
                 from a in context
                     .GetTable<Inte_CRM.CRM_SaleOrder>()
-                    join b in context.GetTable< Inte_CRM.Client>() on a.ClientId equals b.ClientId
-                    //.Include(a => a.Client.AccountList)
-                    //.Include(a => a.HeavyBuyer.AccountList)
-                    //join b in context.GetTable<Inte_CRM.CloudServer>() on a.ClientId equals b.CloudServerId into u_b
-                    //from b in u_b.DefaultIfEmpty()
+                    //join b in context.GetTable< Inte_CRM.Client>() on a.ClientId equals b.ClientId
+                    .Include(a => a.Client.AccountList)
+                    .Include(a => a.HeavyBuyer.AccountList)
+                //join b in context.GetTable<Inte_CRM.CloudServer>() on a.ClientId equals b.CloudServerId into u_b
+                //from b in u_b.DefaultIfEmpty()
                 where a.OrderId > 0
                 select new Inte_CRM.CRM_SaleOrder(a)
                 {
-                    OrderId = a.OrderId,
-                    Client = b //a.Client
-                    //ClientId = a.ClientId,
+                    //OrderId = a.OrderId ,
+                    ////Client = b //a.Client
+                    ////ClientId = a.ClientId,
                     //Client = new Inte_CRM.Client(a.Client)
+                    //{
+                    //    //AccountList = a.Client.AccountList,
+                    //    ClientId = a.Client.ClientId,
+                    //    CloudServer = a.Client.CloudServer
+                    //},
+                    //HeavyBuyer = new Inte_CRM.Client(a.Client)
                     //{
                     //    //AccountList = a.Client.AccountList,
                     //    ClientId = a.Client.ClientId,

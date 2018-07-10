@@ -22,6 +22,8 @@ namespace ICS.XFramework.Data
         private List<string> _navChainHopper = null;
         private bool _mOnly = false;
 
+        public static string NullFieldName = "NULL";
+
         static ColumnExpressionVisitor()
         {
             _statisMethods = new Dictionary<DbExpressionType, string>
@@ -144,7 +146,7 @@ namespace ICS.XFramework.Data
         //{new App() {Id = p.Id}} 
         protected override Expression VisitMemberInit(MemberInitExpression node)
         {
-            if (node.NewExpression != null) this.VisitNewArguments(node.NewExpression);
+            if (node.NewExpression != null) this.VisitMemberNew(node.NewExpression);
             if (_navChainHopper.Count == 0) _navChainHopper.Add(node.Type.Name);
 
             // TODO #对 Bindings 进行排序，保证导航属性的赋值一定要最后面#
@@ -189,14 +191,15 @@ namespace ICS.XFramework.Data
 
                     if (!_navDescriptors.ContainsKey(keyName))
                     {
+                        // fix issue# XC 列占一个位
                         descriptor.Start = _columns.Count;
-                        descriptor.FieldCount = GetFieldCount(binding.Expression);
+                        descriptor.FieldCount = GetFieldCount(binding.Expression) + binding.Expression.NodeType == ExpressionType.MemberAccess ? 1 : 0;
                         _navDescriptors.Add(keyName, descriptor);
                         _navChainHopper.Add(keyName);
                     }
 
-                    if (binding.Expression.NodeType == ExpressionType.MemberAccess) this.VisitMember_Navigation(binding.Expression as MemberExpression);
-                    else if (binding.Expression.NodeType == ExpressionType.New) this.VisitNewArguments(binding.Expression as NewExpression);
+                    if (binding.Expression.NodeType == ExpressionType.MemberAccess) this.VisitMemberNavigation(binding.Expression as MemberExpression, true);
+                    else if (binding.Expression.NodeType == ExpressionType.New) this.VisitMemberNew(binding.Expression as NewExpression);
                     else if (binding.Expression.NodeType == ExpressionType.MemberInit) this.VisitMemberInit(binding.Expression as MemberInitExpression);
 
                     // 恢复访问链
@@ -210,7 +213,7 @@ namespace ICS.XFramework.Data
             return node;
         }
 
-        private Expression VisitMember_Navigation(MemberExpression node)
+        private Expression VisitMemberNavigation(MemberExpression node, bool checkNull = false)
         {
             string alias = string.Empty;
             Type type = node.Type;
@@ -218,12 +221,20 @@ namespace ICS.XFramework.Data
             if (node.IsArrivable())
             {
                 // 例： Client = a.Client.CloudServer
+                // fix issue# Join 表达式显式指定导航属性时时，alias 为空
+                // fix issue# 多个导航属性时 AppendNullColumn 只解析当前表达式的
                 int index = 0;
-                this.VisitNavigation(node);
+                int num = this.Navigations != null ? this.Navigations.Count : 0;
+                alias = this.VisitNavigation(node);
                 foreach (var kvp in Navigations)
                 {
                     index += 1;
-                    if (index < Navigations.Count) continue;
+                    if (index < Navigations.Count && index > num)
+                    {
+                        alias = _aliases.GetNavigationTableAlias(kvp.Key);
+                        if (checkNull ) AppendNullColumn(kvp.Value.Member, alias);
+                        continue;
+                    }
 
                     alias = _aliases.GetNavigationTableAlias(kvp.Key);
                     type = kvp.Value.Type;
@@ -239,6 +250,8 @@ namespace ICS.XFramework.Data
 
             if (type.IsGenericType) type = type.GetGenericArguments()[0];
             this.VisitAllMember(type, alias);
+            if (checkNull) AppendNullColumn(node.Member, alias);
+
             return node;
         }
 
@@ -249,14 +262,14 @@ namespace ICS.XFramework.Data
             if (node != null)
             {
                 if (node.Arguments.Count == 0) throw new XFrameworkException("'NewExpression' do not have any arguments.");
-                this.VisitNewArguments(node);
+                this.VisitMemberNew(node);
             }
 
             return node;
         }
 
         //遍历New表达式的参数集
-        private Expression VisitNewArguments(NewExpression node)
+        private Expression VisitMemberNew(NewExpression node)
         {
             for (int i = 0; i < node.Arguments.Count; i++)
             {
@@ -287,7 +300,7 @@ namespace ICS.XFramework.Data
                     }
                     else
                     {
-                        this.VisitMember_Navigation(exp as MemberExpression);
+                        this.VisitMemberNavigation(exp as MemberExpression);
                     }
 
                     continue;
@@ -418,33 +431,11 @@ namespace ICS.XFramework.Data
             return node;
         }
 
-        // 选择字段
-        public static string AddColumn(IDictionary<string, Column> columns, string name)
-        {
-            // ATTENTION：此方法不能在 VisitMember 方法里调用
-            // 因为 VisitMember 方法不一定是最后SELECT的字段
-            // 返回最终确定的唯一的列名
-
-            string newName = name;
-            int dup = 0;
-            if (columns.ContainsKey(newName))
-            {
-                var column = columns[newName];
-                column.Duplicate += 1;
-
-                newName = newName + column.Duplicate.ToString(); //string.Format("{0}{1}", newName, column.Dup.ToString());
-                dup = column.Duplicate;
-            }
-
-            columns.Add(newName, new Column { Name = name, Duplicate = dup });
-            return newName;
-        }
-
         // 遍历 Include 包含的导航属性
         private void VisitInclude()
         {
             if (_include == null || _include.Count == 0) return;
-            
+
             foreach (var dbExpression in _include)
             {
                 Expression exp = dbExpression.Expressions[0];
@@ -484,15 +475,59 @@ namespace ICS.XFramework.Data
                     keyName = keyName + "." + memberExpression.Member.Name;
                     if (!_navDescriptors.ContainsKey(keyName))
                     {
+                        // fix issue# XC 列占一个位
                         NavigationDescriptor descriptor = new NavigationDescriptor(keyName, memberExpression.Member);
-                        descriptor.Start = i == 0 ? _columns.Count : -1;
-                        descriptor.FieldCount = i == 0 ? GetFieldCount(exp) : -1;
+                        descriptor.Start = _columns.Count; //i == 0 ? _columns.Count : -1;
+                        descriptor.FieldCount = i == 0 ? GetFieldCount(exp) : 1;//-1;
                         _navDescriptors.Add(keyName, descriptor);
                     }
                 }
 
-                this.VisitMember_Navigation(exp as MemberExpression);
+                this.VisitMemberNavigation(exp as MemberExpression, true);
             }
+        }
+
+        // 添加额外列，用来判断整个（左）连接记录是否为空
+        private void AppendNullColumn(System.Reflection.MemberInfo member, string alias)
+        {
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(member.DeclaringType);
+            var foreignKey = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(member.Name);
+            string keyName = foreignKey.OuterKeys[0];
+
+            _builder.Append("CASE WHEN ");
+            _builder.AppendMember(alias, keyName);
+            _builder.Append(" IS NULL THEN NULL ELSE ");
+            _builder.AppendMember(alias, keyName);
+            _builder.Append(" END");
+
+            // 选择字段
+            string newName = ColumnExpressionVisitor.AddColumn(_columns, NullFieldName);
+            // 添加字段别名
+            _builder.AppendAs(newName);
+            _builder.Append(',');
+            _builder.AppendNewLine();
+        }
+
+        // 选择字段
+        private static string AddColumn(IDictionary<string, Column> columns, string name)
+        {
+            // ATTENTION：此方法不能在 VisitMember 方法里调用
+            // 因为 VisitMember 方法不一定是最后SELECT的字段
+            // 返回最终确定的唯一的列名
+
+            string newName = name;
+            int dup = 0;
+            if (columns.ContainsKey(newName))
+            {
+                var column = columns[newName];
+                column.Duplicate += 1;
+
+                newName = newName + column.Duplicate.ToString(); //string.Format("{0}{1}", newName, column.Dup.ToString());
+                dup = column.Duplicate;
+            }
+
+            columns.Add(newName, new Column { Name = name, Duplicate = dup });
+            return newName;
         }
 
         // 计算数据库字段数量 
