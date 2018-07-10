@@ -132,13 +132,13 @@ namespace ICS.XFramework.Data
             });
         }
 
-        /// <summary>
-        ///  指示查询应该包含外键
-        /// </summary>
-        public static IDbQueryable<TResult> Include<TResult, TProperty>(this IDbQueryable<TResult> source, Expression<Func<TResult, TProperty>> path)
-        {
-            return source.CreateQuery<TResult>(DbExpressionType.Include, path);
-        }
+        ///// <summary>
+        /////  指示查询应该包含外键
+        ///// </summary>
+        //public static IDbQueryable<TResult> Include<TResult, TProperty>(this IDbQueryable<TResult> source, Expression<Func<TResult, TProperty>> path)
+        //{
+        //    return source.CreateQuery<TResult>(DbExpressionType.Include, path);
+        //}
 
         /// <summary>
         ///  基于匹配键对两个序列的元素进行关联。使用默认的相等比较器对键进行比较

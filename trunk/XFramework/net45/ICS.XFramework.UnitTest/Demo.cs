@@ -23,8 +23,8 @@ namespace ICS.XFramework.UnitTest
                 from a in context
                     .GetTable<Inte_CRM.CRM_SaleOrder>()
                     //join b in context.GetTable< Inte_CRM.Client>() on a.ClientId equals b.ClientId
-                    .Include(a => a.Client.AccountList)
-                    .Include(a => a.HeavyBuyer.AccountList)
+                    //.Include(a => a.Client.AccountList)
+                    //.Include(a => a.HeavyBuyer.AccountList)
                 //join b in context.GetTable<Inte_CRM.CloudServer>() on a.ClientId equals b.CloudServerId into u_b
                 //from b in u_b.DefaultIfEmpty()
                 where a.OrderId > 0
@@ -33,12 +33,12 @@ namespace ICS.XFramework.UnitTest
                     //OrderId = a.OrderId ,
                     ////Client = b //a.Client
                     ////ClientId = a.ClientId,
-                    //Client = new Inte_CRM.Client(a.Client)
-                    //{
-                    //    //AccountList = a.Client.AccountList,
-                    //    ClientId = a.Client.ClientId,
-                    //    CloudServer = a.Client.CloudServer
-                    //},
+                    Client = new Inte_CRM.Client(a.Client)
+                    {
+                        //ClientId = a.Client.ClientId,
+                        CloudServer = a.Client.CloudServer,
+                        AccountList = a.Client.AccountList,
+                    },
                     //HeavyBuyer = new Inte_CRM.Client(a.Client)
                     //{
                     //    //AccountList = a.Client.AccountList,
@@ -503,11 +503,11 @@ namespace ICS.XFramework.UnitTest
             var r = q4.ToList();
 
             // include
-            var query7 =
-                from a in context
-                    .GetTable<Inte_CRM.Client>()
-                    .Include(a => a.AccountList)
-                select a;
+            //var query7 =
+            //    from a in context
+            //        .GetTable<Inte_CRM.Client>()
+            //        .Include(a => a.AccountList)
+            //    select a;
         }
 
         // 其它说明

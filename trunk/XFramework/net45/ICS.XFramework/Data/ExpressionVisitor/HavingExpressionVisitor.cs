@@ -14,7 +14,7 @@ namespace ICS.XFramework.Data
         /// 初始化 <see cref="HavingExpressionVisitor"/> 类的新实例
         /// </summary>
         public HavingExpressionVisitor(DbQueryProviderBase provider, TableAliasCache aliases, DbExpression having, DbExpression groupBy)
-            : base(provider, aliases, having.Expressions != null ? having.Expressions[0] : null)
+            : base(provider, aliases, having != null && having.Expressions != null ? having.Expressions[0] : null)
         {
             _groupBy = groupBy;
             _aliases = aliases;

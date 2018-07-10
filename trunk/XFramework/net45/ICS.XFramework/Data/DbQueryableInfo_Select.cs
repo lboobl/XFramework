@@ -61,6 +61,11 @@ namespace ICS.XFramework.Data
         public bool HaveAny { get; set; }
 
         /// <summary>
+        /// 表达式是否包含 1:n 类型的导航属性
+        /// </summary>
+        public bool HaveListTypeNavigation { get; set; }
+
+        /// <summary>
         /// 跳过序列中指定数量的元素
         /// </summary>
         public int Skip { get; set; }
@@ -103,14 +108,11 @@ namespace ICS.XFramework.Data
 
         /// <summary>
         /// 并集
+        /// <para>
         /// 注意，T 可能不是 参数T 所表示的类型
+        /// </para>
         /// </summary>
         public List<IDbQueryableInfo<T>> Union { get; set; }
-
-        ///// <summary>
-        ///// 参与表别名运算的表达式集
-        ///// </summary>
-        //public HashSet<Expression> AliasExpressions { get; set; }
 
         /// <summary>
         /// 初始化 <see cref="DbQueryableInfo_Select"/> 类的新实例

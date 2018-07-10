@@ -13,7 +13,7 @@ namespace ICS.XFramework.Data
         /// 初始化 <see cref="WhereExpressionVisitor"/> 类的新实例
         /// </summary>
         public WhereExpressionVisitor(DbQueryProviderBase provider, TableAliasCache aliases, DbExpression exp)
-            : base(provider, aliases, exp.Expressions != null ? exp.Expressions[0] : null)
+            : base(provider, aliases, exp != null && exp.Expressions != null ? exp.Expressions[0] : null)
         {
             _expression = base.Expression;
         }

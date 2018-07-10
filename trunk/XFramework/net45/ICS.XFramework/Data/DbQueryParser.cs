@@ -10,7 +10,6 @@ namespace ICS.XFramework.Data
         public static IDbQueryableInfo<TElement> Parse<TElement>(IDbQueryable<TElement> query, int start = 0)
         {
             // 目的：将query 转换成增/删/改/查
-
             // 1、from a in context.GetTable<T>() select a 此时query里面可能没有SELECT 表达式
             // 2、Take 视为一个查询的结束位，如有更多查询，应使用嵌套查询
 
@@ -99,7 +98,7 @@ namespace ICS.XFramework.Data
 
                     case DbExpressionType.First:
                     case DbExpressionType.FirstOrDefault:
-                       // take = 1;
+                        take = 1;
                         if (curExp.Expressions != null) where.Add(curExp.Expressions[0]);
                         continue;
 
@@ -127,7 +126,7 @@ namespace ICS.XFramework.Data
 
                     case DbExpressionType.Single:
                     case DbExpressionType.SingleOrDefault:
-                       // take = 1;
+                        take = 1;
                         if (curExp.Expressions != null) where.Add(curExp.Expressions[0]);
                         continue;
 
@@ -190,7 +189,6 @@ namespace ICS.XFramework.Data
             qQuery.Statis = statis;
             qQuery.Union = union;
             qQuery.Include = include;
-            //qQuery.AliasExpressions = aliasExpressions;
 
             if (update != null)
             {
@@ -239,14 +237,72 @@ namespace ICS.XFramework.Data
                 else
                 {
                     qOuter.NestedQuery = qQuery;
-                    return qOuter; 
+                    return qOuter;
+                }
+            }
+            else if (select != null)
+            {
+                // 解析导航属性 如果有 1:n 的导航属性，那么结果集记录数会最大增大n倍，这时将使用嵌套语义。
+                Expression expression = select;
+                LambdaExpression lambdaExpression = expression as LambdaExpression;
+                if (lambdaExpression != null) expression = lambdaExpression.Body;
+                MemberInitExpression initExpression = expression as MemberInitExpression;
+                bool is1N = initExpression != null && VisitBinding(initExpression.Bindings);
+                if (is1N)
+                {
+                    NewExpression newExpression = initExpression.NewExpression;
+                    List<MemberBinding> bindings = new List<MemberBinding>();
+                    for (int i = 0; i < initExpression.Bindings.Count; i++)
+                    {
+                        Type propertyType = (initExpression.Bindings[i].Member as System.Reflection.PropertyInfo).PropertyType;
+                        bool isNavigation = !Reflection.TypeUtils.IsPrimitive(propertyType);
+                        if (!isNavigation) bindings.Add(initExpression.Bindings[i]);
+                    }
+
+                    if (bindings.Count > 0 || newExpression != null)
+                    {
+                        var m1 = Expression.MemberInit(newExpression, bindings);
+                        var lambda1 = Expression.Lambda(m1, (select as LambdaExpression).Parameters);
+                        qQuery.Expression = new DbExpression(DbExpressionType.Select, lambda1);
+                    }
+
+                    var qOuter = new DbQueryableInfo_Select<TElement>();
+                    qOuter.FromType = type;
+                    qOuter.Expression = new DbExpression(DbExpressionType.Select, select);
+                    qOuter.NestedQuery = qQuery;
+                    qOuter.Join = new List<DbExpression>();
+                    qOuter.OrderBy = new List<DbExpression>();
+                    qOuter.Include = new List<DbExpression>();
+
+                    return qOuter;
                 }
             }
 
             // 查询表达式
             return qQuery;
         }
-        
+
+        // 判定初始化绑定是否有 1:n 关系的导航
+        private static bool VisitBinding(System.Collections.ObjectModel.ReadOnlyCollection<MemberBinding> bindings)
+        {
+            for (int i = 0; i < bindings.Count; i++)
+            {
+                // TODO 先判定是导航属性，再判定是否 List 类型
+                Type propertyType = (bindings[i].Member as System.Reflection.PropertyInfo).PropertyType;
+                if (propertyType.Name == "List`1") return true;
+
+                MemberAssignment memberAssignment = bindings[i] as MemberAssignment;
+                if (memberAssignment != null && memberAssignment.Expression.NodeType == ExpressionType.MemberInit)
+                {
+                    MemberInitExpression initExpression = memberAssignment.Expression as MemberInitExpression;
+                    bool is1N = VisitBinding(initExpression.Bindings);
+                    if (is1N) return true;
+                }
+            }
+
+            return false;
+        }
+
         private static Expression Combine(IList<Expression> predicates)
         {
             if (predicates.Count == 0) return null;
