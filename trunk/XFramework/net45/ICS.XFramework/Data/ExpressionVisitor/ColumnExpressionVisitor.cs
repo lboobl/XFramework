@@ -182,6 +182,10 @@ namespace ICS.XFramework.Data
 
                 else
                 {
+                    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(binding.Member.DeclaringType);
+                    var attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(binding.Member.Name);
+                    if (attribute == null) throw new XFrameworkException("Complex property must mark 'ForeignKeyAttribute' ");
+
                     int n = _navChainHopper.Count;
 
                     // 生成导航属性描述集合，以类名.属性名做为键值

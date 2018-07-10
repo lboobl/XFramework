@@ -287,9 +287,10 @@ namespace ICS.XFramework.Data
         {
             for (int i = 0; i < bindings.Count; i++)
             {
-                // TODO 先判定是导航属性，再判定是否 List 类型
                 Type propertyType = (bindings[i].Member as System.Reflection.PropertyInfo).PropertyType;
-                if (propertyType.Name == "List`1") return true;
+                TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(bindings[i].Member.DeclaringType);
+                var attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(bindings[i].Member.Name);
+                if (attribute != null && propertyType.Name == "List`1") return true;
 
                 MemberAssignment memberAssignment = bindings[i] as MemberAssignment;
                 if (memberAssignment != null && memberAssignment.Expression.NodeType == ExpressionType.MemberInit)
