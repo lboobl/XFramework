@@ -11,6 +11,9 @@ namespace ICS.XFramework.Data
     /// </summary>
     public class ColumnExpressionVisitor : ExpressionVisitorBase
     {
+        // TODO 所有LEFT JOIN都应检查是否为空 ???
+        // 若是，会否跟 Client = new Inte_CRM.Client(a.Client) 这种表达式表达的语义有冲突
+
         private DbQueryProviderBase _provider = null;
         private TableAliasCache _aliases = null;
         private DbExpression _groupBy = null;
@@ -197,7 +200,7 @@ namespace ICS.XFramework.Data
                     {
                         // fix issue# XC 列占一个位
                         descriptor.Start = _columns.Count;
-                        descriptor.FieldCount = GetFieldCount(binding.Expression) + binding.Expression.NodeType == ExpressionType.MemberAccess ? 1 : 0;
+                        descriptor.FieldCount = GetFieldCount(binding.Expression) + (binding.Expression.NodeType == ExpressionType.MemberAccess || binding.Expression.NodeType == ExpressionType.MemberInit ? 1 : 0);
                         _navDescriptors.Add(keyName, descriptor);
                         _navChainHopper.Add(keyName);
                     }
@@ -236,7 +239,7 @@ namespace ICS.XFramework.Data
                     if (index < Navigations.Count && index > num)
                     {
                         alias = _aliases.GetNavigationTableAlias(kvp.Key);
-                        if (checkNull ) AppendNullColumn(kvp.Value.Member, alias);
+                        if (checkNull) AppendNullColumn(kvp.Value.Member, alias);
                         continue;
                     }
 
@@ -304,7 +307,7 @@ namespace ICS.XFramework.Data
                     }
                     else
                     {
-                        this.VisitMemberNavigation(exp as MemberExpression);
+                        this.VisitMemberNavigation(exp as MemberExpression, true);
                     }
 
                     continue;
@@ -482,7 +485,7 @@ namespace ICS.XFramework.Data
                         // fix issue# XC 列占一个位
                         NavigationDescriptor descriptor = new NavigationDescriptor(keyName, memberExpression.Member);
                         descriptor.Start = _columns.Count; //i == 0 ? _columns.Count : -1;
-                        descriptor.FieldCount = i == 0 ? GetFieldCount(exp) : 1;//-1;
+                        descriptor.FieldCount = i == 0 ? (GetFieldCount(exp) + 1) : 1;//-1;
                         _navDescriptors.Add(keyName, descriptor);
                     }
                 }
