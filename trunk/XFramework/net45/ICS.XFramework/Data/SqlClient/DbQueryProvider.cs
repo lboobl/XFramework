@@ -118,9 +118,10 @@ namespace ICS.XFramework.Data.SqlClient
 
             bool willNest = qQuery.HaveDistinct || qQuery.GroupBy != null || qQuery.Skip > 0 || qQuery.Take > 0;
             bool useStatis = qQuery.Statis != null;
-            bool groupByPaging = qQuery.GroupBy != null && qQuery.Skip > 0;         // 分组分页      
-            bool useOrderBy = (!useStatis || qQuery.Skip > 0) && !qQuery.HaveAny;   // 没有统计函数或者使用 'Skip' 子句，则解析OrderBy
-            //if (useOrderBy) useOrderBy = useOrderBy && (qQuery.HaveListTypeNavigation && nQuery != null && (nQuery.Take > 0 || nQuery.Skip > 0));
+            bool groupByPaging = qQuery.GroupBy != null && qQuery.Skip > 0;         // 分组分页   
+            // 没有统计函数或者使用 'Skip' 子句，则解析OrderBy   
+            bool useOrderBy = (!useStatis || qQuery.Skip > 0) && !qQuery.HaveAny && (!qQuery.IsListTypeNavQuery||);   
+            //if (useOrderBy&& !qQuery.HaveListTypeNavigation) useOrderBy = useOrderBy && (qQuery.IsListTypeNavQuery && (qQuery.Skip > 0 || qQuery.Take > 0));
 
             ExpressionVisitorBase visitor = null;
             TableAliasCache aliases = this.PrepareAlias<T>(qQuery);
@@ -367,11 +368,12 @@ namespace ICS.XFramework.Data.SqlClient
 
             #endregion
 
-            #region 导航排序
+            #region 嵌套导航
 
-            if (qQuery.OrderBy.Count > 0 && !useOrderBy && nQuery != null)
+            if (nQuery!=null && nQuery.IsListTypeNavQuery && !(nQuery.Skip > 0 || nQuery.Take > 0))
             {
-                visitor = new OrderByExpressionVisitor(this, aliases, qQuery.OrderBy, null, "t0");
+                string sql = cd.CommandText;
+                visitor = new OrderByExpressionVisitor(this, aliases, nQuery.OrderBy, null, "t0");
                 visitor.Write(jf);
             }
 

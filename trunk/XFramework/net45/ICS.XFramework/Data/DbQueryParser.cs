@@ -266,6 +266,7 @@ namespace ICS.XFramework.Data
                         qQuery.Expression = new DbExpression(DbExpressionType.Select, lambda1);
                     }
 
+                    qQuery.IsListTypeNavQuery = true;
                     var qOuter = new DbQueryableInfo_Select<TElement>();
                     qOuter.FromType = type;
                     qOuter.Expression = new DbExpression(DbExpressionType.Select, select);

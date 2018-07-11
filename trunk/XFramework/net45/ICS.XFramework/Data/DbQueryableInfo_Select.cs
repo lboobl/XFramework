@@ -107,6 +107,11 @@ namespace ICS.XFramework.Data
         public override IDbQueryableInfo<T> NestedQuery { get; set; }
 
         /// <summary>
+        /// 是否是 1:n 类型导航的嵌套查询
+        /// </summary>
+        public bool IsListTypeNavQuery { get; set; }
+
+        /// <summary>
         /// 并集
         /// <para>
         /// 注意，T 可能不是 参数T 所表示的类型
