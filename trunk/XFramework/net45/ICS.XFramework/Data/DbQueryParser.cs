@@ -244,18 +244,29 @@ namespace ICS.XFramework.Data
             else if (select != null)
             {
                 // 解析导航属性 如果有 1:n 的导航属性，那么结果集记录数会最大增大n倍，这时将使用嵌套语义。
+                bool checkListNavgation = false;
                 Expression expression = select;
                 LambdaExpression lambdaExpression = expression as LambdaExpression;
                 if (lambdaExpression != null) expression = lambdaExpression.Body;
                 MemberInitExpression initExpression = expression as MemberInitExpression;
-                bool checkListNavgation = initExpression != null && CheckListNavigation<TElement>(initExpression);
+
+                foreach (DbExpression d in include)
+                {
+                    Expression exp = d.Expressions[0];
+                    if (exp.NodeType == ExpressionType.Lambda) exp = (exp as LambdaExpression).Body;
+                    if (exp.Type.IsGenericType && exp.Type.GetGenericTypeDefinition() == typeof(List<>)) checkListNavgation = true;
+                    if (checkListNavgation) break;
+                }
+                if (!checkListNavgation) checkListNavgation = initExpression != null && CheckListNavigation<TElement>(initExpression);
+
                 if (checkListNavgation)
                 {
-                    NewExpression newExpression = initExpression.NewExpression;
-                    IEnumerable<MemberBinding> bindings =
-                        initExpression
-                        .Bindings
-                        .Where(x => Reflection.TypeUtils.IsPrimitive((x.Member as System.Reflection.PropertyInfo).PropertyType));
+                    NewExpression newExpression = initExpression != null ? initExpression.NewExpression : null;
+                    IEnumerable<MemberBinding> bindings = initExpression != null
+                        ? initExpression
+                          .Bindings
+                          .Where(x => Reflection.TypeUtils.IsPrimitive((x.Member as System.Reflection.PropertyInfo).PropertyType))
+                        : new List<MemberBinding>();
 
                     if (newExpression != null || bindings.Count() > 0)
                     {
@@ -295,7 +306,7 @@ namespace ICS.XFramework.Data
                 // complex 类型
                 TypeRuntimeInfo memberTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(node.Bindings[i].Member.DeclaringType);
                 var attribute = memberTypeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(node.Bindings[i].Member.Name);
-                if (attribute != null &&pType.IsGenericType)
+                if (attribute != null && pType.IsGenericType)
                 {
                     Type genericType = pType.GetGenericTypeDefinition();
                     if (genericType == typeof(List<>)) return true;
