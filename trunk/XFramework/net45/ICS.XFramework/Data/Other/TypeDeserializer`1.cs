@@ -117,9 +117,29 @@ namespace ICS.XFramework.Data
                 // 第一层
                 if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader, _define.Columns, 0, _define.NavigationDescriptors.MinIndex);
                 model = (T)_modelDeserializer(_reader);
+                // 若有 1:n 的导航属性，判断当前行数据与上一行数据是否相同
+                if (prevModel != null && _define.HaveListNavigation)
+                {
+                    isLine = true;
+                    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+                    Func<KeyValuePair<string, Reflection.MemberAccessWrapper>, bool> predicate =
+                        x => (x.Value as MemberAccessWrapper) != null && (x.Value as MemberAccessWrapper).Column != null && (x.Value as MemberAccessWrapper).Column.IsKey;
+                    var keys =
+                        typeRuntime
+                        .Wrappers
+                        .Where(predicate)
+                        .Select(x => x.Value);
+                    foreach (var wrapper in keys)
+                    {
+                        var key1 = wrapper.Get(prevModel);
+                        var key2 = wrapper.Get(model);
+                        isLine = isLine && key1.Equals(key2);
+                        if (!isLine) break;
+                    }
+                }
 
                 // 递归导航属性 #TODO issue# 空导航怎么处理
-                this.Deserialize_Navigation(prevModel, model, string.Empty, out isLine);
+                this.Deserialize_Navigation(isLine ? prevModel : null, model, string.Empty, isLine);
             }
 
             return model;
@@ -130,11 +150,10 @@ namespace ICS.XFramework.Data
         // 导航属性
         // @prevLine 前一行数据
         // @isLine   是否同一行数据<同一父级>
-        private void Deserialize_Navigation(object prevModel, object model, string typeName, out bool isLine)
+        private void Deserialize_Navigation(object prevModel, object model, string typeName, bool isLine)
         {
             // CRM_SaleOrder.Client 
             // CRM_SaleOrder.Client.AccountList
-            isLine = false;
             Type type = model.GetType();
             TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
             if (string.IsNullOrEmpty(typeName)) typeName = type.Name;
@@ -160,7 +179,7 @@ namespace ICS.XFramework.Data
                 Func<IDataRecord, object> deserializer = null;
                 TypeRuntimeInfo navTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navType);
                 object list = null;
-                if (navType.IsGenericType && navType.Name == "List`1")
+                if (navType.IsGenericType && navType.GetGenericTypeDefinition() == typeof(List<>))
                 {
                     // 1：n关系，导航属性为 List<T>
                     list = navWrapper.Get(model);
@@ -191,14 +210,12 @@ namespace ICS.XFramework.Data
                     else
                     {
                         var method = navTypeRuntime.GetWrapper("Add");
-                        TypeRuntimeInfo itemTypeRuntimeInfo = TypeRuntimeInfoCache.GetRuntimeInfo(navModel.GetType());
-
                         method.Invoke(list, navModel);
 
                         #region 合并列表
 
                         // 合并列表 
-                        if (prevModel != null)
+                        if (prevModel != null && isLine)
                         {
                             // 例：CRM_SaleOrder.Client.AccountList
                             string[] keys = keyName.Split('.');
@@ -212,54 +229,40 @@ namespace ICS.XFramework.Data
                                 pWrapper = pTypeRuntime.GetWrapper(keys[i]);
                                 pModel = pWrapper.Get(pModel);
                                 if (i == keys.Length - 1) prevList = pModel;
-                                if (pModel.GetType().Name == "List`1")
+
+                                Type objType = pModel.GetType();
+                                if(objType.IsGenericType && objType.GetGenericTypeDefinition() == typeof(List<>))
                                 {
                                     // 取最后一个记录
-                                    var wrapper1 = navTypeRuntime.GetWrapper("get_Count");
-                                    int count = Convert.ToInt32(wrapper1.Invoke(pModel));
+                                    TypeRuntimeInfo objTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(objType);
+                                    var wrapper = objTypeRuntime.GetWrapper("get_Count");
+                                    int count = Convert.ToInt32(wrapper.Invoke(pModel));
                                     if (count > 0)
                                     {
                                         var wrapper2 = navTypeRuntime.GetWrapper("get_Item");
                                         pModel = wrapper2.Invoke(pModel, count - 1);
                                     }
-                                    if (pModel == null) break;
+                                    else
+                                    {
+                                        pModel = null;
+                                    }
                                 }
 
                                 // issue#上一个列表为空列表
-                                pTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(pModel.GetType());
+                                if (pModel != null) pTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(pModel.GetType());
                             }
-
-                            var foreignKey = (navWrapper as MemberAccessWrapper).ForeignKey;
-                            if (foreignKey != null && pModel != null)
+                            if (pModel != null)
                             {
-                                bool isLine1 = true;
-                                for (int i = 0; i < foreignKey.InnerKeys.Length; i++)
-                                {
-                                    object innerKey = pTypeRuntime.Get(pModel, foreignKey.InnerKeys[i]);
-                                    object outerKey = pTypeRuntime.Get(navModel, foreignKey.OuterKeys[i]);
-                                    isLine1 = isLine1 && innerKey.Equals(outerKey);
-                                    if (isLine1)
-                                    {
-                                        // 如果属于同一个父级，则添加到上一行的相同导航列表中去
-                                        method = navTypeRuntime.GetWrapper("Add");
-                                        method.Invoke(prevList, navModel);
-                                        isLine = isLine1;
-                                    }
-                                    else
-                                    {
-                                        //
-                                        //
-                                        //
-                                        break;
-                                    }
-                                }
+                                // 则添加到上一行的相同导航列表中去
+                                method = navTypeRuntime.GetWrapper("Add");
+                                method.Invoke(prevList, navModel);
                             }
                         }
 
                         #endregion
                     }
 
-                    if (navTypeRuntime.NavWrappers.Count > 0) Deserialize_Navigation(prevModel, navModel, keyName, out isLine);
+                    if (navTypeRuntime.NavWrappers.Count > 0) Deserialize_Navigation(prevModel, navModel, keyName, isLine);
                 }
             }
         }

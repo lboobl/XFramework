@@ -84,8 +84,9 @@ namespace ICS.XFramework
             if (node.NodeType == ExpressionType.Call)
             {
                 // List<int>{0}[]
-                var call = node as MethodCallExpression;
-                if (call.Object != null && call.Method.Name == "get_Item" && call.Object.Type.Name == "List`1")
+                MethodCallExpression methodCallExpression = node as MethodCallExpression;
+                Expression expression = methodCallExpression.Object;
+                if (expression != null && expression.Type.IsGenericType && expression.Type.GetGenericTypeDefinition() == typeof(List<>) && methodCallExpression.Method.Name == "get_Item")
                 {
                     return true;
                 }
@@ -95,6 +96,7 @@ namespace ICS.XFramework
             if (member == null) return false;
             if (member.Expression == null) return true;
             if (member.Expression.NodeType == ExpressionType.Constant) return true;
+
             return member.Expression.CanEvaluate();
         }
 

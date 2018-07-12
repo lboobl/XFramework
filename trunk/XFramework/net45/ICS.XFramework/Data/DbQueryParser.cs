@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -175,7 +176,7 @@ namespace ICS.XFramework.Data
             }
 
             var qQuery = new DbQueryableInfo_Select<TElement>();
-            qQuery.FromType = type;
+            qQuery.DefinitionType = type;
             qQuery.Expression = new DbExpression(DbExpressionType.Select, select);
             qQuery.HaveDistinct = isDistinct;
             qQuery.HaveAny = isAny;
@@ -247,34 +248,31 @@ namespace ICS.XFramework.Data
                 LambdaExpression lambdaExpression = expression as LambdaExpression;
                 if (lambdaExpression != null) expression = lambdaExpression.Body;
                 MemberInitExpression initExpression = expression as MemberInitExpression;
-                bool is1N = initExpression != null && VisitBinding(initExpression.Bindings);
-                if (is1N)
+                bool checkListNavgation = initExpression != null && CheckListNavigation<TElement>(initExpression);
+                if (checkListNavgation)
                 {
                     NewExpression newExpression = initExpression.NewExpression;
-                    List<MemberBinding> bindings = new List<MemberBinding>();
-                    for (int i = 0; i < initExpression.Bindings.Count; i++)
-                    {
-                        Type propertyType = (initExpression.Bindings[i].Member as System.Reflection.PropertyInfo).PropertyType;
-                        bool isNavigation = !Reflection.TypeUtils.IsPrimitive(propertyType);
-                        if (!isNavigation) bindings.Add(initExpression.Bindings[i]);
-                    }
+                    IEnumerable<MemberBinding> bindings =
+                        initExpression
+                        .Bindings
+                        .Where(x => Reflection.TypeUtils.IsPrimitive((x.Member as System.Reflection.PropertyInfo).PropertyType));
 
-                    if (bindings.Count > 0 || newExpression != null)
+                    if (newExpression != null || bindings.Count() > 0)
                     {
-                        var m1 = Expression.MemberInit(newExpression, bindings);
-                        var lambda1 = Expression.Lambda(m1, (select as LambdaExpression).Parameters);
-                        qQuery.Expression = new DbExpression(DbExpressionType.Select, lambda1);
+                        initExpression = Expression.MemberInit(newExpression, bindings);
+                        lambdaExpression = Expression.Lambda(initExpression, lambdaExpression.Parameters);
+                        qQuery.Expression = new DbExpression(DbExpressionType.Select, lambdaExpression);
                     }
+                    qQuery.IsListNavigationQuery = true;
 
-                    qQuery.IsListTypeNavQuery = true;
                     var qOuter = new DbQueryableInfo_Select<TElement>();
-                    qOuter.FromType = type;
+                    qOuter.DefinitionType = type;
                     qOuter.Expression = new DbExpression(DbExpressionType.Select, select);
                     qOuter.NestedQuery = qQuery;
                     qOuter.Join = new List<DbExpression>();
                     qOuter.OrderBy = new List<DbExpression>();
                     qOuter.Include = new List<DbExpression>();
-                    qOuter.HaveListTypeNavigation = true;                    
+                    qOuter.HaveListNavigation = true;
 
                     return qOuter;
                 }
@@ -284,22 +282,38 @@ namespace ICS.XFramework.Data
             return qQuery;
         }
 
-        // 判定初始化绑定是否有 1:n 关系的导航
-        private static bool VisitBinding(System.Collections.ObjectModel.ReadOnlyCollection<MemberBinding> bindings)
+        // 判定 MemberInit 绑定是否声明了一对多关系的导航
+        // 如果声明了一对多关系的导航，则需要强制要求 T 有主键声明<KeyAttriubte>
+        private static bool CheckListNavigation<T>(MemberInitExpression node)
         {
-            for (int i = 0; i < bindings.Count; i++)
+            for (int i = 0; i < node.Bindings.Count; i++)
             {
-                Type propertyType = (bindings[i].Member as System.Reflection.PropertyInfo).PropertyType;
-                TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(bindings[i].Member.DeclaringType);
-                var attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(bindings[i].Member.Name);
-                if (attribute != null && propertyType.Name == "List`1") return true;
+                // primitive 类型
+                Type pType = (node.Bindings[i].Member as System.Reflection.PropertyInfo).PropertyType;
+                if (Reflection.TypeUtils.IsPrimitive(pType)) continue;
 
-                MemberAssignment memberAssignment = bindings[i] as MemberAssignment;
+                // complex 类型
+                TypeRuntimeInfo memberTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(node.Bindings[i].Member.DeclaringType);
+                var attribute = memberTypeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(node.Bindings[i].Member.Name);
+                if (attribute != null &&pType.IsGenericType)
+                {
+                    Type genericType = pType.GetGenericTypeDefinition();
+                    if (genericType == typeof(List<>)) return true;
+                    //{
+                    //    // 导航属性是 List 类型，即 1:n 关系。此时强制 T 有 <KeyAttriubte>并且 MemberInitExpression.Bindings 包含这些Key
+                    //    // 在 DataReader 反序列化成实体时需要根据 KeyAttriubte 判断不同行数据之前是否同属于一个 Key
+                    //    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+                    //    if(typeRuntime.)
+                    //}
+
+                }
+
+                MemberAssignment memberAssignment = node.Bindings[i] as MemberAssignment;
                 if (memberAssignment != null && memberAssignment.Expression.NodeType == ExpressionType.MemberInit)
                 {
                     MemberInitExpression initExpression = memberAssignment.Expression as MemberInitExpression;
-                    bool is1N = VisitBinding(initExpression.Bindings);
-                    if (is1N) return true;
+                    bool checkListNavgation = CheckListNavigation<T>(initExpression);
+                    if (checkListNavgation) return true;
                 }
             }
 

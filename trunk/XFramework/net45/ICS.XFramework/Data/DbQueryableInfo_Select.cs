@@ -63,7 +63,7 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 表达式是否包含 1:n 类型的导航属性
         /// </summary>
-        public bool HaveListTypeNavigation { get; set; }
+        public bool HaveListNavigation { get; set; }
 
         /// <summary>
         /// 跳过序列中指定数量的元素
@@ -78,10 +78,10 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 指示 SELECT FROM 子句表对应类型
         /// </summary>
-        public Type FromType { get; set; }
+        public Type DefinitionType { get; set; }
 
         /// <summary>
-        /// SELECT 字段表达式，空表示选取 <see cref="FromType"/> 的所有字段
+        /// SELECT 字段表达式，空表示选取 <see cref="DefinitionType"/> 的所有字段
         /// </summary>
         public DbExpression Expression { get; set; }
 
@@ -109,7 +109,7 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 是否是 1:n 类型导航的嵌套查询
         /// </summary>
-        public bool IsListTypeNavQuery { get; set; }
+        public bool IsListNavigationQuery { get; set; }
 
         /// <summary>
         /// 并集

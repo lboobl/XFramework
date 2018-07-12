@@ -16,6 +16,11 @@ namespace ICS.XFramework.Data
         private CommandBuilder _builder = null;
 
         /// <summary>
+        /// 表达式是否包含 1:n 类型的导航属性
+        /// </summary>
+        public bool HaveListNavigation { get; set; }
+
+        /// <summary>
         /// 针对数据源运行的文本命令
         /// </summary>
         public override string CommandText { get { return _builder.Command; } }

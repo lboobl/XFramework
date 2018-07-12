@@ -115,7 +115,7 @@ namespace ICS.XFramework.Data.SqlClient
             // 导航属性中有1:n关系，只统计主表
             // 例：AccountList = a.Client.AccountList,
             DbQueryableInfo_Select<T> nQuery = qQuery.NestedQuery as DbQueryableInfo_Select<T>;
-            if (qQuery.HaveListTypeNavigation && nQuery != null && nQuery.Statis != null) qQuery = nQuery;
+            if (qQuery.HaveListNavigation && nQuery != null && nQuery.Statis != null) qQuery = nQuery;
 
             bool willNest = qQuery.HaveDistinct || qQuery.GroupBy != null || qQuery.Skip > 0 || qQuery.Take > 0;
             bool useStatis = qQuery.Statis != null;
@@ -123,13 +123,14 @@ namespace ICS.XFramework.Data.SqlClient
             bool groupByPaging = qQuery.GroupBy != null && qQuery.Skip > 0;
             // 没有统计函数或者使用 'Skip' 子句，则解析OrderBy
             // 导航属性如果使用嵌套，除非有 TOP 或者 OFFSET 子句，否则不能用ORDER BY
-            bool useOrderBy = (!useStatis || qQuery.Skip > 0) && !qQuery.HaveAny && (!qQuery.IsListTypeNavQuery|| (qQuery.Skip > 0 || qQuery.Take > 0));
+            bool useOrderBy = (!useStatis || qQuery.Skip > 0) && !qQuery.HaveAny && (!qQuery.IsListNavigationQuery || (qQuery.Skip > 0 || qQuery.Take > 0));
 
             ExpressionVisitorBase visitor = null;
             TableAliasCache aliases = this.PrepareAlias<T>(qQuery);
             string sColumnName = string.Empty;
 
             CommandDefinition cd = new CommandDefinition(this, aliases);
+            cd.HaveListNavigation = qQuery.HaveListNavigation;
             SqlBuilder jf = cd.JoinFragment;
             SqlBuilder wf = cd.WhereFragment;
 
@@ -247,7 +248,7 @@ namespace ICS.XFramework.Data.SqlClient
             }
             else
             {
-                jf.AppendMember(TypeRuntimeInfoCache.GetRuntimeInfo(qQuery.FromType).TableName);
+                jf.AppendMember(TypeRuntimeInfoCache.GetRuntimeInfo(qQuery.DefinitionType).TableName);
             }
             jf.Append(" t0 ");
             if (!string.IsNullOrEmpty(DbQueryProvider.NOLOCK)) jf.Append(DbQueryProvider.NOLOCK);
@@ -372,7 +373,7 @@ namespace ICS.XFramework.Data.SqlClient
 
             #region 嵌套导航
 
-            if (qQuery.HaveListTypeNavigation && nQuery != null && nQuery.OrderBy.Count > 0 && nQuery.Statis == null && !(nQuery.Skip > 0 || nQuery.Take > 0))
+            if (qQuery.HaveListNavigation && nQuery != null && nQuery.OrderBy.Count > 0 && nQuery.Statis == null && !(nQuery.Skip > 0 || nQuery.Take > 0))
             {
                 string sql = cd.CommandText;
                 visitor = new OrderByExpressionVisitor(this, aliases, nQuery.OrderBy, null, "t0");

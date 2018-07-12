@@ -149,12 +149,20 @@ namespace ICS.XFramework.Data
         //{new App() {Id = p.Id}} 
         protected override Expression VisitMemberInit(MemberInitExpression node)
         {
-            if (node.NewExpression != null) this.VisitMemberNew(node.NewExpression);
+            bool checkLeft = false;
+            return VisitMemberInitImpl(node, out checkLeft);
+        }
+
+        //{new App() {Id = p.Id}} 
+        private Expression VisitMemberInitImpl(MemberInitExpression node, out bool checkLeft)
+        {
+            if (node.NewExpression != null) this.VisitMemberNew(node.NewExpression, out checkLeft);
             if (_navChainHopper.Count == 0) _navChainHopper.Add(node.Type.Name);
 
             // TODO #对 Bindings 进行排序，保证导航属性的赋值一定要最后面#
             // 未实现，在书写表达式时人工保证 ##
 
+            checkLeft = false;
             for (int i = 0; i < node.Bindings.Count; i++)
             {
                 MemberAssignment binding = node.Bindings[i] as MemberAssignment;
@@ -195,19 +203,21 @@ namespace ICS.XFramework.Data
                     string keyName = _navChainHopper.Count > 0 ? _navChainHopper[_navChainHopper.Count - 1] : string.Empty;
                     keyName = !string.IsNullOrEmpty(keyName) ? keyName + "." + binding.Member.Name : binding.Member.Name;
                     NavigationDescriptor descriptor = new NavigationDescriptor(keyName, binding.Member);
+                    int start = _columns.Count;
+
+                    if (binding.Expression.NodeType == ExpressionType.MemberAccess) this.VisitMemberNavigation(binding.Expression as MemberExpression, out checkLeft);
+                    else if (binding.Expression.NodeType == ExpressionType.New) this.VisitMemberNew(binding.Expression as NewExpression, out checkLeft);
+                    else if (binding.Expression.NodeType == ExpressionType.MemberInit) this.VisitMemberInitImpl(binding.Expression as MemberInitExpression, out checkLeft);
 
                     if (!_navDescriptors.ContainsKey(keyName))
                     {
                         // fix issue# XC 列占一个位
-                        descriptor.Start = _columns.Count;
-                        descriptor.FieldCount = GetFieldCount(binding.Expression) + (binding.Expression.NodeType == ExpressionType.MemberAccess || binding.Expression.NodeType == ExpressionType.MemberInit ? 1 : 0);
+                        descriptor.Start = start;
+                        descriptor.FieldCount = GetFieldCount(binding.Expression) + (checkLeft ? 1 : 0);
                         _navDescriptors.Add(keyName, descriptor);
                         _navChainHopper.Add(keyName);
                     }
 
-                    if (binding.Expression.NodeType == ExpressionType.MemberAccess) this.VisitMemberNavigation(binding.Expression as MemberExpression, true);
-                    else if (binding.Expression.NodeType == ExpressionType.New) this.VisitMemberNew(binding.Expression as NewExpression);
-                    else if (binding.Expression.NodeType == ExpressionType.MemberInit) this.VisitMemberInit(binding.Expression as MemberInitExpression);
 
                     // 恢复访问链
                     // 在访问导航属性时可能是 Client.CloudServer，这时要恢复为 Client，以保证能访问 Client 的下一个导航属性
@@ -220,8 +230,9 @@ namespace ICS.XFramework.Data
             return node;
         }
 
-        private Expression VisitMemberNavigation(MemberExpression node, bool checkNull = false)
+        private Expression VisitMemberNavigation(MemberExpression node, out bool checkLeft)
         {
+            checkLeft = true;
             string alias = string.Empty;
             Type type = node.Type;
 
@@ -239,7 +250,7 @@ namespace ICS.XFramework.Data
                     if (index < Navigations.Count && index > num)
                     {
                         alias = _aliases.GetNavigationTableAlias(kvp.Key);
-                        if (checkNull) AppendNullColumn(kvp.Value.Member, alias);
+                        if (checkLeft) AppendNullColumn(kvp.Value.Member, alias);
                         continue;
                     }
 
@@ -257,7 +268,7 @@ namespace ICS.XFramework.Data
 
             if (type.IsGenericType) type = type.GetGenericArguments()[0];
             this.VisitAllMember(type, alias);
-            if (checkNull) AppendNullColumn(node.Member, alias);
+            if (checkLeft) AppendNullColumn(node.Member, alias);
 
             return node;
         }
@@ -269,15 +280,17 @@ namespace ICS.XFramework.Data
             if (node != null)
             {
                 if (node.Arguments.Count == 0) throw new XFrameworkException("'NewExpression' do not have any arguments.");
-                this.VisitMemberNew(node);
+                bool checkLeft = false;
+                this.VisitMemberNew(node, out checkLeft);
             }
 
             return node;
         }
 
         //遍历New表达式的参数集
-        private Expression VisitMemberNew(NewExpression node)
+        private Expression VisitMemberNew(NewExpression node, out bool checkLeft)
         {
+            checkLeft = false;
             for (int i = 0; i < node.Arguments.Count; i++)
             {
                 Expression exp = node.Arguments[i];
@@ -307,7 +320,7 @@ namespace ICS.XFramework.Data
                     }
                     else
                     {
-                        this.VisitMemberNavigation(exp as MemberExpression, true);
+                        this.VisitMemberNavigation(exp as MemberExpression, out checkLeft);
                     }
 
                     continue;
@@ -490,7 +503,8 @@ namespace ICS.XFramework.Data
                     }
                 }
 
-                this.VisitMemberNavigation(exp as MemberExpression, true);
+                bool checkLeft = false;
+                this.VisitMemberNavigation(exp as MemberExpression, out checkLeft);
             }
         }
 
