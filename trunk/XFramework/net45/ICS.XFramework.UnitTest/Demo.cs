@@ -66,7 +66,7 @@ namespace ICS.XFramework.UnitTest
                     {
                         //AccountList = a.Client.AccountList,
                         ClientId = a.Client.ClientId,
-                        CloudServer = a.Client.CloudServer
+                        CloudServer = a.HeavyBuyer.CloudServer
                     }
                 };
             var result3 = query3.ToList();
