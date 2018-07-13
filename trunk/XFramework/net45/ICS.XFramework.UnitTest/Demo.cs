@@ -17,39 +17,6 @@ namespace ICS.XFramework.UnitTest
 
         public static void Run()
         {
-            // include 
-            var context = new DataContext();
-            var query7 =
-                from a in context
-                    .GetTable<Inte_CRM.CRM_SaleOrder>()
-                    ///join b in context.GetTable< Inte_CRM.Client>() on a.ClientId equals b.ClientId
-                    //.Include(a => a.Client.AccountList)
-                    //.Include(a => a.HeavyBuyer.AccountList)
-                    //join b in context.GetTable<Inte_CRM.CloudServer>() on a.ClientId equals b.CloudServerId into u_b
-                    //from b in u_b.DefaultIfEmpty()
-                where a.OrderId >0 //&& a.Client.CloudServer.CloudServerCode=="ABC"
-                orderby a.OrderId
-                select new Inte_CRM.CRM_SaleOrder//(a)
-                {
-                    OrderId = a.OrderId ,
-                    ClientId = a.ClientId,
-                    ////Client = b //a.Client
-                    ///ClientId = b.ClientId,
-                    Client = new Inte_CRM.Client(a.Client)
-                    {
-                        //ClientId = a.Client.ClientId,
-                        CloudServer = a.Client.CloudServer,
-                        AccountList = a.Client.AccountList,
-                    },
-                    HeavyBuyer = new Inte_CRM.Client(a.Client)
-                    {
-                        //AccountList = a.Client.AccountList,
-                        ClientId = a.Client.ClientId,
-                        CloudServer = a.Client.CloudServer
-                    }
-                };
-            var result = query7.ToList();
-
             Query();
             Join();
             Other();
@@ -60,8 +27,70 @@ namespace ICS.XFramework.UnitTest
         static void Query()
         {
             var context = new DataContext();
+            var query0 = context.GetTable<Inte_CRM.CRM_SaleOrder>();
+            var result01 = query0.ToList();
 
-            //context.GetTable<Inte_CRM.Demo>().Include(x => x.Buyers);
+            query0 =
+                from a in context
+                    .GetTable<Inte_CRM.CRM_SaleOrder>()
+                where a.OrderId > 0
+                orderby a.OrderId
+                select new Inte_CRM.CRM_SaleOrder(a)
+                {
+                    //OrderId = a.OrderId,
+                    //ClientId = a.ClientId,
+                    Client = new Inte_CRM.Client(a.Client)
+                    {
+                        //ClientId = a.Client.ClientId,
+                        CloudServer = a.Client.CloudServer,
+                        AccountList = a.Client.AccountList,
+                    }
+                };
+            var result0 = query0.ToList();
+
+            var query3 =
+                from a in context
+                    .GetTable<Inte_CRM.CRM_SaleOrder>()
+                    //join b in context.GetTable< Inte_CRM.Client>() on a.ClientId equals b.ClientId
+                    .Include(a => a.Client.AccountList)
+                    .Include(a => a.Client.CloudServer)
+                    //join b in context.GetTable<Inte_CRM.CloudServer>() on a.ClientId equals b.CloudServerId into u_b
+                    //from b in u_b.DefaultIfEmpty()
+                where a.OrderId > 0
+                orderby a.OrderId
+                select new Inte_CRM.CRM_SaleOrder//(a)
+                {
+                    OrderId = a.OrderId,
+                    ClientId = a.ClientId,
+                    HeavyBuyer = new Inte_CRM.Client(a.Client)
+                    {
+                        //AccountList = a.Client.AccountList,
+                        ClientId = a.Client.ClientId,
+                        CloudServer = a.Client.CloudServer
+                    }
+                };
+            var result3 = query3.ToList();
+
+            query3 =
+                from a in context
+                .GetTable<Inte_CRM.CRM_SaleOrder>()
+                .Include(a => a.Client.AccountList)
+                .Include(a => a.Client.CloudServer)
+                where a.OrderId > 0
+                orderby a.OrderId
+                select new Inte_CRM.CRM_SaleOrder//(a)
+                {
+                    OrderId = a.OrderId,
+                    ClientId = a.ClientId,
+                    HeavyBuyer = new Inte_CRM.Client(a.Client)
+                    {
+                        ClientId = a.Client.ClientId,
+                        CloudServer = a.Client.CloudServer
+                    }
+                };
+            query3 = query3.Where(a=>a.Client.ClientId>0);
+            query3 = query3.Where(a => a.Client.CloudServer.CloudServerId > 0);
+            result3 = query3.ToList();
 
             var q1 =
                 from a in context.GetTable<Inte_CRM.Demo>()

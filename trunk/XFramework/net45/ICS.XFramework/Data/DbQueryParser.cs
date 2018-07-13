@@ -32,9 +32,7 @@ namespace ICS.XFramework.Data
             DbExpression update = null;     // UPDATE #
             DbExpression delete = null;     // DELETE #
             DbExpression groupBy = null;    // GROUP BY #
-            DbExpression statis = null;     // MAX/MIN... #
-
-            //HashSet<Expression> aliasExpressions = new HashSet<Expression>();
+            DbExpression statis = null;     // SUM/MAX  #
 
             for (int index = start; index < query.DbExpressions.Count; ++index)
             {
@@ -46,7 +44,7 @@ namespace ICS.XFramework.Data
                     outer = index;
                     break;
                 }
-                //if (skip != null && (index == query.DbExpressions.Count - 1 || query.DbExpressions[index + 1].DbExpressionType != DbExpressionType.Take))
+
                 if (skip != null && curExp.DbExpressionType != DbExpressionType.Take)
                 {
                     outer = index;
@@ -107,7 +105,6 @@ namespace ICS.XFramework.Data
                     case DbExpressionType.Join:
                         select = curExp.Expressions[3];
                         join.Add(curExp);
-                        //aliasExpressions.Add(select);
                         continue;
 
                     case DbExpressionType.OrderBy:
@@ -116,13 +113,11 @@ namespace ICS.XFramework.Data
                         continue;
                     case DbExpressionType.Select:
                         select = curExp.Expressions[0];
-                        //aliasExpressions.Add(select);
                         continue;
 
                     case DbExpressionType.SelectMany:
                         select = curExp.Expressions[1];
                         if (!curExp.Expressions[0].IsAnonymous()) join.Add(curExp);
-                        //aliasExpressions.Add(select);
                         continue;
 
                     case DbExpressionType.Single:
@@ -170,9 +165,9 @@ namespace ICS.XFramework.Data
             bool useAllColumn = insert == null && delete == null && update == null && select == null && statis == null;
             if (useAllColumn)
             {
-                select = Expression.Constant(type ?? typeof(TElement));
-                //aliasExpressions.Add(select);
-                //移到 GetTabl 中去 
+                ParameterExpression parameterExpression = Expression.Parameter(type ?? typeof(TElement), "a");
+                LambdaExpression lambdaExpression = Expression.Lambda(parameterExpression, parameterExpression);
+                select = lambdaExpression;
             }
 
             var qQuery = new DbQueryableInfo_Select<TElement>();
@@ -222,28 +217,9 @@ namespace ICS.XFramework.Data
                 return qInsert;
             }
 
-            if (outer != null)
+            if (select != null)
             {
-                // 解析嵌套查询
-                var qOuter = DbQueryParser.Parse<TElement>(query, outer.Value);
-                var qInsert = qOuter as DbQueryableInfo_Insert<TElement>;
-                if (qInsert != null)
-                {
-                    if (insert != null && insert.Expressions != null) qInsert.Entity = (insert.Expressions[0] as ConstantExpression).Value;
-                    qInsert.SelectInfo = qQuery;
-                    query.DbQueryInfo = qInsert;
-                    qInsert.Bulk = query.Bulk;
-                    return qInsert;
-                }
-                else
-                {
-                    qOuter.NestedQuery = qQuery;
-                    return qOuter;
-                }
-            }
-            else if (select != null)
-            {
-                // 解析导航属性 如果有 1:n 的导航属性，那么结果集记录数会最大增大n倍，这时将使用嵌套语义。
+                // 解析导航属性 如果有 1:n 的导航属性，那么查询的结果集的主记录将会有重复记录，这时就需要使用嵌套语义，先查主记录，再关联导航记录
                 bool checkListNavgation = false;
                 Expression expression = select;
                 LambdaExpression lambdaExpression = expression as LambdaExpression;
@@ -275,6 +251,7 @@ namespace ICS.XFramework.Data
                         qQuery.Expression = new DbExpression(DbExpressionType.Select, lambdaExpression);
                     }
                     qQuery.IsListNavigationQuery = true;
+                    qQuery.Include = new List<DbExpression>();
 
                     var qOuter = new DbQueryableInfo_Select<TElement>();
                     qOuter.DefinitionType = type;
@@ -282,9 +259,30 @@ namespace ICS.XFramework.Data
                     qOuter.NestedQuery = qQuery;
                     qOuter.Join = new List<DbExpression>();
                     qOuter.OrderBy = new List<DbExpression>();
-                    qOuter.Include = new List<DbExpression>();
+                    qOuter.Include = include;
                     qOuter.HaveListNavigation = true;
 
+                    //return qOuter;
+                    qQuery = qOuter;
+                }
+            }
+
+            if (outer != null)
+            {
+                // 解析嵌套查询
+                var qOuter = DbQueryParser.Parse<TElement>(query, outer.Value);
+                var qInsert = qOuter as DbQueryableInfo_Insert<TElement>;
+                if (qInsert != null)
+                {
+                    if (insert != null && insert.Expressions != null) qInsert.Entity = (insert.Expressions[0] as ConstantExpression).Value;
+                    qInsert.SelectInfo = qQuery;
+                    query.DbQueryInfo = qInsert;
+                    qInsert.Bulk = query.Bulk;
+                    return qInsert;
+                }
+                else
+                {
+                    qOuter.NestedQuery = qQuery;
                     return qOuter;
                 }
             }
@@ -294,7 +292,6 @@ namespace ICS.XFramework.Data
         }
 
         // 判定 MemberInit 绑定是否声明了一对多关系的导航
-        // 如果声明了一对多关系的导航，则需要强制要求 T 有主键声明<KeyAttriubte>
         private static bool CheckListNavigation<T>(MemberInitExpression node)
         {
             for (int i = 0; i < node.Bindings.Count; i++)
@@ -304,20 +301,18 @@ namespace ICS.XFramework.Data
                 if (Reflection.TypeUtils.IsPrimitive(pType)) continue;
 
                 // complex 类型
-                TypeRuntimeInfo memberTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(node.Bindings[i].Member.DeclaringType);
-                var attribute = memberTypeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(node.Bindings[i].Member.Name);
-                if (attribute != null && pType.IsGenericType)
-                {
-                    Type genericType = pType.GetGenericTypeDefinition();
-                    if (genericType == typeof(List<>)) return true;
-                    //{
-                    //    // 导航属性是 List 类型，即 1:n 关系。此时强制 T 有 <KeyAttriubte>并且 MemberInitExpression.Bindings 包含这些Key
-                    //    // 在 DataReader 反序列化成实体时需要根据 KeyAttriubte 判断不同行数据之前是否同属于一个 Key
-                    //    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
-                    //    if(typeRuntime.)
-                    //}
+                if (pType.IsGenericType && pType.GetGenericTypeDefinition() == typeof(List<>)) return true;
+                //{
+                //    Type genericType = pType.GetGenericTypeDefinition();
+                //    if (genericType == typeof(List<>)) return true;
+                //    //{
+                //    //    // 导航属性是 List 类型，即 1:n 关系。此时强制 T 有 <KeyAttriubte>并且 MemberInitExpression.Bindings 包含这些Key
+                //    //    // 在 DataReader 反序列化成实体时需要根据 KeyAttriubte 判断不同行数据之前是否同属于一个 Key
+                //    //    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+                //    //    if(typeRuntime.)
+                //    //}
 
-                }
+                //}
 
                 MemberAssignment memberAssignment = node.Bindings[i] as MemberAssignment;
                 if (memberAssignment != null && memberAssignment.Expression.NodeType == ExpressionType.MemberInit)
@@ -331,6 +326,7 @@ namespace ICS.XFramework.Data
             return false;
         }
 
+        // 合并 'Where' 表达式语义
         private static Expression Combine(IList<Expression> predicates)
         {
             if (predicates.Count == 0) return null;

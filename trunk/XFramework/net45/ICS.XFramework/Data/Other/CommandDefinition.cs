@@ -111,14 +111,6 @@ namespace ICS.XFramework.Data
             /// </summary>
             public SqlBuilder WhereFragment { get { return _whereFragment; } }
 
-            ///// <summary>
-            ///// 附加外键
-            ///// <para>
-            ///// 用来构造额外的表达式没有显式指定的外键 Left Join 语句
-            ///// </para>
-            ///// </summary>
-            //public IDictionary<string, MemberExpression> AdditionNavigations { get { return _navigations; } }
-
             /// <summary>
             /// 实例化 <see cref="CommandBuilder" /> 的新实例
             /// </summary>

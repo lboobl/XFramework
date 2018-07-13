@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using TypeUtils = ICS.XFramework.Reflection.TypeUtils;
@@ -21,6 +22,7 @@ namespace ICS.XFramework.Data
         private static IDictionary<DbExpressionType, string> _statisMethods = null;
 
         private IDictionary<string, Column> _columns = null;
+        private IDictionary<string, string> _visitedNavigations = null;
         private NavigationDescriptorCollection _navDescriptors = null;
         private List<string> _navChainHopper = null;
         private bool _mOnly = false;
@@ -55,6 +57,7 @@ namespace ICS.XFramework.Data
             if (_columns == null) _columns = new Dictionary<string, Column>();
             _navDescriptors = new NavigationDescriptorCollection();
             _navChainHopper = new List<string>(10);
+            _visitedNavigations = new Dictionary<string, string>(8);
         }
 
         /// <summary>
@@ -68,17 +71,7 @@ namespace ICS.XFramework.Data
                 _builder.AppendNewLine();
 
                 // SELECT 表达式解析
-                if (base.Expression.NodeType == ExpressionType.Constant)
-                {
-                    // if have no select syntax
-                    Type type = (base.Expression as ConstantExpression).Value as Type;
-                    this.VisitAllMember(type, "t0");
-                }
-                else
-                {
-                    base.Write(builder);
-                }
-
+                base.Write(builder);
                 // Include 表达式解析<导航属性>
                 this.VisitInclude();
 
@@ -96,6 +89,11 @@ namespace ICS.XFramework.Data
                 }
             }
         }
+
+        /// <summary>
+        /// 表达式是否包含 1:n 类型的导航属性
+        /// </summary>
+        public bool HaveListNavigation { get; set; }
 
         /// <summary>
         /// SELECT 字段
@@ -146,23 +144,24 @@ namespace ICS.XFramework.Data
             return base.VisitLambda(node);
         }
 
-        //{new App() {Id = p.Id}} 
+        // {new App() {Id = p.Id}} 
         protected override Expression VisitMemberInit(MemberInitExpression node)
         {
-            bool checkLeft = false;
-            return VisitMemberInitImpl(node, out checkLeft);
+            bool visitNavigation = false;
+            return VisitMemberInitImpl(node, out visitNavigation);
         }
 
-        //{new App() {Id = p.Id}} 
-        private Expression VisitMemberInitImpl(MemberInitExpression node, out bool checkLeft)
+        // {new App() {Id = p.Id}} 
+        private Expression VisitMemberInitImpl(MemberInitExpression node, out bool visitNavigation, bool isTopBinding = true)
         {
-            if (node.NewExpression != null) this.VisitMemberNew(node.NewExpression, out checkLeft);
-            if (_navChainHopper.Count == 0) _navChainHopper.Add(node.Type.Name);
-
+            // 如果有一对多的导航属性会产生嵌套的SQL，这时需要强制主表选择的列里面必须包含导航外键
             // TODO #对 Bindings 进行排序，保证导航属性的赋值一定要最后面#
             // 未实现，在书写表达式时人工保证 ##
 
-            checkLeft = false;
+            if (node.NewExpression != null) this.VisitNewImpl(node.NewExpression, out visitNavigation);
+            if (_navChainHopper.Count == 0) _navChainHopper.Add(node.Type.Name);
+
+            visitNavigation = false;
             for (int i = 0; i < node.Bindings.Count; i++)
             {
                 MemberAssignment binding = node.Bindings[i] as MemberAssignment;
@@ -179,7 +178,7 @@ namespace ICS.XFramework.Data
                     base.VisitMemberBinding(node.Bindings[i]);
 
                     // 选择字段
-                    string newName = ColumnExpressionVisitor.AddColumn(_columns, binding.Member.Name);
+                    string newName = AddColumn(_columns, binding.Member.Name);
                     // 添加字段别名
                     _builder.AppendAs(newName);
                     _builder.Append(',');
@@ -197,27 +196,34 @@ namespace ICS.XFramework.Data
                     var attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(binding.Member.Name);
                     if (attribute == null) throw new XFrameworkException("Complex property must mark 'ForeignKeyAttribute' ");
 
-                    int n = _navChainHopper.Count;
+                    // 如果是主记录并且有一对多的导航记录，必须强制主表选择的列里面必须包含导航外键
+                    if (isTopBinding && HaveListNavigation)
+                    {
+                        if (attribute.InnerKeys.Any(x => !_columns.Any(w => w.Value.Name == x)))
+                            throw new XFrameworkException("Select columns must contains 'ForeignKeyAttribute' keys. {{{0}}}", String.Join(",", attribute.InnerKeys));
+                    }
 
                     // 生成导航属性描述集合，以类名.属性名做为键值
+                    int n = _navChainHopper.Count;
                     string keyName = _navChainHopper.Count > 0 ? _navChainHopper[_navChainHopper.Count - 1] : string.Empty;
                     keyName = !string.IsNullOrEmpty(keyName) ? keyName + "." + binding.Member.Name : binding.Member.Name;
                     NavigationDescriptor descriptor = new NavigationDescriptor(keyName, binding.Member);
-                    int start = _columns.Count;
-
-                    if (binding.Expression.NodeType == ExpressionType.MemberAccess) this.VisitMemberNavigation(binding.Expression as MemberExpression, out checkLeft);
-                    else if (binding.Expression.NodeType == ExpressionType.New) this.VisitMemberNew(binding.Expression as NewExpression, out checkLeft);
-                    else if (binding.Expression.NodeType == ExpressionType.MemberInit) this.VisitMemberInitImpl(binding.Expression as MemberInitExpression, out checkLeft);
-
                     if (!_navDescriptors.ContainsKey(keyName))
                     {
                         // fix issue# XC 列占一个位
-                        descriptor.Start = start;
-                        descriptor.FieldCount = GetFieldCount(binding.Expression) + (checkLeft ? 1 : 0);
+                        descriptor.Start = _columns.Count;
+                        descriptor.FieldCount = -1;
                         _navDescriptors.Add(keyName, descriptor);
                         _navChainHopper.Add(keyName);
                     }
 
+
+                    if (binding.Expression.NodeType == ExpressionType.MemberAccess) this.VisitNavigation(binding.Expression as MemberExpression, out visitNavigation);
+                    else if (binding.Expression.NodeType == ExpressionType.New) this.VisitNewImpl(binding.Expression as NewExpression, out visitNavigation);
+                    else if (binding.Expression.NodeType == ExpressionType.MemberInit) this.VisitMemberInitImpl(binding.Expression as MemberInitExpression, out visitNavigation, false);
+
+                    // 重新计算所占列数
+                    if (descriptor.FieldCount == -1) descriptor.FieldCount = GetFieldCount(binding.Expression) + (visitNavigation ? 1 : 0);
 
                     // 恢复访问链
                     // 在访问导航属性时可能是 Client.CloudServer，这时要恢复为 Client，以保证能访问 Client 的下一个导航属性
@@ -230,10 +236,12 @@ namespace ICS.XFramework.Data
             return node;
         }
 
-        private Expression VisitMemberNavigation(MemberExpression node, out bool checkLeft)
+        // Client = a.Client.CloudServer
+        private Expression VisitNavigation(MemberExpression node, out bool visitNavigation)
         {
-            checkLeft = true;
+            visitNavigation = true;
             string alias = string.Empty;
+            string navKey = string.Empty;
             Type type = node.Type;
 
             if (node.IsArrivable())
@@ -244,18 +252,24 @@ namespace ICS.XFramework.Data
                 int index = 0;
                 int num = this.Navigations != null ? this.Navigations.Count : 0;
                 alias = this.VisitNavigation(node);
-                foreach (var kvp in Navigations)
-                {
-                    index += 1;
-                    if (index < Navigations.Count && index > num)
-                    {
-                        alias = _aliases.GetNavigationTableAlias(kvp.Key);
-                        if (checkLeft) AppendNullColumn(kvp.Value.Member, alias);
-                        continue;
-                    }
 
-                    alias = _aliases.GetNavigationTableAlias(kvp.Key);
-                    type = kvp.Value.Type;
+                if (num != this.Navigations.Count)
+                {
+                    foreach (var kvp in Navigations)
+                    {
+                        index += 1;
+                        if (index < Navigations.Count && index > num)
+                        {
+                            alias = _aliases.GetNavigationTableAlias(kvp.Key);
+                            navKey = kvp.Key;
+                            if (visitNavigation) AppendNullColumn(kvp.Value.Member, alias, navKey);
+                            continue;
+                        }
+
+                        navKey = kvp.Key;
+                        alias = _aliases.GetNavigationTableAlias(kvp.Key);
+                        type = kvp.Value.Type;
+                    }
                 }
             }
             else
@@ -265,32 +279,30 @@ namespace ICS.XFramework.Data
                 type = node.Type;
             }
 
-
             if (type.IsGenericType) type = type.GetGenericArguments()[0];
             this.VisitAllMember(type, alias);
-            if (checkLeft) AppendNullColumn(node.Member, alias);
+            if (visitNavigation) AppendNullColumn(node.Member, alias, navKey);
 
             return node;
         }
 
-        //{new  {Id = p.Id}} 
+        // {new  {Id = p.Id}} 
         protected override Expression VisitNew(NewExpression node)
         {
             // TODO 未支持匿名类的导航属性
-            if (node != null)
-            {
-                if (node.Arguments.Count == 0) throw new XFrameworkException("'NewExpression' do not have any arguments.");
-                bool checkLeft = false;
-                this.VisitMemberNew(node, out checkLeft);
-            }
+            if (node == null) return node;
+
+            bool visitNavigation = false;
+            if (node.Arguments.Count == 0) throw new XFrameworkException("'NewExpression' arguments empty.");
+            this.VisitNewImpl(node, out visitNavigation);
 
             return node;
         }
 
-        //遍历New表达式的参数集
-        private Expression VisitMemberNew(NewExpression node, out bool checkLeft)
+        // 遍历New表达式的参数集
+        private Expression VisitNewImpl(NewExpression node, out bool visitNavigation)
         {
-            checkLeft = false;
+            visitNavigation = false;
             for (int i = 0; i < node.Arguments.Count; i++)
             {
                 Expression exp = node.Arguments[i];
@@ -311,16 +323,18 @@ namespace ICS.XFramework.Data
                     {
                         // new Client(a.ClientId)
                         this.Visit(exp);
-                        // 选择字段
-                        string newName = ColumnExpressionVisitor.AddColumn(_columns, node.Members != null ? node.Members[i].Name : (exp as MemberExpression).Member.Name);
-                        // 添加字段别名
+                        string newName = AddColumn(_columns, node.Members != null ? node.Members[i].Name : (exp as MemberExpression).Member.Name);
                         _builder.AppendAs(newName);
                         _builder.Append(',');
                         _builder.AppendNewLine();
                     }
                     else
                     {
-                        this.VisitMemberNavigation(exp as MemberExpression, out checkLeft);
+                        //
+                        //
+                        //
+                        //
+                        this.VisitNavigation(exp as MemberExpression, out visitNavigation);
                     }
 
                     continue;
@@ -330,9 +344,7 @@ namespace ICS.XFramework.Data
                 {
                     //例： new Client(a)
                     this.Visit(exp);
-                    // 选择字段
-                    string newName = ColumnExpressionVisitor.AddColumn(_columns, node.Members != null ? node.Members[i].Name : (exp as MemberExpression).Member.Name);
-                    // 添加字段别名
+                    string newName = AddColumn(_columns, node.Members != null ? node.Members[i].Name : (exp as MemberExpression).Member.Name);
                     _builder.AppendAs(newName);
                     _builder.Append(',');
                     _builder.AppendNewLine();
@@ -387,10 +399,35 @@ namespace ICS.XFramework.Data
             var newNode = base.VisitMember(node);
             if (_mOnly)
             {
-                string newName = ColumnExpressionVisitor.AddColumn(_columns, node.Member.Name);
+                string newName = AddColumn(_columns, node.Member.Name);
                 _builder.AppendAs(newName);
             }
             return newNode;
+        }
+
+        // 选择所有的字段
+        private Expression VisitAllMember(Type type, string alias, Expression node = null)
+        {
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
+            Dictionary<string, Reflection.MemberAccessWrapper> wrappers = typeRuntime.Wrappers;
+
+            foreach (var w in wrappers)
+            {
+                var wrapper = w.Value as MemberAccessWrapper;
+                if (wrapper != null && wrapper.Column != null && wrapper.Column.NoMapped) continue;
+                if (wrapper != null && wrapper.ForeignKey != null) continue; // 不加载导航属性
+                if (wrapper.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
+
+                _builder.AppendMember(alias, wrapper.Member.Name);
+
+                // 选择字段
+                string newName = AddColumn(_columns, wrapper.Member.Name);
+                _builder.AppendAs(newName);
+                _builder.Append(",");
+                _builder.AppendNewLine();
+            }
+
+            return node;
         }
 
         // g.Max(a=>a.Level)
@@ -419,38 +456,6 @@ namespace ICS.XFramework.Data
             return base.VisitMethodCall(node);
         }
 
-        // 选择所有的字段
-        private Expression VisitAllMember(Type type, string alias, Expression node = null)
-        {
-            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
-            Dictionary<string, Reflection.MemberAccessWrapper> wrappers = typeRuntime.Wrappers;
-
-            //Fixed issue# 匿名类的字段不能Set
-            //runtimeInfo.IsAnonymousType
-            //? type.GetProperties().ToDictionary(p => p.Name, p => new ICS.XFramework.Reflection.MemberAccessWrapper(p))
-            //: runtimeInfo.Wrappers;
-
-            foreach (var w in wrappers)
-            {
-                var wrapper = w.Value;// as ICS.XFramework.Reflection.MemberAccessWrapper;
-                var mapper = wrapper as MemberAccessWrapper;
-                if (mapper != null && mapper.Column != null && mapper.Column.NoMapped) continue;
-                if (mapper != null && mapper.ForeignKey != null) continue; // 不加载导航属性
-                if (wrapper.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
-
-                _builder.AppendMember(alias, wrapper.Member.Name);
-
-                // 选择字段
-                string newName = ColumnExpressionVisitor.AddColumn(_columns, wrapper.Member.Name);
-                // 添加字段别名
-                _builder.AppendAs(newName);
-                _builder.Append(",");
-                _builder.AppendNewLine();
-            }
-
-            return node;
-        }
-
         // 遍历 Include 包含的导航属性
         private void VisitInclude()
         {
@@ -463,7 +468,7 @@ namespace ICS.XFramework.Data
 
                 if (exp.NodeType == ExpressionType.Lambda) exp = (exp as LambdaExpression).Body;
                 MemberExpression memberExpression = exp as MemberExpression;
-                if (memberExpression == null) throw new XFrameworkException("Include expression body must be MemberExpression.");
+                if (memberExpression == null) throw new XFrameworkException("Include expression body must be 'MemberExpression'.");
 
                 // 解析导航属性链
                 List<Expression> chain = new List<Expression>();
@@ -472,7 +477,7 @@ namespace ICS.XFramework.Data
                     // a.Client 要求 <Client> 必须标明 ForeignKeyAttribute
                     TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(memberExpression.Expression.Type);
                     ForeignKeyAttribute attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(memberExpression.Member.Name);
-                    if (attribute == null) throw new XFrameworkException("Include member {{{0}}} must mark ForeignKeyAttribute.", memberExpression);
+                    if (attribute == null) throw new XFrameworkException("Include member {{{0}}} must mark 'ForeignKeyAttribute'.", memberExpression);
 
                     chain.Add(memberExpression);
                     var m = memberExpression.Expression as MemberExpression;
@@ -503,27 +508,37 @@ namespace ICS.XFramework.Data
                     }
                 }
 
-                bool checkLeft = false;
-                this.VisitMemberNavigation(exp as MemberExpression, out checkLeft);
+                bool visitNavigation = false;
+                this.VisitNavigation(exp as MemberExpression, out visitNavigation);
             }
         }
 
         // 添加额外列，用来判断整个（左）连接记录是否为空
-        private void AppendNullColumn(System.Reflection.MemberInfo member, string alias)
+        private void AppendNullColumn(System.Reflection.MemberInfo member, string alias, string navKey)
         {
-            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(member.DeclaringType);
-            var foreignKey = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(member.Name);
-            string keyName = foreignKey.OuterKeys[0];
+            string caseWhen = string.Empty;
+            if (!_visitedNavigations.ContainsKey(navKey))
+            {
+                TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(member.DeclaringType);
+                var foreignKey = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(member.Name);
+                string keyName = foreignKey.OuterKeys[0];
+                caseWhen = string.Format("CASE WHEN {0}.{1} IS NULL THEN NULL ELSE {0}.{1} END", alias, keyName);
+            }
+            else
+            {
+                caseWhen = _visitedNavigations[navKey];
+            }
 
-            _builder.Append("CASE WHEN ");
-            _builder.AppendMember(alias, keyName);
-            _builder.Append(" IS NULL THEN NULL ELSE ");
-            _builder.AppendMember(alias, keyName);
-            _builder.Append(" END");
+
+            //_builder.Append("CASE WHEN ");
+            //_builder.AppendMember(alias, keyName);
+            //_builder.Append(" IS NULL THEN NULL ELSE ");
+            //_builder.AppendMember(alias, keyName);
+            //_builder.Append(" END");
 
             // 选择字段
-            string newName = ColumnExpressionVisitor.AddColumn(_columns, NullFieldName);
-            // 添加字段别名
+            string newName = AddColumn(_columns, NullFieldName);
+            _builder.Append(caseWhen);
             _builder.AppendAs(newName);
             _builder.Append(',');
             _builder.AppendNewLine();
@@ -543,7 +558,7 @@ namespace ICS.XFramework.Data
                 var column = columns[newName];
                 column.Duplicate += 1;
 
-                newName = newName + column.Duplicate.ToString(); //string.Format("{0}{1}", newName, column.Dup.ToString());
+                newName = newName + column.Duplicate.ToString();
                 dup = column.Duplicate;
             }
 

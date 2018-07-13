@@ -125,7 +125,7 @@ namespace ICS.XFramework.Data.SqlClient
             // 导航属性如果使用嵌套，除非有 TOP 或者 OFFSET 子句，否则不能用ORDER BY
             bool useOrderBy = (!useStatis || qQuery.Skip > 0) && !qQuery.HaveAny && (!qQuery.IsListNavigationQuery || (qQuery.Skip > 0 || qQuery.Take > 0));
 
-            ExpressionVisitorBase visitor = null;
+            //ExpressionVisitorBase visitor = null;
             TableAliasCache aliases = this.PrepareAlias<T>(qQuery);
             string sColumnName = string.Empty;
 
@@ -146,9 +146,9 @@ namespace ICS.XFramework.Data.SqlClient
                 jf.AppendNewLine();
 
                 // SELECT COUNT(1)
-                visitor = new StatisExpressionVisitor(this, aliases, qQuery.Statis, qQuery.GroupBy, "t0");
+                StatisExpressionVisitor visitor = new StatisExpressionVisitor(this, aliases, qQuery.Statis, qQuery.GroupBy, "t0");
                 visitor.Write(jf);
-                sColumnName = (visitor as StatisExpressionVisitor).ColumnName;
+                sColumnName = visitor.ColumnName;
                 cd.AddNavigation(visitor.Navigations);
 
                 // SELECT COUNT(1) FROM
@@ -178,7 +178,7 @@ namespace ICS.XFramework.Data.SqlClient
             {
                 // 如果有统计函数，并且不是嵌套的话，则直接使用SELECT <MAX,MIN...>，不需要解析选择的字段
                 jf.AppendNewLine();
-                visitor = new StatisExpressionVisitor(this, aliases, qQuery.Statis, qQuery.GroupBy);
+                StatisExpressionVisitor visitor = new StatisExpressionVisitor(this, aliases, qQuery.Statis, qQuery.GroupBy);
                 visitor.Write(jf);
                 cd.AddNavigation(visitor.Navigations);
             }
@@ -199,10 +199,11 @@ namespace ICS.XFramework.Data.SqlClient
                 if (!qQuery.HaveAny)
                 {
                     // SELECT 范围
-                    visitor = new ColumnExpressionVisitor(this, aliases, qQuery.Expression, qQuery.GroupBy, false, null, qQuery.Include);
+                    ColumnExpressionVisitor visitor = new ColumnExpressionVisitor(this, aliases, qQuery.Expression, qQuery.GroupBy, false, null, qQuery.Include);
+                    visitor.HaveListNavigation = qQuery.HaveListNavigation;
                     visitor.Write(jf);
 
-                    cd.Columns = (visitor as ColumnExpressionVisitor).Columns;
+                    cd.Columns = visitor.Columns;
                     cd.NavigationDescriptors = (visitor as ColumnExpressionVisitor).NavigationDescriptors;
                     cd.AddNavigation(visitor.Navigations);
 
@@ -211,6 +212,7 @@ namespace ICS.XFramework.Data.SqlClient
                     {
                         if (cd.Columns.Count > 0) jf.Append(",");
                         visitor = new ColumnExpressionVisitor(this, aliases, qQuery.Statis, qQuery.GroupBy, true, cd.Columns);
+                        visitor.HaveListNavigation = qQuery.HaveListNavigation;
                         visitor.Write(jf);
 
                         cd.AddNavigation(visitor.Navigations);
@@ -223,6 +225,7 @@ namespace ICS.XFramework.Data.SqlClient
                         for (int i = 0; i < qQuery.OrderBy.Count; i++)
                         {
                             visitor = new ColumnExpressionVisitor(this, aliases, qQuery.OrderBy[i], qQuery.GroupBy, true, cd.Columns);
+                            visitor.HaveListNavigation = qQuery.HaveListNavigation;
                             visitor.Write(jf);
 
                             cd.AddNavigation(visitor.Navigations);
@@ -254,32 +257,32 @@ namespace ICS.XFramework.Data.SqlClient
             if (!string.IsNullOrEmpty(DbQueryProvider.NOLOCK)) jf.Append(DbQueryProvider.NOLOCK);
 
             // LEFT<INNER> JOIN 子句
-            visitor = new JoinExpressionVisitor(this, aliases, qQuery.Join);
-            visitor.Write(jf);
+            ExpressionVisitorBase  visitorBase = new JoinExpressionVisitor(this, aliases, qQuery.Join);
+            visitorBase.Write(jf);
 
             wf.Indent = jf.Indent;
 
             // WHERE 子句
-            visitor = new WhereExpressionVisitor(this, aliases, qQuery.Where);
-            visitor.Write(wf);
-            cd.AddNavigation(visitor.Navigations);
+            visitorBase = new WhereExpressionVisitor(this, aliases, qQuery.Where);
+            visitorBase.Write(wf);
+            cd.AddNavigation(visitorBase.Navigations);
 
             // GROUP BY 子句
-            visitor = new GroupByExpressionVisitor(this, aliases, qQuery.GroupBy);
-            visitor.Write(wf);
-            cd.AddNavigation(visitor.Navigations);
+            visitorBase = new GroupByExpressionVisitor(this, aliases, qQuery.GroupBy);
+            visitorBase.Write(wf);
+            cd.AddNavigation(visitorBase.Navigations);
 
             // HAVING 子句
-            visitor = new HavingExpressionVisitor(this, aliases, qQuery.Having, qQuery.GroupBy);
-            visitor.Write(wf);
-            cd.AddNavigation(visitor.Navigations);
+            visitorBase = new HavingExpressionVisitor(this, aliases, qQuery.Having, qQuery.GroupBy);
+            visitorBase.Write(wf);
+            cd.AddNavigation(visitorBase.Navigations);
 
             // ORDER 子句
             if (qQuery.OrderBy.Count > 0 && useOrderBy && !groupByPaging)
             {
-                visitor = new OrderByExpressionVisitor(this, aliases, qQuery.OrderBy, qQuery.GroupBy);
-                visitor.Write(wf);
-                cd.AddNavigation(visitor.Navigations);
+                visitorBase = new OrderByExpressionVisitor(this, aliases, qQuery.OrderBy, qQuery.GroupBy);
+                visitorBase.Write(wf);
+                cd.AddNavigation(visitorBase.Navigations);
             }
 
             #region 分页查询
@@ -348,8 +351,8 @@ namespace ICS.XFramework.Data.SqlClient
                 // 排序
                 if (qQuery.OrderBy.Count > 0 && useOrderBy)
                 {
-                    visitor = new OrderByExpressionVisitor(this, aliases, qQuery.OrderBy, null, "t0");
-                    visitor.Write(jf);
+                    visitorBase = new OrderByExpressionVisitor(this, aliases, qQuery.OrderBy, null, "t0");
+                    visitorBase.Write(jf);
                 }
 
                 // 分页
@@ -376,8 +379,8 @@ namespace ICS.XFramework.Data.SqlClient
             if (qQuery.HaveListNavigation && nQuery != null && nQuery.OrderBy.Count > 0 && nQuery.Statis == null && !(nQuery.Skip > 0 || nQuery.Take > 0))
             {
                 string sql = cd.CommandText;
-                visitor = new OrderByExpressionVisitor(this, aliases, nQuery.OrderBy, null, "t0");
-                visitor.Write(jf);
+                visitorBase = new OrderByExpressionVisitor(this, aliases, nQuery.OrderBy, null, "t0");
+                visitorBase.Write(jf);
             }
 
             #endregion

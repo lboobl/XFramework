@@ -50,7 +50,7 @@ namespace ICS.XFramework.Data
         public void Add(string key, NavigationDescriptor descriptor)
         {
             _navCollection.Add(key, descriptor);
-            if (descriptor != null && descriptor.FieldCount > 0)
+            if (descriptor != null && descriptor.FieldCount != 0)
             {
                 if (_minIndex == null)
                 {
