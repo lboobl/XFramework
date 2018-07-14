@@ -163,12 +163,7 @@ namespace ICS.XFramework.Data
 
             // 没有解析到INSERT/DELETE/UPDATE/SELECT表达式，并且没有相关统计函数，则默认选择FromType的所有字段
             bool useAllColumn = insert == null && delete == null && update == null && select == null && statis == null;
-            if (useAllColumn)
-            {
-                ParameterExpression parameterExpression = Expression.Parameter(type ?? typeof(TElement), "a");
-                LambdaExpression lambdaExpression = Expression.Lambda(parameterExpression, parameterExpression);
-                select = lambdaExpression;
-            }
+            if (useAllColumn) select = Expression.Constant(type ?? typeof(TElement));
 
             var qQuery = new DbQueryableInfo_Select<TElement>();
             qQuery.DefinitionType = type;

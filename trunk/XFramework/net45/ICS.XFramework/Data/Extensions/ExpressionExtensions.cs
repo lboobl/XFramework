@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace ICS.XFramework.Data
 {
-    public static  class ExpressionExtensions
+    public static class ExpressionExtensions
     {
         private static readonly string _anonymousName = "<>h__TransparentIdentifier";
         private static readonly string _groupingName = "IGrouping`2";
@@ -22,7 +22,7 @@ namespace ICS.XFramework.Data
         {
             // <>h__TransparentIdentifier => h__TransparentIdentifier.a.CompanyName
             Expression exp = node;
-            ParameterExpression paramExp = exp.NodeType == ExpressionType.Lambda 
+            ParameterExpression paramExp = exp.NodeType == ExpressionType.Lambda
                 ? (node as LambdaExpression).Parameters[0]
                 : exp as ParameterExpression;
             if (paramExp != null) return ExpressionExtensions._isAnonymous(paramExp.Name);
@@ -89,7 +89,7 @@ namespace ICS.XFramework.Data
             // a 
             // <>h__TransparentIdentifier.a
             // <>h__TransparentIdentifier0.<>h__TransparentIdentifier1.a
-            
+
             if (node.NodeType == ExpressionType.Parameter) return false;
 
             if (node.NodeType == ExpressionType.MemberAccess)
@@ -114,7 +114,7 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 取剔除掉系统动态生成前缀后的表达式
         /// </summary>
-        public static string GetKeyWidthoutAnonymous(this MemberExpression node)
+        public static string GetKeyWidthoutAnonymous(this MemberExpression node, bool isDesciptor = false)
         {
             List<string> chain = new List<string>();
             chain.Add(node.Member.Name);
@@ -126,7 +126,7 @@ namespace ICS.XFramework.Data
                 expression = (expression as MemberExpression).Expression;
             }
 
-            if (expression.NodeType == ExpressionType.Parameter) chain.Add((expression as ParameterExpression).Name);
+            if (expression.NodeType == ExpressionType.Parameter) chain.Add(isDesciptor ? expression.Type.Name : (expression as ParameterExpression).Name);
             if (expression.NodeType == ExpressionType.MemberAccess) chain.Add((expression as MemberExpression).Member.Name);
 
             chain.Reverse();

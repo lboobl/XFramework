@@ -27,6 +27,7 @@ namespace ICS.XFramework.UnitTest
         static void Query()
         {
             var context = new DataContext();
+
             var query0 = context.GetTable<Inte_CRM.CRM_SaleOrder>();
             var result01 = query0.ToList();
 
@@ -64,8 +65,8 @@ namespace ICS.XFramework.UnitTest
                     ClientId = a.ClientId,
                     HeavyBuyer = new Inte_CRM.Client(a.Client)
                     {
-                        //AccountList = a.Client.AccountList,
                         ClientId = a.Client.ClientId,
+                        AccountList = a.Client.AccountList,
                         CloudServer = a.HeavyBuyer.CloudServer
                     }
                 };
@@ -815,28 +816,18 @@ namespace ICS.XFramework.UnitTest
 
 
             Stopwatch stop = new Stopwatch();
-            //stop.Start();
+            stop.Start();
 
-            //for (int i = 0; i < 1000; i++)
-            //{
-            //    var query =
-            //        from a in context.GetTable<Prd_Center.Product>()
-            //        where a.Client.ClientID == 1
-            //        select new Prd_Center.Product(a)
-            //        {
-            //            Client = a.Client
-            //        };
-            //    //var query =
-            //    //    from a in context.GetTable<Prd_Center.Product>()
-            //    //    where a.ClientID == 1
-            //    //    select new Prd_Center.Product
-            //    //    {
-            //    //        ClientID = a.ClientID,
-            //    //        ProductID = a.ProductID,
-            //    //        Title = a.Title
-            //    //    };
-            //    var result = query.ToList();
-            //}
+            for (int i = 0; i < 100; i++)
+            {
+                var result = context
+                    .GetTable<Prd_Center.Product>()
+                    .Include(a => a.Client)
+                    .ToList();
+            }
+            Console.WriteLine(stop.ElapsedMilliseconds);
+            Console.WriteLine(stop.Elapsed);
+            Console.ReadLine();
 
             for (int i = 0; i < 1000; i++)
             {
