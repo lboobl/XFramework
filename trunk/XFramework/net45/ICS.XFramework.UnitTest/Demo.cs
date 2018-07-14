@@ -829,6 +829,21 @@ namespace ICS.XFramework.UnitTest
             Console.WriteLine(stop.Elapsed);
             Console.ReadLine();
 
+            connString = "Server=.;Database=Inte_CRM;uid=sa;pwd=123456";
+            context = new DataContext(new ICS.XFramework.Data.SqlClient.DbQueryProvider(connString));
+            stop = new Stopwatch();
+            stop.Start();
+            for (int i = 0; i < 1000; i++)
+            {
+                var result = context
+                    .GetTable<Inte_CRM.Client>()
+                    .Include(a => a.AccountList)
+                    .ToList();
+            }
+            Console.WriteLine(stop.ElapsedMilliseconds);
+            Console.WriteLine(stop.Elapsed);
+            Console.ReadLine();
+
             for (int i = 0; i < 1000; i++)
             {
                 var query =

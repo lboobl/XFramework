@@ -138,7 +138,7 @@ namespace ICS.XFramework.Data
                     }
                 }
 
-                // 递归导航属性 #TODO issue# 空导航怎么处理
+                // 递归导航属性
                 this.Deserialize_Navigation(isLine ? prevModel : null, model, string.Empty, isLine);
             }
 
