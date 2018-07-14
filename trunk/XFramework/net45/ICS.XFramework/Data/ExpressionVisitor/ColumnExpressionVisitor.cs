@@ -27,7 +27,7 @@ namespace ICS.XFramework.Data
         private List<string> _navChainHopper = null;
         private bool _mOnly = false;
 
-        public static string NullFieldName = "NULL";
+        public static string NullFieldName = "CheckNull";
 
         static ColumnExpressionVisitor()
         {
