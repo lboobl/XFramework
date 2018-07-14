@@ -95,8 +95,8 @@ namespace ICS.XFramework.UnitTest
 
             var qg =
                 from a in context.GetTable<Inte_CRM.CRM_SaleOrder>()
-                            //.Include(a => a.Client.AccountList)
-                            //.Include(a => a.Client.CloudServer)
+                            .Include(a => a.Client.AccountList)
+                            .Include(a => a.Client.CloudServer)
                 group a by new { a.OrderId, a.OrderNo } into g
                 select new
                 {
@@ -105,7 +105,7 @@ namespace ICS.XFramework.UnitTest
                 };
             var result4 = 
                 qg
-                //.OrderBy(a=>a.OrderId)
+                .OrderBy(a=>a.OrderId)
                 .Skip(5)
                 .Take(1)
                 .ToList();
