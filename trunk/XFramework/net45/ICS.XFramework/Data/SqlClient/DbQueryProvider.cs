@@ -358,6 +358,7 @@ namespace ICS.XFramework.Data.SqlClient
                 // 分页
                 if (qQuery.Skip > 0)
                 {
+                    if (qQuery.OrderBy.Count == 0) throw new XFrameworkException("'OrderBy' must be called before the method 'Skip'.");
                     jf.AppendNewLine();
                     jf.Append("OFFSET ");
                     jf.Append(qQuery.Skip);

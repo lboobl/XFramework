@@ -17,9 +17,9 @@ namespace ICS.XFramework.UnitTest
 
         public static void Run()
         {
-            //Query();
-            //Join();
-            //Other();
+            Query();
+            Join();
+            Other();
             Rabbit();
         }
 
@@ -92,6 +92,23 @@ namespace ICS.XFramework.UnitTest
             query3 = query3.Where(a=>a.Client.ClientId>0);
             query3 = query3.Where(a => a.Client.CloudServer.CloudServerId > 0);
             result3 = query3.ToList();
+
+            var qg =
+                from a in context.GetTable<Inte_CRM.CRM_SaleOrder>()
+                            //.Include(a => a.Client.AccountList)
+                            //.Include(a => a.Client.CloudServer)
+                group a by new { a.OrderId, a.OrderNo } into g
+                select new
+                {
+                    OrderId= g.Key.OrderId,
+                    OrderNo = g.Key.OrderNo
+                };
+            var result4 = 
+                qg
+                //.OrderBy(a=>a.OrderId)
+                .Skip(5)
+                .Take(1)
+                .ToList();
 
             var q1 =
                 from a in context.GetTable<Inte_CRM.Demo>()
