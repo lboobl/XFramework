@@ -17,9 +17,9 @@ namespace ICS.XFramework.UnitTest
 
         public static void Run()
         {
-            Query();
-            Join();
-            Other();
+            //Query();
+            //Join();
+            //Other();
             Rabbit();
         }
 
