@@ -527,37 +527,37 @@ namespace ICS.XFramework.Data
 
                         case 2:
                             if (deserializer2 == null) deserializer2 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q2 = deserializer1.Deserialize<T2>();
+                            q2 = deserializer2.Deserialize<T2>();
 
                             break;
 
                         case 3:
                             if (deserializer3 == null) deserializer3 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q3 = deserializer1.Deserialize<T3>();
+                            q3 = deserializer3.Deserialize<T3>();
 
                             break;
 
                         case 4:
                             if (deserializer4 == null) deserializer4 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q4 = deserializer1.Deserialize<T4>();
+                            q4 = deserializer4.Deserialize<T4>();
 
                             break;
 
                         case 5:
                             if (deserializer5 == null) deserializer5 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q5 = deserializer1.Deserialize<T5>();
+                            q5 = deserializer5.Deserialize<T5>();
 
                             break;
 
                         case 6:
                             if (deserializer6 == null) deserializer6 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q6 = deserializer1.Deserialize<T6>();
+                            q6 = deserializer6.Deserialize<T6>();
 
                             break;
 
                         case 7:
                             if (deserializer7 == null) deserializer7 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q7 = deserializer1.Deserialize<T7>();
+                            q7 = deserializer7.Deserialize<T7>();
 
                             break;
 

@@ -298,37 +298,37 @@ namespace ICS.XFramework.Data
 
                         case 2:
                             if (deserializer2 == null) deserializer2 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q2 = await deserializer1.DeserializeAsync<T2>();
+                            q2 = await deserializer2.DeserializeAsync<T2>();
 
                             break;
 
                         case 3:
                             if (deserializer3 == null) deserializer3 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q3 = await deserializer1.DeserializeAsync<T3>();
+                            q3 = await deserializer3.DeserializeAsync<T3>();
 
                             break;
 
                         case 4:
                             if (deserializer4 == null) deserializer4 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q4 = await deserializer1.DeserializeAsync<T4>();
+                            q4 = await deserializer4.DeserializeAsync<T4>();
 
                             break;
 
                         case 5:
                             if (deserializer5 == null) deserializer5 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q5 = await deserializer1.DeserializeAsync<T5>();
+                            q5 = await deserializer5.DeserializeAsync<T5>();
 
                             break;
 
                         case 6:
                             if (deserializer6 == null) deserializer6 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q6 = await deserializer1.DeserializeAsync<T6>();
+                            q6 = await deserializer6.DeserializeAsync<T6>();
 
                             break;
 
                         case 7:
                             if (deserializer7 == null) deserializer7 = new TypeDeserializer(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
-                            q7 = await deserializer1.DeserializeAsync<T7>();
+                            q7 = await deserializer7.DeserializeAsync<T7>();
 
                             break;
 
