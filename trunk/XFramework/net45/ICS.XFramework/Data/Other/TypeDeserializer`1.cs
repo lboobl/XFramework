@@ -47,9 +47,11 @@ namespace ICS.XFramework.Data
         /// 将 <see cref="IDataRecord"/> 上的当前行反序列化为实体
         /// </summary>
         /// <param name="prevModel">前一行数据</param>
-        /// <param name="prevModel">是否同行数据</param>
-        internal T Deserialize(object prevModel, bool isLine)
+        /// <param name="isLine">是否同行数据</param>
+        internal T Deserialize(object prevModel, out bool isLine)
         {
+            isLine = false;
+
             #region 基元类型
 
             if (Reflection.TypeUtils.IsPrimitive(typeof(T)))
@@ -115,6 +117,27 @@ namespace ICS.XFramework.Data
                 // 第一层
                 if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader, _define.Columns, 0, _define.NavigationDescriptors.MinIndex);
                 model = (T)_modelDeserializer(_reader);
+                // 若有 1:n 的导航属性，判断当前行数据与上一行数据是否相同
+                if (prevModel != null && _define.HaveListNavigation)
+                {
+                    isLine = true;
+                    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+                    Func<KeyValuePair<string, Reflection.MemberAccessWrapper>, bool> predicate =
+                        x => (x.Value as MemberAccessWrapper) != null && (x.Value as MemberAccessWrapper).Column != null && (x.Value as MemberAccessWrapper).Column.IsKey;
+                    var keys =
+                        typeRuntime
+                        .Wrappers
+                        .Where(predicate)
+                        .Select(x => x.Value);
+                    foreach (var wrapper in keys)
+                    {
+                        var key1 = wrapper.Get(prevModel);
+                        var key2 = wrapper.Get(model);
+                        isLine = isLine && key1.Equals(key2);
+                        if (!isLine) break;
+                    }
+                }
+
                 // 递归导航属性
                 this.Deserialize_Navigation(isLine ? prevModel : null, model, string.Empty, isLine);
             }
