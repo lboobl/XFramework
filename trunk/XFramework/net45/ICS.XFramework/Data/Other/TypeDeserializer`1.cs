@@ -50,8 +50,6 @@ namespace ICS.XFramework.Data
         /// <param name="prevModel">是否同行数据</param>
         internal T Deserialize(object prevModel, bool isLine)
         {
-            isLine = false;
-
             #region 基元类型
 
             if (Reflection.TypeUtils.IsPrimitive(typeof(T)))
