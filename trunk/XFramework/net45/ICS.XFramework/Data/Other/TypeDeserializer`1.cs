@@ -179,7 +179,7 @@ namespace ICS.XFramework.Data
                 Func<IDataRecord, object> deserializer = null;
                 TypeRuntimeInfo navTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navType);
                 object list = null;
-                if (navType.IsGenericType && navType.GetGenericTypeDefinition() == typeof(List<>))
+                if (navType.IsGenericType && navTypeRuntime.GenericTypeDefinition == typeof(List<>))
                 {
                     // 1：n关系，导航属性为 List<T>
                     list = navWrapper.Get(model);
@@ -231,20 +231,23 @@ namespace ICS.XFramework.Data
                                 if (i == keys.Length - 1) prevList = pModel;
 
                                 Type objType = pModel.GetType();
-                                if(objType.IsGenericType && objType.GetGenericTypeDefinition() == typeof(List<>))
+                                if(objType.IsGenericType)// && objType.GetGenericTypeDefinition() == typeof(List<>))
                                 {
                                     // 取最后一个记录
                                     TypeRuntimeInfo objTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(objType);
-                                    var wrapper = objTypeRuntime.GetWrapper("get_Count");
-                                    int count = Convert.ToInt32(wrapper.Invoke(pModel));
-                                    if (count > 0)
+                                    if (objTypeRuntime.GenericTypeDefinition == typeof(List<>))
                                     {
-                                        var wrapper2 = navTypeRuntime.GetWrapper("get_Item");
-                                        pModel = wrapper2.Invoke(pModel, count - 1);
-                                    }
-                                    else
-                                    {
-                                        pModel = null;
+                                        var wrapper = objTypeRuntime.GetWrapper("get_Count");
+                                        int count = Convert.ToInt32(wrapper.Invoke(pModel));
+                                        if (count > 0)
+                                        {
+                                            var wrapper2 = navTypeRuntime.GetWrapper("get_Item");
+                                            pModel = wrapper2.Invoke(pModel, count - 1);
+                                        }
+                                        else
+                                        {
+                                            pModel = null;
+                                        }
                                     }
                                 }
 

@@ -23,6 +23,7 @@ namespace ICS.XFramework.Reflection
         private Type[] _gTypes = null;
         private bool _gTypesReaded = false;
         private Dictionary<string, MemberAccessWrapper> _wrappers = null;
+        private Type _genericTypeDefinition = null;
 
         /// <summary>
         /// 类型声明
@@ -66,6 +67,21 @@ namespace ICS.XFramework.Reflection
         public bool IsGenericType
         {
             get { return _type.IsGenericType; }
+        }
+
+        /// <summary>
+        /// 泛型类型的类型
+        /// </summary>
+        public Type GenericTypeDefinition
+        {
+            get
+            {
+                if (_type.IsGenericType && _genericTypeDefinition == null)
+                {
+                    _genericTypeDefinition = _type.GetGenericTypeDefinition();
+                }
+                return _genericTypeDefinition;
+            }
         }
 
         /// <summary>

@@ -28,8 +28,21 @@ namespace ICS.XFramework.UnitTest
         {
             var context = new DataContext();
 
+            var q10=
+                from a in context.GetTable<Inte_CRM.CRM_SaleOrder>()
+                group a by a.ClientId into g
+                select new { ClientId = g.Key };
+            q10 = q10.OrderBy(a => a.ClientId);
+            var result10 = q10.Max(a => a.ClientId);
+
             var query0 = context.GetTable<Inte_CRM.CRM_SaleOrder>();
             var result01 = query0.ToList();
+
+            var query2 =
+                from a in context.GetTable<Inte_CRM.CRM_SaleOrder>()
+                group a by a.ClientId into g
+                select new { ClientId= g.Key};
+            var m2 = query2.Max(a=>a.ClientId);
 
             query0 =
                 from a in context
@@ -91,24 +104,27 @@ namespace ICS.XFramework.UnitTest
                 };
             query3 = query3.Where(a=>a.Client.ClientId>0);
             query3 = query3.Where(a => a.Client.CloudServer.CloudServerId > 0);
-            result3 = query3.ToList();
+            result3 = query3.Skip(10).Take(20).ToList();
 
             var qg =
                 from a in context.GetTable<Inte_CRM.CRM_SaleOrder>()
-                            .Include(a => a.Client.AccountList)
-                            .Include(a => a.Client.CloudServer)
-                group a by new { a.OrderId, a.OrderNo } into g
-                select new
+                    .Include(g => g.Client.AccountList)
+                    .Include(g => g.Client.CloudServer)
+                group a by new { a.OrderId, a.OrderNo, a.ClientId } into g
+                select new Inte_CRM.CRM_SaleOrder
                 {
-                    OrderId= g.Key.OrderId,
-                    OrderNo = g.Key.OrderNo
+                    OrderId = g.Key.OrderId,
+                    OrderNo = g.Key.OrderNo,
+                    ClientId = g.Key.ClientId
+                    //ClientId = g.Max(a => a.OrderId)
                 };
-            var result4 = 
+            qg =
                 qg
-                .OrderBy(a=>a.OrderId)
+                .OrderBy(a => a.OrderId)
                 .Skip(5)
-                .Take(1)
-                .ToList();
+                .Take(1);
+                var result4 = qg.ToList();
+            var m1 = qg.Max(a => a.OrderId);
 
             var q1 =
                 from a in context.GetTable<Inte_CRM.Demo>()

@@ -225,7 +225,11 @@ namespace ICS.XFramework.Data
                 {
                     Expression exp = d.Expressions[0];
                     if (exp.NodeType == ExpressionType.Lambda) exp = (exp as LambdaExpression).Body;
-                    if (exp.Type.IsGenericType && exp.Type.GetGenericTypeDefinition() == typeof(List<>)) checkListNavgation = true;
+                    if (exp.Type.IsGenericType)
+                    {
+                        TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(exp.Type);
+                        if(typeRuntime.GenericTypeDefinition == typeof(List<>)) checkListNavgation = true;
+                    } //&& exp.Type.GetGenericTypeDefinition() == typeof(List<>)) checkListNavgation = true;
                     if (checkListNavgation) break;
                 }
                 if (!checkListNavgation) checkListNavgation = initExpression != null && CheckListNavigation<TElement>(initExpression);
@@ -296,18 +300,11 @@ namespace ICS.XFramework.Data
                 if (Reflection.TypeUtils.IsPrimitive(pType)) continue;
 
                 // complex 类型
-                if (pType.IsGenericType && pType.GetGenericTypeDefinition() == typeof(List<>)) return true;
-                //{
-                //    Type genericType = pType.GetGenericTypeDefinition();
-                //    if (genericType == typeof(List<>)) return true;
-                //    //{
-                //    //    // 导航属性是 List 类型，即 1:n 关系。此时强制 T 有 <KeyAttriubte>并且 MemberInitExpression.Bindings 包含这些Key
-                //    //    // 在 DataReader 反序列化成实体时需要根据 KeyAttriubte 判断不同行数据之前是否同属于一个 Key
-                //    //    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
-                //    //    if(typeRuntime.)
-                //    //}
-
-                //}
+                if (pType.IsGenericType)
+                {
+                    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(pType);
+                    if (typeRuntime.GenericTypeDefinition == typeof(List<>)) return true;
+                } //&& pType.GetGenericTypeDefinition() == typeof(List<>)) return true;
 
                 MemberAssignment memberAssignment = node.Bindings[i] as MemberAssignment;
                 if (memberAssignment != null && memberAssignment.Expression.NodeType == ExpressionType.MemberInit)

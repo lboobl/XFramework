@@ -14,7 +14,7 @@ namespace ICS.XFramework.Data.SqlClient
     /// </remarks>
     public sealed class DbQueryProvider : DbQueryProviderBase
     {
-        private static readonly string NOLOCK = string.Empty;
+        private static readonly string WITHNOLOCK = string.Empty;
         private MethodCallExressionVisitor _methodVisitor = null;
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace ICS.XFramework.Data.SqlClient
             bool willNest = qQuery.HaveDistinct || qQuery.GroupBy != null || qQuery.Skip > 0 || qQuery.Take > 0;
             bool useStatis = qQuery.Statis != null;
             // 分组分页   
-            bool groupByPaging = qQuery.GroupBy != null && qQuery.Skip > 0;
+            //bool groupByPaging = qQuery.GroupBy != null && qQuery.Skip > 0;
             // 没有统计函数或者使用 'Skip' 子句，则解析OrderBy
             // 导航属性如果使用嵌套，除非有 TOP 或者 OFFSET 子句，否则不能用ORDER BY
             bool useOrderBy = (!useStatis || qQuery.Skip > 0) && !qQuery.HaveAny && (!qQuery.IsListNavigationQuery || (qQuery.Skip > 0 || qQuery.Take > 0));
@@ -134,7 +134,7 @@ namespace ICS.XFramework.Data.SqlClient
             SqlBuilder jf = cd.JoinFragment;
             SqlBuilder wf = cd.WhereFragment;
 
-            if (groupByPaging) indent = indent + 1;
+            //if (groupByPaging) indent = indent + 1;
             jf.Indent = indent;
 
             #region 嵌套查询
@@ -218,20 +218,20 @@ namespace ICS.XFramework.Data.SqlClient
                         cd.AddNavigation(visitor.Navigations);
                     }
 
-                    // 如果分组后再分页，此时需要在原先的选择字段上再加上 'OrderBy' 子句指定的字段，外层的分页时需要用到这些排序字段
-                    if (qQuery.OrderBy.Count > 0 && useOrderBy && groupByPaging)
-                    {
-                        if (cd.Columns.Count > 0) jf.Append(",");
-                        for (int i = 0; i < qQuery.OrderBy.Count; i++)
-                        {
-                            visitor = new ColumnExpressionVisitor(this, aliases, qQuery.OrderBy[i], qQuery.GroupBy, true, cd.Columns);
-                            visitor.HaveListNavigation = qQuery.HaveListNavigation;
-                            visitor.Write(jf);
+                    //// 如果分组后再分页，此时需要在原先的选择字段上再加上 'OrderBy' 子句指定的字段，外层的分页时需要用到这些排序字段
+                    //if (qQuery.OrderBy.Count > 0 && useOrderBy && groupByPaging)
+                    //{
+                    //    if (cd.Columns.Count > 0) jf.Append(",");
+                    //    for (int i = 0; i < qQuery.OrderBy.Count; i++)
+                    //    {
+                    //        visitor = new ColumnExpressionVisitor(this, aliases, qQuery.OrderBy[i], qQuery.GroupBy, true, cd.Columns);
+                    //        visitor.HaveListNavigation = qQuery.HaveListNavigation;
+                    //        visitor.Write(jf);
 
-                            cd.AddNavigation(visitor.Navigations);
-                            if (i < qQuery.OrderBy.Count - 1) jf.AppendNewLine(",");
-                        }
-                    }
+                    //        cd.AddNavigation(visitor.Navigations);
+                    //        if (i < qQuery.OrderBy.Count - 1) jf.AppendNewLine(",");
+                    //    }
+                    //}
                 }
 
                 #endregion
@@ -254,7 +254,7 @@ namespace ICS.XFramework.Data.SqlClient
                 jf.AppendMember(TypeRuntimeInfoCache.GetRuntimeInfo(qQuery.DefinitionType).TableName);
             }
             jf.Append(" t0 ");
-            if (!string.IsNullOrEmpty(DbQueryProvider.NOLOCK)) jf.Append(DbQueryProvider.NOLOCK);
+            if (!string.IsNullOrEmpty(DbQueryProvider.WITHNOLOCK)) jf.Append(DbQueryProvider.WITHNOLOCK);
 
             // LEFT<INNER> JOIN 子句
             ExpressionVisitorBase  visitorBase = new JoinExpressionVisitor(this, aliases, qQuery.Join);
@@ -278,7 +278,7 @@ namespace ICS.XFramework.Data.SqlClient
             cd.AddNavigation(visitorBase.Navigations);
 
             // ORDER 子句
-            if (qQuery.OrderBy.Count > 0 && useOrderBy && !groupByPaging)
+            if (qQuery.OrderBy.Count > 0 && useOrderBy)// && !groupByPaging)
             {
                 visitorBase = new OrderByExpressionVisitor(this, aliases, qQuery.OrderBy, qQuery.GroupBy);
                 visitorBase.Write(wf);
@@ -287,7 +287,7 @@ namespace ICS.XFramework.Data.SqlClient
 
             #region 分页查询
 
-            if (qQuery.Skip > 0 && !groupByPaging)
+            if (qQuery.Skip > 0)// && !groupByPaging)
             {
                 if (qQuery.OrderBy.Count == 0) throw new XFrameworkException("The method 'OrderBy' must be called before the method 'Skip'.");
                 wf.AppendNewLine();
@@ -320,58 +320,58 @@ namespace ICS.XFramework.Data.SqlClient
 
             #region 分组分页
 
-            if (groupByPaging)
-            {
-                SqlBuilder builder = new SqlBuilder(this);
+            //if (groupByPaging)
+            //{
+            //    SqlBuilder builder = new SqlBuilder(this);
 
-                // SELECT
-                int index = -1;
-                builder.Append("SELECT ");
-                foreach (var kvp in cd.Columns)
-                {
-                    index += 1;
-                    builder.AppendNewLine();
-                    builder.AppendMember("t0", kvp.Key);
-                    if (index < cd.Columns.Count - 1) builder.Append(",");
-                }
+            //    // SELECT
+            //    int index = -1;
+            //    builder.Append("SELECT ");
+            //    foreach (var kvp in cd.Columns)
+            //    {
+            //        index += 1;
+            //        builder.AppendNewLine();
+            //        builder.AppendMember("t0", kvp.Key);
+            //        if (index < cd.Columns.Count - 1) builder.Append(",");
+            //    }
 
-                builder.AppendNewLine();
-                builder.Append("FROM ( ");
+            //    builder.AppendNewLine();
+            //    builder.Append("FROM ( ");
 
-                string inner = cd.CommandText;
-                //jf.Replace(Environment.NewLine, Environment.NewLine + SqlBuilder.TAB);
-                jf.Insert(0, builder);
+            //    string inner = cd.CommandText;
+            //    //jf.Replace(Environment.NewLine, Environment.NewLine + SqlBuilder.TAB);
+            //    jf.Insert(0, builder);
 
 
-                indent -= 1;
-                jf.Indent = indent;
-                jf.AppendNewLine();
-                jf.Append(" ) t0");
+            //    indent -= 1;
+            //    jf.Indent = indent;
+            //    jf.AppendNewLine();
+            //    jf.Append(" ) t0");
 
-                // 排序
-                if (qQuery.OrderBy.Count > 0 && useOrderBy)
-                {
-                    visitorBase = new OrderByExpressionVisitor(this, aliases, qQuery.OrderBy, null, "t0");
-                    visitorBase.Write(jf);
-                }
+            //    // 排序
+            //    if (qQuery.OrderBy.Count > 0 && useOrderBy)
+            //    {
+            //        visitorBase = new OrderByExpressionVisitor(this, aliases, qQuery.OrderBy, null, "t0");
+            //        visitorBase.Write(jf);
+            //    }
 
-                // 分页
-                if (qQuery.Skip > 0)
-                {
-                    if (qQuery.OrderBy.Count == 0) throw new XFrameworkException("'OrderBy' must be called before the method 'Skip'.");
-                    jf.AppendNewLine();
-                    jf.Append("OFFSET ");
-                    jf.Append(qQuery.Skip);
-                    jf.Append(" ROWS");
+            //    // 分页
+            //    if (qQuery.Skip > 0)
+            //    {
+            //        if (qQuery.OrderBy.Count == 0) throw new XFrameworkException("'OrderBy' must be called before the method 'Skip'.");
+            //        jf.AppendNewLine();
+            //        jf.Append("OFFSET ");
+            //        jf.Append(qQuery.Skip);
+            //        jf.Append(" ROWS");
 
-                    if (qQuery.Take > 0)
-                    {
-                        jf.Append(" FETCH NEXT ");
-                        jf.Append(qQuery.Take);
-                        jf.Append(" ROWS ONLY ");
-                    }
-                }
-            }
+            //        if (qQuery.Take > 0)
+            //        {
+            //            jf.Append(" FETCH NEXT ");
+            //            jf.Append(qQuery.Take);
+            //            jf.Append(" ROWS ONLY ");
+            //        }
+            //    }
+            //}
 
             #endregion
 
