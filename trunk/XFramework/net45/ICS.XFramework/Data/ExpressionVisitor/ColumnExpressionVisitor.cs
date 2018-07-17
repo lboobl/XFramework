@@ -201,7 +201,7 @@ namespace ICS.XFramework.Data
                 {
                     TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(binding.Member.DeclaringType);
                     var attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(binding.Member.Name);
-                    if (attribute == null) throw new XFrameworkException("Complex property must mark 'ForeignKeyAttribute' ");
+                    if (attribute == null && HaveListNavigation) throw new XFrameworkException("Complex property must mark 'ForeignKeyAttribute' ");
 
                     // 如果是主记录并且有一对多的导航记录，必须强制主表选择的列里面必须包含导航外键
                     // TODO 表达式链上任何的外键
