@@ -199,6 +199,7 @@ namespace ICS.XFramework.Data
 
                 else
                 {
+                    // TODO 显式指定join不需要外键
                     TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(binding.Member.DeclaringType);
                     var attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(binding.Member.Name);
                     if (attribute == null && HaveListNavigation) throw new XFrameworkException("Complex property must mark 'ForeignKeyAttribute' ");
