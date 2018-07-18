@@ -62,7 +62,7 @@ namespace ICS.XFramework
         public static string SerializeToXml<T>(T obj) where T : class
         {
             XmlSerializer serializer = new XmlSerializer(typeof(T));
-            return SerializeToXml(serializer, obj);
+            return SerializeToXml(serializer, obj, null);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace ICS.XFramework
         public static string SerializeToXml<T>(T obj, XmlRootAttribute root) where T : class
         {
             XmlSerializer serializer = new XmlSerializer(typeof(T), root);
-            return SerializeToXml(serializer, obj);
+            return SerializeToXml(serializer, obj, null);
         }
 
         /// <summary>
@@ -101,24 +101,7 @@ namespace ICS.XFramework
         public static string SerializeToXml<T>(T obj, XmlRootAttribute root, string defaultNamespace) where T : class
         {
             XmlSerializer serializer = new XmlSerializer(typeof(T), null, new System.Type[] { }, root, defaultNamespace);
-            return SerializeToXml(serializer, obj);
-        }
-
-        /// <summary>
-        /// 对象序列化成 XML 字符串
-        /// </summary>
-        /// <typeparam name="T">T</typeparam>
-        /// <param name="serializer">序列化器</param>
-        /// <param name="obj">要序列化的对象</param>
-        /// <returns></returns>
-        public static string SerializeToXml<T>(XmlSerializer serializer, T obj) where T : class
-        {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                serializer.Serialize(ms, obj);
-                string xml = Encoding.UTF8.GetString(ms.ToArray());
-                return xml;
-            }
+            return SerializeToXml(serializer, obj,null);
         }
 
         /// <summary>
