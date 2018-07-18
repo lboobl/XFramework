@@ -21,7 +21,7 @@ namespace ICS.XFramework
         /// 对象序列化成Json字符串
         /// </summary>
         /// <returns></returns>
-        public static string SerializeToJson(object obj,string format = null)
+        public static string SerializeToJson(object obj, string format = null)
         {
             // 还有个JavascriptSerializer
             DataContractJsonSerializer serializer = string.IsNullOrEmpty(format)
@@ -70,6 +70,18 @@ namespace ICS.XFramework
         /// </summary>
         /// <typeparam name="T">T</typeparam>
         /// <param name="obj">要序列化的对象</param>
+        /// <returns></returns>
+        public static string SerializeToXml<T>(T obj, XmlSerializerNamespaces ns) where T : class
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(T));
+            return SerializeToXml(serializer, obj, ns);
+        }
+
+        /// <summary>
+        /// 对象序列化成 XML 字符串
+        /// </summary>
+        /// <typeparam name="T">T</typeparam>
+        /// <param name="obj">要序列化的对象</param>
         /// <param name="root">指定根对象的名称</param>
         /// <returns></returns>
         public static string SerializeToXml<T>(T obj, XmlRootAttribute root) where T : class
@@ -104,6 +116,23 @@ namespace ICS.XFramework
             using (MemoryStream ms = new MemoryStream())
             {
                 serializer.Serialize(ms, obj);
+                string xml = Encoding.UTF8.GetString(ms.ToArray());
+                return xml;
+            }
+        }
+
+        /// <summary>
+        /// 对象序列化成 XML 字符串
+        /// </summary>
+        /// <typeparam name="T">T</typeparam>
+        /// <param name="serializer">序列化器</param>
+        /// <param name="obj">要序列化的对象</param>
+        /// <returns></returns>
+        public static string SerializeToXml<T>(XmlSerializer serializer, T obj, XmlSerializerNamespaces ns) where T : class
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                serializer.Serialize(ms, obj, ns);
                 string xml = Encoding.UTF8.GetString(ms.ToArray());
                 return xml;
             }
