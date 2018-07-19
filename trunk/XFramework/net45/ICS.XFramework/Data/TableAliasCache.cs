@@ -139,7 +139,7 @@ namespace ICS.XFramework.Data
             MemberExpression memExp = expression as MemberExpression;
             if (memExp == null) return TableAliasCache.GetTableAliasKey(expression);
 
-            if (memExp.IsArrivable()) return TableAliasCache.GetTableAliasKey(memExp.Expression);
+            if (memExp.Acceptable()) return TableAliasCache.GetTableAliasKey(memExp.Expression);
 
             return memExp.Member.Name;
         }

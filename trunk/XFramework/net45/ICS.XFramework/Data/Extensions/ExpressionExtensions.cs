@@ -84,7 +84,7 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 在递归访问 MemberAccess 表达式时，判定节点是否能够被继续递归访问
         /// </summary>
-        public static bool IsArrivable(this Expression node)
+        public static bool Acceptable(this Expression node)
         {
             // a 
             // <>h__TransparentIdentifier.a
@@ -116,21 +116,26 @@ namespace ICS.XFramework.Data
         /// </summary>
         public static string GetKeyWidthoutAnonymous(this MemberExpression node, bool isDesciptor = false)
         {
-            List<string> chain = new List<string>();
-            chain.Add(node.Member.Name);
+            List<string> segs = new List<string>();
+            segs.Add(node.Member.Name);
 
             Expression expression = node.Expression;
-            while (expression.IsArrivable())
+            while (expression.Acceptable())
             {
-                chain.Add((expression as MemberExpression).Member.Name);
-                expression = (expression as MemberExpression).Expression;
+                MemberExpression memberExpression = null;
+                if (expression.NodeType == ExpressionType.MemberAccess) memberExpression = (MemberExpression)expression;
+                else if (expression.NodeType == ExpressionType.Call) memberExpression = (expression as MethodCallExpression).Object as MemberExpression;
+
+                segs.Add(memberExpression.Member.Name);
+                expression = memberExpression.Expression;
             }
 
-            if (expression.NodeType == ExpressionType.Parameter) chain.Add(isDesciptor ? expression.Type.Name : (expression as ParameterExpression).Name);
-            if (expression.NodeType == ExpressionType.MemberAccess) chain.Add((expression as MemberExpression).Member.Name);
+            // 如果读取
+            if (expression.NodeType == ExpressionType.Parameter) segs.Add(isDesciptor ? expression.Type.Name : (expression as ParameterExpression).Name);
+            if (expression.NodeType == ExpressionType.MemberAccess) segs.Add((expression as MemberExpression).Member.Name);
 
-            chain.Reverse();
-            string result = string.Join(".", chain);
+            segs.Reverse();
+            string result = string.Join(".", segs);
             return result;
         }
     }

@@ -32,6 +32,6 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 生成的脚本命令
         /// </summary>
-        CommandDefine Command { get; set; }
+        CommandBase Command { get; set; }
     }
 }

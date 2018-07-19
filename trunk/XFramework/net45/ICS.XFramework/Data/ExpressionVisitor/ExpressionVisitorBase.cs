@@ -163,7 +163,7 @@ namespace ICS.XFramework.Data
             // => a.Name.Length
             if (Reflection.TypeUtils.IsPrimitive(node.Expression.Type)) return _provider.MethodVisitor.VisitMemberMember(node, this);
             // => <>h__3.b.ClientName
-            if (!node.Expression.IsArrivable()) return _builder.AppendMember(node, _aliases);
+            if (!node.Expression.Acceptable()) return _builder.AppendMember(node, _aliases);
             // => b.Client.Address.AddressName
             this.VisitNavigation(node.Expression, node.Member.Name);
 
@@ -371,7 +371,7 @@ namespace ICS.XFramework.Data
             Expression node = expression;
             Stack<KeyValuePair<string, MemberExpression>> stack = null;
             string alias = string.Empty;
-            while (node != null && node.IsArrivable())
+            while (node != null && node.Acceptable())
             {
                 if (node.NodeType != ExpressionType.MemberAccess) break;
 

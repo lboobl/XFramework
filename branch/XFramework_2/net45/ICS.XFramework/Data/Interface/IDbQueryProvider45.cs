@@ -113,7 +113,7 @@ namespace ICS.XFramework.Data
         /// <param name="cmd">SQL 命令</param>
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <returns></returns>
-        Task<T> ExecuteAsync<T>(IDbCommand cmd, CommandDefine define = null);
+        Task<T> ExecuteAsync<T>(IDbCommand cmd, CommandBase define = null);
 
         /// <summary>
         /// 异步执行SQL 语句，并返回单个实体对象
@@ -122,7 +122,7 @@ namespace ICS.XFramework.Data
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <param name="transaction">事务</param>
         /// <returns></returns>
-        Task<T> ExecuteAsync<T>(List<string> sqlList, CommandDefine define = null, IDbTransaction transaction = null);
+        Task<T> ExecuteAsync<T>(List<string> sqlList, CommandBase define = null, IDbTransaction transaction = null);
 
         /// <summary>
         /// 异步执行SQL 语句，并返回并返回单结果集集合
@@ -149,7 +149,7 @@ namespace ICS.XFramework.Data
         /// <param name="cmd">SQL 命令</param>
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <returns></returns>
-        Task<List<T>> ExecuteListAsync<T>(IDbCommand cmd, CommandDefine define = null);
+        Task<List<T>> ExecuteListAsync<T>(IDbCommand cmd, CommandBase define = null);
 
         /// <summary>
         /// 异步执行SQL 语句，并返回并返回单结果集集合
@@ -158,7 +158,7 @@ namespace ICS.XFramework.Data
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <param name="transaction">事务</param>
         /// <returns></returns>
-        Task<List<T>> ExecuteListAsync<T>(List<string> sqlList, CommandDefine define = null, IDbTransaction transaction = null);
+        Task<List<T>> ExecuteListAsync<T>(List<string> sqlList, CommandBase define = null, IDbTransaction transaction = null);
 
         /// <summary>
         /// 异步执行 SQL 语句，并返回两个实体集合
@@ -189,7 +189,7 @@ namespace ICS.XFramework.Data
         /// </summary>
         /// <param name="cmd">SQL 命令</param>
         /// <param name="defines">命令定义对象，用于解析实体的外键</param>
-        Task<Tuple<List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>>> ExecuteMultipleAsync<T1, T2, T3, T4, T5, T6, T7>(IDbCommand cmd, CommandDefine[] defines = null);
+        Task<Tuple<List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>>> ExecuteMultipleAsync<T1, T2, T3, T4, T5, T6, T7>(IDbCommand cmd, CommandBase[] defines = null);
 
         /// <summary>
         /// 异步执行SQL 语句，并返回 <see cref="DataTable"/> 对象

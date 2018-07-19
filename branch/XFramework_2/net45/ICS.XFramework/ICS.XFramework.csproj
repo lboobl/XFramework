@@ -107,7 +107,6 @@
     <Compile Include="Data\ExpressionVisitor\StatisExpressionVisitor.cs" />
     <Compile Include="Data\ExpressionVisitor\UpdateExpressionVisitor.cs" />
     <Compile Include="Data\ExpressionVisitor\WhereExpressionVisitor.cs" />
-    <Compile Include="Data\Extensions\DataRecordExtensions.cs" />
     <Compile Include="Data\Extensions\DbQueryableExtensions.cs" />
     <Compile Include="Data\Extensions\ExpressionExtensions.cs" />
     <Compile Include="Data\Interface\IDbCommandInterceptor.cs" />
@@ -126,8 +125,8 @@
     <Compile Include="Data\Mapping\TypeRuntimeInfoCache.cs" />
     <Compile Include="Data\Other\Column.cs" />
     <Compile Include="Data\Other\ColumnNavDescriptor.cs" />
-    <Compile Include="Data\Other\CommandDefine.cs" />
-    <Compile Include="Data\Other\CommandDefine_Select.cs" />
+    <Compile Include="Data\Other\CommandBase.cs" />
+    <Compile Include="Data\Other\CommandDefinition.cs" />
     <Compile Include="Data\Other\Null.cs" />
     <Compile Include="Data\Other\SqlMethod.cs" />
     <Compile Include="Data\Other\TypeDeserializer`1.cs" />

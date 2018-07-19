@@ -763,28 +763,23 @@ namespace ICS.XFramework.UnitTest
 
 
             Stopwatch stop = new Stopwatch();
-            //stop.Start();
+            stop.Start();
 
-            //for (int i = 0; i < 1000; i++)
-            //{
-            //    var query =
-            //        from a in context.GetTable<Prd_Center.Product>()
-            //        where a.Client.ClientID == 1
-            //        select new Prd_Center.Product(a)
-            //        {
-            //            Client = a.Client
-            //        };
-            //    //var query =
-            //    //    from a in context.GetTable<Prd_Center.Product>()
-            //    //    where a.ClientID == 1
-            //    //    select new Prd_Center.Product
-            //    //    {
-            //    //        ClientID = a.ClientID,
-            //    //        ProductID = a.ProductID,
-            //    //        Title = a.Title
-            //    //    };
-            //    var result = query.ToList();
-            //}
+            for (int i = 0; i < 100; i++)
+            {
+                var query =
+                    from a in context.GetTable<Prd_Center.Product>()
+                    select new Prd_Center.Product(a)
+                    {
+                        Client = a.Client
+                    };
+                var reuslt = query.ToList();
+            }
+
+            stop.Stop();
+            Console.WriteLine(stop.ElapsedMilliseconds);
+            Console.WriteLine(stop.Elapsed);
+            Console.ReadLine();
 
             for (int i = 0; i < 1000; i++)
             {

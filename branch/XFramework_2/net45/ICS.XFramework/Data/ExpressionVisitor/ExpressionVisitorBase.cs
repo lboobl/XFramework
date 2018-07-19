@@ -163,7 +163,7 @@ namespace ICS.XFramework.Data
             // => a.Name.Length
             if (Reflection.TypeUtils.IsPrimitive(node.Expression.Type)) return _provider.MethodVisitor.VisitMemberMember(node, this);
             // => <>h__3.b.ClientName
-            if (!node.Expression.IsVisitable()) return _builder.AppendMember(node, _aliases);
+            if (!node.Expression.Acceptable()) return _builder.AppendMember(node, _aliases);
             // => b.Client.Address.AddressName            
             this.VisitNavigation(node.Expression, node.Member.Name);
 
@@ -398,7 +398,7 @@ namespace ICS.XFramework.Data
             // 表达式 => b.Client.Address.AddressName
             Expression f = node;
             Stack<KeyValuePair<string, MemberExpression>> stack = null;
-            while (f != null && f.IsVisitable())
+            while (f != null && f.Acceptable())
             {
                 if (f.NodeType != ExpressionType.MemberAccess) break;
 

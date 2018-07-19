@@ -7,7 +7,7 @@ namespace ICS.XFramework.Data
     /// <summary>
     /// 命令定义
     /// </summary>
-    public class CommandDefine
+    public class CommandBase
     {
         private string _commandText;
         private IEnumerable<IDataParameter> _parameters;
@@ -51,9 +51,9 @@ namespace ICS.XFramework.Data
         }
 
         /// <summary>
-        /// 初始化 <see cref="CommandDefine"/> 类的新实例
+        /// 初始化 <see cref="CommandBase"/> 类的新实例
         /// </summary>
-        public CommandDefine(string commandText, IEnumerable<IDataParameter> parameters = null, CommandType? commandType = null)
+        public CommandBase(string commandText, IEnumerable<IDataParameter> parameters = null, CommandType? commandType = null)
         {
             this._commandText = commandText;
             this._parameters = parameters;

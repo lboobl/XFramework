@@ -203,8 +203,17 @@
     <Compile Include="..\..\net45\ICS.XFramework\Data\Mapping\TypeRuntimeInfoCache.cs">
       <Link>Data\Mapping\TypeRuntimeInfoCache.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Other\CommandDefine_Select.cs">
-      <Link>Data\Other\CommandDefine_Select.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Other\Column.cs">
+      <Link>Data\Other\Column.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Other\ColumnNavDescriptor.cs">
+      <Link>Data\Other\ColumnNavDescriptor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Other\CommandBase.cs">
+      <Link>Data\Other\CommandBase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Other\CommandDefinition.cs">
+      <Link>Data\Other\CommandDefinition.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\Other\Null.cs">
       <Link>Data\Other\Null.cs</Link>
@@ -265,11 +274,7 @@
     <Compile Include="Data\DbExpression.cs" />
     <Compile Include="Data\DbQueryableInfo_Delete.cs" />
     <Compile Include="Data\DbQueryableInfo_Update.cs" />
-    <Compile Include="Data\Extensions\DataRecordExtensions.cs" />
     <Compile Include="Data\Extensions\DbQueryableExtensions.cs" />
-    <Compile Include="Data\Other\Column.cs" />
-    <Compile Include="Data\Other\ColumnNavDescriptor.cs" />
-    <Compile Include="Data\Other\CommandDefine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Interface\IConstructorInvoker.cs" />
     <Compile Include="Reflection\Interface\IMethodInvoker.cs" />

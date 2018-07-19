@@ -12,6 +12,7 @@ namespace ICS.XFramework.Data
         private List<DbExpression> _join = null;
         private List<DbExpression> _orderBy = null;
         private DbExpression _groupBy = null;
+        private List<DbExpression> _include = null;
 
         /// <summary>
         /// JOIN 表达式集合
@@ -29,6 +30,15 @@ namespace ICS.XFramework.Data
         {
             get { return _orderBy; }
             set { _orderBy = value; }
+        }
+
+        /// <summary>
+        /// Include表达式集合
+        /// </summary>
+        public List<DbExpression> Include
+        {
+            get { return _include; }
+            set { _include = value; }
         }
 
         /// <summary>
@@ -63,10 +73,10 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 指示 SELECT FROM 子句表对应类型
         /// </summary>
-        public Type FromType { get; set; }
+        public Type DefinitionType { get; set; }
 
         /// <summary>
-        /// SELECT 字段表达式，空表示选取 <see cref="FromType"/> 的所有字段
+        /// SELECT 字段表达式，空表示选取 <see cref="DefinitionType"/> 的所有字段
         /// </summary>
         public DbExpression Expression { get; set; }
 
@@ -89,7 +99,7 @@ namespace ICS.XFramework.Data
         /// 子查询语义
         /// 注意，T 可能不是 参数T 所表示的类型
         /// </summary>
-        public override IDbQueryableInfo<T> Subquery { get; set; }
+        public override IDbQueryableInfo<T> NestedQuery { get; set; }
 
         /// <summary>
         /// 并集
@@ -98,23 +108,13 @@ namespace ICS.XFramework.Data
         public List<IDbQueryableInfo<T>> Union { get; set; }
 
         /// <summary>
-        /// 包含查询语义
-        /// 注意，T 可能不是 参数T 所表示的类型
-        /// </summary>
-        public List<IDbQueryableInfo<T>> Include { get; set; }
-
-        /// <summary>
-        /// 参与表别名运算的表达式集
-        /// </summary>
-        public HashSet<Expression> AliasExpressions { get; set; }
-
-        /// <summary>
         /// 初始化 <see cref="DbQueryableInfo_Select"/> 类的新实例
         /// </summary>
         public DbQueryableInfo_Select()
         {
             _join = new List<DbExpression>();
             _orderBy = new List<DbExpression>();
+            _include = new List<DbExpression>();
         }
     }
 }

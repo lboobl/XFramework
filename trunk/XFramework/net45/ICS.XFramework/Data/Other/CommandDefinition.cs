@@ -158,7 +158,7 @@ namespace ICS.XFramework.Data
                     string outerKey = key;
                     string innerAlias = string.Empty;
 
-                    if (!m.Expression.IsArrivable())
+                    if (!m.Expression.Acceptable())
                     {
                         innerKey = m.Expression.NodeType == ExpressionType.Parameter
                             ? (m.Expression as ParameterExpression).Name
@@ -166,7 +166,9 @@ namespace ICS.XFramework.Data
                     }
                     else
                     {
-                        MemberExpression mLeft = m.Expression as MemberExpression;
+                        MemberExpression mLeft = null;
+                        if (m.Expression.NodeType == ExpressionType.MemberAccess) mLeft = m.Expression as MemberExpression;
+                        else if(m.Expression.NodeType == ExpressionType.Call) mLeft = (m.Expression as MethodCallExpression).Object as MemberExpression; 
                         string name = TypeRuntimeInfoCache.GetRuntimeInfo(mLeft.Type).TableName;
                         innerAlias = _aliases.GetJoinTableAlias(name);
 

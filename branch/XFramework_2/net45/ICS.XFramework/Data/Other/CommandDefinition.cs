@@ -10,7 +10,7 @@ namespace ICS.XFramework.Data
     /// <summary>
     /// SELECT 命令定义
     /// </summary>
-    public class CommandDefine_Select : CommandDefine
+    public class CommandDefinition : CommandBase
     {
         private Builder _builder = null;
 
@@ -32,6 +32,11 @@ namespace ICS.XFramework.Data
         public ColumnNavDescriptorCollection NavDescriptors { get; set; }
 
         /// <summary>
+        /// Include 表达式
+        /// </summary>
+        public List<DbExpression> Include { get; set; }
+
+        /// <summary>
         /// JOIN（含） 之前的片断
         /// </summary>
         public SqlBuilder JoinFragment { get { return _builder.JoinFragment; } }
@@ -42,12 +47,12 @@ namespace ICS.XFramework.Data
         public SqlBuilder WhereFragment { get { return _builder.WhereFragment; } }
 
         /// <summary>
-        /// 实例化 <see cref="CommandDefine_Select"/> 类的新实例
+        /// 实例化 <see cref="CommandDefinition"/> 类的新实例
         /// </summary>
         /// <param name="escCharLeft">如 [</param>
         /// <param name="escCharRight">如 ]</param>
         /// <param name="aliases">别名</param>
-        public CommandDefine_Select(IDbQueryProvider provider, TableAliasCache aliases)
+        public CommandDefinition(IDbQueryProvider provider, TableAliasCache aliases)
             : base(string.Empty, null, System.Data.CommandType.Text)
         {
             _builder = new Builder(provider, aliases);
@@ -159,7 +164,7 @@ namespace ICS.XFramework.Data
                     string outerKey = key;
                     string innerAlias = string.Empty;
 
-                    if (!m.Expression.IsVisitable())
+                    if (!m.Expression.Acceptable())
                     {
                         innerKey = m.Expression.NodeType == ExpressionType.Parameter
                             ? (m.Expression as ParameterExpression).Name

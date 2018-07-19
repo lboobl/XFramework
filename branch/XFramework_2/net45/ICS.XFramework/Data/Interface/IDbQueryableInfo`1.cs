@@ -10,6 +10,6 @@ namespace ICS.XFramework.Data
         /// 子查询语义
         /// 注意，T 可能不是 参数T 所表示的类型
         /// </summary>
-        IDbQueryableInfo<T> Subquery { get; set; }
+        IDbQueryableInfo<T> NestedQuery { get; set; }
     }
 }

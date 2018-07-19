@@ -248,7 +248,7 @@ namespace ICS.XFramework.Data
             string alias = string.Empty;
             Type type = node.Type;
 
-            if (node.IsArrivable())
+            if (node.Acceptable())
             {
                 // 例： Client = a.Client.CloudServer
                 // fix issue# Join 表达式显式指定导航属性时时，alias 为空

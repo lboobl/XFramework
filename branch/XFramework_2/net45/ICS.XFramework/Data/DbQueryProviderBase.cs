@@ -157,7 +157,7 @@ namespace ICS.XFramework.Data
         /// </summary>
         /// <param name="query">查询 语句</param>
         /// <returns></returns>
-        public CommandDefine Parse<T>(IDbQueryable<T> query)
+        public CommandBase Parse<T>(IDbQueryable<T> query)
         {
             IDbQueryableInfo<T> info = DbQueryParser.Parse(query);
 
@@ -375,7 +375,7 @@ namespace ICS.XFramework.Data
         /// <returns></returns>
         public T Execute<T>(IDbQueryable<T> query, IDbTransaction trans = null)
         {
-            CommandDefine define = this.Parse(query);
+            CommandBase define = this.Parse(query);
             IDbCommand cmd = this.CreateCommand(define.CommandText, trans, define.CommandType, define.Parameters);
             return this.Execute<T>(cmd, define);
         }
@@ -398,7 +398,7 @@ namespace ICS.XFramework.Data
         /// <param name="cmd">SQL 命令</param>
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <returns></returns>
-        public T Execute<T>(IDbCommand cmd, CommandDefine define = null)
+        public T Execute<T>(IDbCommand cmd, CommandBase define = null)
         {
             IDataReader reader = null;
             T TResult = default(T);
@@ -408,7 +408,7 @@ namespace ICS.XFramework.Data
             {
                 reader = this.ExecuteReader(cmd);
                 conn = cmd != null ? cmd.Connection : null;
-                TypeDeserializer<T> deserializer = new TypeDeserializer<T>(reader, define as CommandDefine_Select);
+                TypeDeserializer<T> deserializer = new TypeDeserializer<T>(reader, define as CommandDefinition);
                 if (reader.Read()) TResult = deserializer.Deserialize();
                 return TResult;
             }
@@ -425,7 +425,7 @@ namespace ICS.XFramework.Data
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <param name="trans">事务</param>
         /// <returns></returns>
-        public T Execute<T>(List<string> sqlList, CommandDefine define = null, IDbTransaction trans = null)
+        public T Execute<T>(List<string> sqlList, CommandBase define = null, IDbTransaction trans = null)
         {
             return this.DoExecute<T>(sqlList, p => this.Execute<T>(p, define), trans);
         }
@@ -438,7 +438,7 @@ namespace ICS.XFramework.Data
         /// <param name="trans">事务</param>
         public Tuple<List<T1>, List<T2>> ExecuteMultiple<T1, T2>(IDbQueryable<T1> query1, IDbQueryable<T2> query2, IDbTransaction trans = null)
         {
-            CommandDefine[] defines = new[] { this.Parse(query1), this.Parse(query2) };
+            CommandBase[] defines = new[] { this.Parse(query1), this.Parse(query2) };
             System.Text.StringBuilder builder = new System.Text.StringBuilder();
             if (!string.IsNullOrEmpty(defines[0].CommandText)) builder.AppendLine(defines[0].CommandText);
             if (!string.IsNullOrEmpty(defines[1].CommandText)) builder.AppendLine(defines[1].CommandText);
@@ -458,7 +458,7 @@ namespace ICS.XFramework.Data
         /// <param name="trans">事务</param>
         public Tuple<List<T1>, List<T2>, List<T3>> ExecuteMultiple<T1, T2, T3>(IDbQueryable<T1> query1, IDbQueryable<T2> query2, IDbQueryable<T3> query3, IDbTransaction trans = null)
         {
-            CommandDefine[] defines = new[] { this.Parse(query1), this.Parse(query2), this.Parse(query3) };
+            CommandBase[] defines = new[] { this.Parse(query1), this.Parse(query2), this.Parse(query3) };
             System.Text.StringBuilder builder = new System.Text.StringBuilder();
             if (!string.IsNullOrEmpty(defines[0].CommandText)) builder.AppendLine(defines[0].CommandText);
             if (!string.IsNullOrEmpty(defines[1].CommandText)) builder.AppendLine(defines[1].CommandText);
@@ -486,7 +486,7 @@ namespace ICS.XFramework.Data
         /// </summary>
         /// <param name="cmd">SQL 命令</param>
         /// <param name="defines">命令定义对象，用于解析实体的外键</param>
-        public Tuple<List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>> ExecuteMultiple<T1, T2, T3, T4, T5, T6, T7>(IDbCommand cmd, CommandDefine[] defines = null)
+        public Tuple<List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>> ExecuteMultiple<T1, T2, T3, T4, T5, T6, T7>(IDbCommand cmd, CommandBase[] defines = null)
         {
             IDataReader reader = null;
             IDbConnection conn = null;
@@ -523,7 +523,7 @@ namespace ICS.XFramework.Data
                             #region 元组赋值
 
                             case 1:
-                                if (deserializer1 == null) deserializer1 = new TypeDeserializer<T1>(reader, defines != null ? defines[i - 1] as CommandDefine_Select : null);
+                                if (deserializer1 == null) deserializer1 = new TypeDeserializer<T1>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
                                 T1 TValue1 = deserializer1.Deserialize();
                                 if (q1 == null) q1 = new List<T1>();
                                 q1.Add(TValue1);
@@ -531,7 +531,7 @@ namespace ICS.XFramework.Data
                                 break;
 
                             case 2:
-                                if (deserializer2 == null) deserializer2 = new TypeDeserializer<T2>(reader, defines != null ? defines[i - 1] as CommandDefine_Select : null);
+                                if (deserializer2 == null) deserializer2 = new TypeDeserializer<T2>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
                                 T2 TValue2 = deserializer2.Deserialize();
                                 if (q2 == null) q2 = new List<T2>();
                                 q2.Add(TValue2);
@@ -539,7 +539,7 @@ namespace ICS.XFramework.Data
                                 break;
 
                             case 3:
-                                if (deserializer3 == null) deserializer3 = new TypeDeserializer<T3>(reader, defines != null ? defines[i - 1] as CommandDefine_Select : null);
+                                if (deserializer3 == null) deserializer3 = new TypeDeserializer<T3>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
                                 T3 TValue3 = deserializer3.Deserialize();
                                 if (q3 == null) q3 = new List<T3>();
                                 q3.Add(TValue3);
@@ -547,7 +547,7 @@ namespace ICS.XFramework.Data
                                 break;
 
                             case 4:
-                                if (deserializer4 == null) deserializer4 = new TypeDeserializer<T4>(reader, defines != null ? defines[i - 1] as CommandDefine_Select : null);
+                                if (deserializer4 == null) deserializer4 = new TypeDeserializer<T4>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
                                 T4 TValue4 = deserializer4.Deserialize();
                                 if (q4 == null) q4 = new List<T4>();
                                 q4.Add(TValue4);
@@ -555,7 +555,7 @@ namespace ICS.XFramework.Data
                                 break;
 
                             case 5:
-                                if (deserializer5 == null) deserializer5 = new TypeDeserializer<T5>(reader, defines != null ? defines[i - 1] as CommandDefine_Select : null);
+                                if (deserializer5 == null) deserializer5 = new TypeDeserializer<T5>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
                                 T5 TValue5 = deserializer5.Deserialize();
                                 if (q5 == null) q5 = new List<T5>();
                                 q5.Add(TValue5);
@@ -563,7 +563,7 @@ namespace ICS.XFramework.Data
                                 break;
 
                             case 6:
-                                if (deserializer6 == null) deserializer6 = new TypeDeserializer<T6>(reader, defines != null ? defines[i - 1] as CommandDefine_Select : null);
+                                if (deserializer6 == null) deserializer6 = new TypeDeserializer<T6>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
                                 T6 TValue6 = deserializer6.Deserialize();
                                 if (q6 == null) q6 = new List<T6>();
                                 q6.Add(TValue6);
@@ -571,7 +571,7 @@ namespace ICS.XFramework.Data
                                 break;
 
                             case 7:
-                                if (deserializer7 == null) deserializer7 = new TypeDeserializer<T7>(reader, defines != null ? defines[i - 1] as CommandDefine_Select : null);
+                                if (deserializer7 == null) deserializer7 = new TypeDeserializer<T7>(reader, defines != null ? defines[i - 1] as CommandDefinition : null);
                                 T7 TValue7 = deserializer7.Deserialize();
                                 if (q7 == null) q7 = new List<T7>();
                                 q7.Add(TValue7);
@@ -601,7 +601,7 @@ namespace ICS.XFramework.Data
         /// <returns></returns>
         public List<T> ExecuteList<T>(IDbQueryable<T> query, IDbTransaction trans = null)
         {
-            CommandDefine define = this.Parse(query);
+            CommandBase define = this.Parse(query);
             IDbCommand cmd = this.CreateCommand(define.CommandText, trans, define.CommandType, define.Parameters);
             return this.ExecuteList<T>(cmd, define);
         }
@@ -626,7 +626,7 @@ namespace ICS.XFramework.Data
         /// <param name="cmd">SQL 命令</param>
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <returns></returns>
-        public List<T> ExecuteList<T>(IDbCommand cmd, CommandDefine define = null)
+        public List<T> ExecuteList<T>(IDbCommand cmd, CommandBase define = null)
         {
             IDataReader reader = null;
             IDbConnection conn = null;
@@ -636,7 +636,7 @@ namespace ICS.XFramework.Data
             {
                 reader = this.ExecuteReader(cmd);
                 conn = cmd != null ? cmd.Connection : null;
-                TypeDeserializer<T> deserializer = new TypeDeserializer<T>(reader, define as CommandDefine_Select);
+                TypeDeserializer<T> deserializer = new TypeDeserializer<T>(reader, define as CommandDefinition);
                 while (reader.Read())
                     objList.Add(deserializer.Deserialize());
                 //yield return reader.ToEntity<T>();
@@ -656,7 +656,7 @@ namespace ICS.XFramework.Data
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <param name="trans">事务</param>
         /// <returns></returns>
-        public List<T> ExecuteList<T>(List<string> sqlList, CommandDefine define = null, IDbTransaction trans = null)
+        public List<T> ExecuteList<T>(List<string> sqlList, CommandBase define = null, IDbTransaction trans = null)
         {
             return this.DoExecute<List<T>>(sqlList, p => this.ExecuteList<T>(p, define), trans);
         }
@@ -863,16 +863,16 @@ namespace ICS.XFramework.Data
         }
 
         // 创建 SELECT 命令
-        protected abstract CommandDefine ParseSelectCommand<T>(DbQueryableInfo_Select<T> qQuery, int indent = 0);
+        protected abstract CommandBase ParseSelectCommand<T>(DbQueryableInfo_Select<T> qQuery, int indent = 0);
 
         // 创建 INSRT 命令
-        protected abstract CommandDefine ParseInsertCommand<T>(DbQueryableInfo_Insert<T> qInsert);
+        protected abstract CommandBase ParseInsertCommand<T>(DbQueryableInfo_Insert<T> qInsert);
 
         // 创建 DELETE 命令
-        protected abstract CommandDefine ParseDeleteCommand<T>(DbQueryableInfo_Delete<T> qDelete);
+        protected abstract CommandBase ParseDeleteCommand<T>(DbQueryableInfo_Delete<T> qDelete);
 
         // 创建 UPDATE 命令
-        protected abstract CommandDefine ParseUpdateCommand<T>(DbQueryableInfo_Update<T> qUpdate);
+        protected abstract CommandBase ParseUpdateCommand<T>(DbQueryableInfo_Update<T> qUpdate);
 
         // 获取 JOIN 子句关联表的的别名
         protected TableAliasCache PrepareAlias<T>(DbQueryableInfo_Select<T> query)

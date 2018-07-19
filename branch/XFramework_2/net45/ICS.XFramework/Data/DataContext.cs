@@ -279,8 +279,8 @@ namespace ICS.XFramework.Data
             int count = _dbQueryables.Count;
             if (count == 0) return 0;
 
-            List<CommandDefine> sqlList = this.InnerResolve(true);
-            CommandDefine define = sqlList.FirstOrDefault(x => (x as CommandDefine_Select) != null);
+            List<CommandBase> sqlList = this.InnerResolve(true);
+            CommandBase define = sqlList.FirstOrDefault(x => (x as CommandDefinition) != null);
             result = _provider.ExecuteList<T>(sqlList.ToList(x => x.CommandText), define, trans);
             return count;
         }
@@ -296,7 +296,7 @@ namespace ICS.XFramework.Data
             int count = _dbQueryables.Count;
             if (count == 0) return 0;
 
-            List<CommandDefine> sqlList = this.InnerResolve(true);
+            List<CommandBase> sqlList = this.InnerResolve(true);
             result = _provider.ExecuteDataTable(sqlList.ToList(x => x.CommandText), trans);
             return count;
         }
@@ -479,9 +479,9 @@ namespace ICS.XFramework.Data
         }
 
         // 将查询语义解析成 SQL 语句
-        protected List<CommandDefine> InnerResolve(bool clear = true)
+        protected List<CommandBase> InnerResolve(bool clear = true)
         {
-            List<CommandDefine> sqlList = new List<CommandDefine>();
+            List<CommandBase> sqlList = new List<CommandBase>();
             int count = _dbQueryables.Count;
 
             try
@@ -500,7 +500,7 @@ namespace ICS.XFramework.Data
                         else if (obj is string)
                         {
                             string cmd = _dbQueryables[i].ToString();
-                            CommandDefine d = new CommandDefine(cmd);
+                            CommandBase d = new CommandBase(cmd);
                             sqlList.Add(d);
                         }
                         else
@@ -521,7 +521,7 @@ namespace ICS.XFramework.Data
         }
 
         // 解析批量 INSERT 语句
-        private void ResolveBulk(List<CommandDefine> sqlList, List<IDbQueryable> bulkList)
+        private void ResolveBulk(List<CommandBase> sqlList, List<IDbQueryable> bulkList)
         {
             // SQL 只能接收1000个
             int pageSize = 1000;
@@ -542,7 +542,7 @@ namespace ICS.XFramework.Data
                     builder.Append(cmd);
                 }
 
-                if (builder.Length > 0) sqlList.Add(new CommandDefine(builder.ToString()));
+                if (builder.Length > 0) sqlList.Add(new CommandBase(builder.ToString()));
             }
         }
 

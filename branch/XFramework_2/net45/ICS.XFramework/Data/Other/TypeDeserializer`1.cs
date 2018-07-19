@@ -32,11 +32,11 @@ namespace ICS.XFramework.Data
         static MethodInfo _getValue = typeof(IDataRecord).GetMethod("GetValue", new Type[] { typeof(int) });
 
         private IDataRecord _reader = null;
-        private CommandDefine_Select _define = null;
+        private CommandDefinition _define = null;
         private IDictionary<string, Func<IDataRecord, object>> _funcCache = null;
         private Func<IDataRecord, object> _topLevel = null;
 
-        public TypeDeserializer(IDataRecord reader, CommandDefine_Select define)
+        public TypeDeserializer(IDataRecord reader, CommandDefinition define)
         {
             _define = define;
             _reader = reader;

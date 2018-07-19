@@ -14,7 +14,7 @@ namespace ICS.XFramework.Data.SqlClient
     /// </remarks>
     public sealed class DbQueryProvider : DbQueryProviderBase
     {
-        private static readonly string NOLOCK = string.Empty;
+        private static readonly string WITHNOLOCK = string.Empty;
         private MethodCallExressionVisitor _methodVisitor = null;
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace ICS.XFramework.Data.SqlClient
         }
 
         // 创建 SELECT 命令
-        protected override CommandDefine ParseSelectCommand<T>(DbQueryableInfo_Select<T> qQuery, int indent = 0)
+        protected override CommandBase ParseSelectCommand<T>(DbQueryableInfo_Select<T> qQuery, int indent = 0)
         {
             // 说明：
             // 1.OFFSET 前必须要有 'ORDER BY'，即 'Skip' 子句前必须使用 'OrderBy' 子句
@@ -119,7 +119,8 @@ namespace ICS.XFramework.Data.SqlClient
             TableAliasCache aliases = this.PrepareAlias<T>(qQuery);
             string sColumnName = string.Empty;
 
-            CommandDefine_Select sc = new CommandDefine_Select(this, aliases);
+            CommandDefinition sc = new CommandDefinition(this, aliases);
+            sc.Include = qQuery.Include;
             SqlBuilder jf = sc.JoinFragment;
             SqlBuilder wf = sc.WhereFragment;
 
@@ -226,21 +227,21 @@ namespace ICS.XFramework.Data.SqlClient
             // FROM 子句
             jf.AppendNewLine();
             jf.Append("FROM ");
-            if (qQuery.Subquery != null)
+            if (qQuery.NestedQuery != null)
             {
                 // 子查询
                 jf.Append("(");
-                CommandDefine define = this.ParseSelectCommand<T>(qQuery.Subquery as DbQueryableInfo_Select<T>, indent + 1);
+                CommandBase define = this.ParseSelectCommand<T>(qQuery.NestedQuery as DbQueryableInfo_Select<T>, indent + 1);
                 jf.Append(define.CommandText);
                 jf.AppendNewLine();
                 jf.Append(")");
             }
             else
             {
-                jf.AppendMember(TypeRuntimeInfoCache.GetRuntimeInfo(qQuery.FromType).TableName);
+                jf.AppendMember(TypeRuntimeInfoCache.GetRuntimeInfo(qQuery.DefinitionType).TableName);
             }
             jf.Append(" t0 ");
-            if (!string.IsNullOrEmpty(DbQueryProvider.NOLOCK)) jf.Append(DbQueryProvider.NOLOCK);
+            if (!string.IsNullOrEmpty(DbQueryProvider.WITHNOLOCK)) jf.Append(DbQueryProvider.WITHNOLOCK);
 
             // LEFT<INNER> JOIN 子句
             visitor = new JoinExpressionVisitor(this, aliases, qQuery.Join);
@@ -378,7 +379,7 @@ namespace ICS.XFramework.Data.SqlClient
                 {
                     jf.AppendNewLine();
                     jf.AppendNewLine("UNION ALL");
-                    CommandDefine define = this.ParseSelectCommand<T>(qQuery.Union[index] as DbQueryableInfo_Select<T>);
+                    CommandBase define = this.ParseSelectCommand<T>(qQuery.Union[index] as DbQueryableInfo_Select<T>);
                     jf.Append(define.CommandText);
                 }
 
@@ -388,7 +389,7 @@ namespace ICS.XFramework.Data.SqlClient
         }
 
         // 创建 INSRT 命令
-        protected override CommandDefine ParseInsertCommand<T>(DbQueryableInfo_Insert<T> qInsert)
+        protected override CommandBase ParseInsertCommand<T>(DbQueryableInfo_Insert<T> qInsert)
         {
             SqlBuilder builder = new SqlBuilder(this);
             var rInfo = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
@@ -451,7 +452,7 @@ namespace ICS.XFramework.Data.SqlClient
                 builder.AppendMember(rInfo.TableName);
                 builder.Append('(');
 
-                CommandDefine_Select sc = this.ParseSelectCommand(qInsert.SelectInfo) as CommandDefine_Select;
+                CommandDefinition sc = this.ParseSelectCommand(qInsert.SelectInfo) as CommandDefinition;
                 //for (int i = 0; i < seg.Columns.Count; i++)
                 int i = 0;
                 foreach (var kvp in sc.Columns)
@@ -471,11 +472,11 @@ namespace ICS.XFramework.Data.SqlClient
                 builder.Append(sc.CommandText);
             }
 
-            return new CommandDefine(builder.ToString(), null, System.Data.CommandType.Text); //builder.ToString();
+            return new CommandBase(builder.ToString(), null, System.Data.CommandType.Text); //builder.ToString();
         }
 
         // 创建 DELETE 命令
-        protected override CommandDefine ParseDeleteCommand<T>(DbQueryableInfo_Delete<T> qDelete)
+        protected override CommandBase ParseDeleteCommand<T>(DbQueryableInfo_Delete<T> qDelete)
         {
             var rInfo = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
             SqlBuilder builder = new SqlBuilder(this);
@@ -515,7 +516,7 @@ namespace ICS.XFramework.Data.SqlClient
             else if (qDelete.SelectInfo != null)
             {
                 TableAliasCache aliases = this.PrepareAlias<T>(qDelete.SelectInfo);
-                var sc = new CommandDefine_Select.Builder(this, aliases);
+                var sc = new CommandDefinition.Builder(this, aliases);
 
                 ExpressionVisitorBase visitor = new JoinExpressionVisitor(this, aliases, qDelete.SelectInfo.Join);
                 visitor.Write(sc.JoinFragment);
@@ -527,11 +528,11 @@ namespace ICS.XFramework.Data.SqlClient
                 builder.Append(sc.Command);
             }
 
-            return new CommandDefine(builder.ToString(), null, System.Data.CommandType.Text); //builder.ToString();
+            return new CommandBase(builder.ToString(), null, System.Data.CommandType.Text); //builder.ToString();
         }
 
         // 创建 UPDATE 命令
-        protected override CommandDefine ParseUpdateCommand<T>(DbQueryableInfo_Update<T> qUpdate)
+        protected override CommandBase ParseUpdateCommand<T>(DbQueryableInfo_Update<T> qUpdate)
         {
             SqlBuilder builder = new SqlBuilder(this);
             var rInfo = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
@@ -602,7 +603,7 @@ namespace ICS.XFramework.Data.SqlClient
                 builder.AppendMember(rInfo.TableName);
                 builder.AppendAs("t0");
 
-                var sc = new CommandDefine_Select.Builder(this, aliases);
+                var sc = new CommandDefinition.Builder(this, aliases);
 
                 visitor = new JoinExpressionVisitor(this, aliases, qUpdate.SelectInfo.Join);
                 visitor.Write(sc.JoinFragment);
@@ -614,7 +615,7 @@ namespace ICS.XFramework.Data.SqlClient
                 builder.Append(sc.Command);
             }
 
-            return new CommandDefine(builder.ToString(), null, System.Data.CommandType.Text); //builder.ToString();
+            return new CommandBase(builder.ToString(), null, System.Data.CommandType.Text); //builder.ToString();
         }
     }
 }

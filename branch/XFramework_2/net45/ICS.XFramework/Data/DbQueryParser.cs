@@ -25,7 +25,7 @@ namespace ICS.XFramework.Data
             List<DbExpression> join = new List<DbExpression>();               // JOIN
             List<DbExpression> orderBy = new List<DbExpression>();            // ORDER BY
             List<IDbQueryableInfo<TElement>> union = new List<IDbQueryableInfo<TElement>>();
-            List<IDbQueryableInfo<TElement>> include = new List<IDbQueryableInfo<TElement>>();
+            List<DbExpression> include = new List<DbExpression>();
 
             Expression select = null;       // SELECT #
             DbExpression insert = null;     // INSERT #
@@ -70,9 +70,7 @@ namespace ICS.XFramework.Data
                         union.Add(u);
                         continue;
                     case DbExpressionType.Include:
-                        //var uQuery = (curExp.Expressions[0] as ConstantExpression).Value as IDbQueryable<TElement>;
-                        //var u = DbQueryParser.Parse(uQuery);
-                        //union.Add(u);
+                        include.Add(curExp);
                         continue;
 
                     case DbExpressionType.GroupBy:
@@ -170,15 +168,10 @@ namespace ICS.XFramework.Data
 
             // 没有解析到INSERT/DELETE/UPDATE/SELECT表达式，并且没有相关统计函数，则默认选择FromType的所有字段
             bool useAllColumn = insert == null && delete == null && update == null && select == null && statis == null;
-            if (useAllColumn)
-            {
-                select = Expression.Constant(type ?? typeof(TElement));
-                //aliasExpressions.Add(select);
-                //移到 GetTabl 中去 
-            }
+            if (useAllColumn) select = Expression.Constant(type ?? typeof(TElement));
 
             var qQuery = new DbQueryableInfo_Select<TElement>();
-            qQuery.FromType = type;
+            qQuery.DefinitionType = type;
             qQuery.Expression = new DbExpression(DbExpressionType.Select, select);
             qQuery.HaveDistinct = isDistinct;
             qQuery.HaveAny = isAny;
@@ -239,7 +232,7 @@ namespace ICS.XFramework.Data
                 }
                 else
                 {
-                    qOuter.Subquery = qQuery;
+                    qOuter.NestedQuery = qQuery;
                     return qOuter; 
                 }
             }

@@ -83,7 +83,7 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 在递归访问 MemberAccess 表达式时，判定节点是否能够被继续递归访问
         /// </summary>
-        public static bool IsVisitable(this Expression node)
+        public static bool Acceptable(this Expression node)
         {
             // a 
             // <>h__TransparentIdentifier.a
@@ -109,15 +109,18 @@ namespace ICS.XFramework.Data
         }
 
         /// <summary>
+        /// 
         /// 取剔除掉系统动态生成前缀后的表达式
         /// </summary>
+        /// <param name="node">表达式</param>
+        /// <returns></returns>
         public static string GetKeyWidthoutAnonymous(this MemberExpression node)
         {
             System.Text.StringBuilder b = new System.Text.StringBuilder();
             b.Append(node.Member.Name);
 
             Expression f = node.Expression;
-            while (f.IsVisitable())
+            while (f.Acceptable())
             {
                 b.Append('.');
                 b.Append((f as MemberExpression).Member.Name);

@@ -75,7 +75,7 @@ namespace ICS.XFramework.Data
         /// </summary>
         /// <param name="query">查询 语句</param>
         /// <returns></returns>
-        CommandDefine Parse<T>(IDbQueryable<T> query);
+        CommandBase Parse<T>(IDbQueryable<T> query);
 
         /// <summary>
         /// 创建 SQL 命令
@@ -196,7 +196,7 @@ namespace ICS.XFramework.Data
         /// <param name="cmd">SQL 命令</param>
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <returns></returns>
-        T Execute<T>(IDbCommand cmd, CommandDefine define = null);
+        T Execute<T>(IDbCommand cmd, CommandBase define = null);
 
         /// <summary>
         /// 执行SQL 语句，并返回单个实体对象
@@ -205,7 +205,7 @@ namespace ICS.XFramework.Data
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <param name="trans">事务</param>
         /// <returns></returns>
-        T Execute<T>(List<string> sqlList, CommandDefine define = null, IDbTransaction trans = null);
+        T Execute<T>(List<string> sqlList, CommandBase define = null, IDbTransaction trans = null);
 
         /// <summary>
         /// 执行 SQL 语句，并返回两个实体集合
@@ -236,7 +236,7 @@ namespace ICS.XFramework.Data
         /// </summary>
         /// <param name="cmd">SQL 命令</param>
         /// <param name="defines">命令定义对象，用于解析实体的外键</param>
-        Tuple<List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>> ExecuteMultiple<T1, T2, T3, T4, T5, T6, T7>(IDbCommand cmd, CommandDefine[] defines = null);
+        Tuple<List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>> ExecuteMultiple<T1, T2, T3, T4, T5, T6, T7>(IDbCommand cmd, CommandBase[] defines = null);
 
         /// <summary>
         /// 执行SQL 语句，并返回并返回单结果集集合
@@ -263,7 +263,7 @@ namespace ICS.XFramework.Data
         /// <param name="cmd">SQL 命令</param>
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <returns></returns>
-        List<T> ExecuteList<T>(IDbCommand cmd, CommandDefine define = null);
+        List<T> ExecuteList<T>(IDbCommand cmd, CommandBase define = null);
 
         /// <summary>
         /// 执行SQL 语句，并返回并返回单结果集集合
@@ -272,7 +272,7 @@ namespace ICS.XFramework.Data
         /// <param name="define">命令定义对象，用于解析实体的外键</param>
         /// <param name="trans">事务</param>
         /// <returns></returns>
-        List<T> ExecuteList<T>(List<string> sqlList, CommandDefine define = null, IDbTransaction trans = null);
+        List<T> ExecuteList<T>(List<string> sqlList, CommandBase define = null, IDbTransaction trans = null);
 
         /// <summary>
         /// 执行SQL 语句，并返回并返回单结果集集合

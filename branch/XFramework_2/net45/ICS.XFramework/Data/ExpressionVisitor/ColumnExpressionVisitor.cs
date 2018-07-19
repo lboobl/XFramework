@@ -202,7 +202,7 @@ namespace ICS.XFramework.Data
             string alias = string.Empty;
             Type type = node.Type;
 
-            if (node.IsVisitable())
+            if (node.Acceptable())
             {
                 int index = 0;
                 this.VisitNavigation(node);

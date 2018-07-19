@@ -48,7 +48,7 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 生成的脚本命令
         /// </summary>
-        public CommandDefine Command { get; set; }
+        public CommandBase Command { get; set; }
 
         /// <summary>
         /// 创建查询
