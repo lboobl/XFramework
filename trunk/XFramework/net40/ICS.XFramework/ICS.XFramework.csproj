@@ -122,26 +122,26 @@
     <Compile Include="..\..\net45\ICS.XFramework\Data\BulkInfo.cs">
       <Link>Data\BulkInfo.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbCommandInterceptor.cs">
-      <Link>Data\Core\IDbCommandInterceptor.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Contract\IDbCommandInterceptor.cs">
+      <Link>Data\Contract\IDbCommandInterceptor.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryable.cs">
-      <Link>Data\Core\IDbQueryable.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Contract\IDbQueryable.cs">
+      <Link>Data\Contract\IDbQueryable.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryableInfo.cs">
-      <Link>Data\Core\IDbQueryableInfo.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Contract\IDbQueryableInfo.cs">
+      <Link>Data\Contract\IDbQueryableInfo.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryableInfo_Insert.cs">
-      <Link>Data\Core\IDbQueryableInfo_Insert.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Contract\IDbQueryableInfo_Insert.cs">
+      <Link>Data\Contract\IDbQueryableInfo_Insert.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryableInfo`1.cs">
-      <Link>Data\Core\IDbQueryableInfo`1.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Contract\IDbQueryableInfo`1.cs">
+      <Link>Data\Contract\IDbQueryableInfo`1.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryable`1.cs">
-      <Link>Data\Core\IDbQueryable`1.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Contract\IDbQueryable`1.cs">
+      <Link>Data\Contract\IDbQueryable`1.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryProvider.cs">
-      <Link>Data\Core\IDbQueryProvider.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Contract\IDbQueryProvider.cs">
+      <Link>Data\Contract\IDbQueryProvider.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\DataContext.cs">
       <Link>Data\DataContext.cs</Link>
@@ -272,11 +272,17 @@
     <Compile Include="..\..\net45\ICS.XFramework\Data\TableAliasCache.cs">
       <Link>Data\TableAliasCache.cs</Link>
     </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Contract\IConstructorInvoker.cs">
+      <Link>Reflection\Contract\IConstructorInvoker.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Contract\IMethodInvoker.cs">
+      <Link>Reflection\Contract\IMethodInvoker.cs</Link>
+    </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\ConstructorInvoker.cs">
       <Link>Reflection\Emit\ConstructorInvoker.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\Hepler.cs">
-      <Link>Reflection\Emit\Hepler.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\Helper.cs">
+      <Link>Reflection\Emit\Helper.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\MemberAccess_Field.cs">
       <Link>Reflection\Emit\MemberAccess_Field.cs</Link>
@@ -286,12 +292,6 @@
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\MemberAccess_Property.cs">
       <Link>Reflection\Emit\MemberAccess_Property.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Interface\IConstructorInvoker.cs">
-      <Link>Reflection\Interface\IConstructorInvoker.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Interface\IMethodInvoker.cs">
-      <Link>Reflection\Interface\IMethodInvoker.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberAccess.cs">
       <Link>Reflection\MemberAccess.cs</Link>
