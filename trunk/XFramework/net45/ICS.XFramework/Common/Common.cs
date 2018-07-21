@@ -174,32 +174,10 @@ namespace ICS.XFramework
             return result;
         }
 
-        static char[] _chars = 
-        { 
-            '2','3','4','5','6','7','8','9', 
-            'A','B','C','D','E','F','G','H','J','K','L','M','N','P','Q','R','S','T','U','V','W','X','Y','Z' 
-        };
-
         /// <summary>
-        /// 生成0-9, a-b,A-B 之间指定的数量的随机数
+        /// 根据表达式取得属性名称
         /// </summary>
-        /// <param name="length">指定返回多少个数.</param>
-        /// <returns></returns>
-        public static string GenerateRandom(int length)
-        {
-            System.Text.StringBuilder newRandom = new System.Text.StringBuilder(length);
-            Random rd = new Random();
-            for (int i = 0; i < length; i++)
-            {
-                newRandom.Append(_chars[rd.Next(_chars.Length)]);
-            }
-            return newRandom.ToString();
-        }
-
-        /// <summary>
-        /// 根据表达式取得属性名称链
-        /// </summary>
-        public static string PropertyName<T>(System.Linq.Expressions.Expression<Func<T, object>> lambda)
+        public static string Name<T>(System.Linq.Expressions.Expression<Func<T, object>> lambda)
         {
 
             List<string> navs = new List<string>();
@@ -230,17 +208,6 @@ namespace ICS.XFramework
             navs.Reverse();
             string nav = string.Join(".", navs);
             return nav;
-
-            //if (lambda != null)
-            //{
-            //    System.Linq.Expressions.Expression node = lambda;
-            //    if (node.NodeType == System.Linq.Expressions.ExpressionType.Lambda) node = (node as System.Linq.Expressions.LambdaExpression).Body;
-            //    if (node.NodeType == System.Linq.Expressions.ExpressionType.Convert) node = (node as System.Linq.Expressions.UnaryExpression).Operand;
-            //    var m = node as System.Linq.Expressions.MemberExpression;
-            //    if (m != null) return m.Member.Name;
-            //}
-
-            //return string.Empty;
         }
 
         /// <summary>
