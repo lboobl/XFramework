@@ -132,16 +132,25 @@ namespace ICS.XFramework.Data
             });
         }
 
+        ///// <summary>
+        ///// 指示查询应该包含外键
+        ///// </summary>
+        //public static IDbQueryable<TResult> Include<TResult, TProperty>(this IDbQueryable<TResult> source, Expression<Func<TResult, TProperty>> path, int multiIndex = 0)
+        //{
+        //    return source.CreateQuery<TResult>(new DbExpression
+        //    {
+        //        DbExpressionType = DbExpressionType.GroupJoin,
+        //        Expressions = new Expression[] { path, Expression.Constant(multiIndex) }
+        //    });
+        //}
+
         /// <summary>
-        /// 指示查询应该包含外键
+        ///  指示查询应该包含外键
         /// </summary>
-        public static IDbQueryable<TResult> Include<TResult, TProperty>(this IDbQueryable<TResult> source, Expression<Func<TResult, TProperty>> path, int multiIndex = 0)
+        public static IDbQueryable<TResult> Include<TResult, TProperty>(this IDbQueryable<TResult> source, Expression<Func<TResult, TProperty>> path)
         {
-            return source.CreateQuery<TResult>(new DbExpression
-            {
-                DbExpressionType = DbExpressionType.GroupJoin,
-                Expressions = new Expression[] { path, Expression.Constant(multiIndex) }
-            });
+            throw new NotSupportedException();
+            //return source.CreateQuery<TResult>(DbExpressionType.Include, path);
         }
 
         /// <summary>
