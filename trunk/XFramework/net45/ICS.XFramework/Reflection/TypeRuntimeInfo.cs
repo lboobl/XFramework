@@ -20,10 +20,11 @@ namespace ICS.XFramework.Reflection
 
         private object[] _customAttributes;
         private ConstructorInvoker _ctorInvoker = null;
-        private Type[] _gTypes = null;
-        private bool _gTypesReaded = false;
         private Dictionary<string, MemberAccessWrapper> _wrappers = null;
+        private Type[] _genericArguments = null;
         private Type _genericTypeDefinition = null;
+        private bool? _lazyIsCompilerGenerated = null;
+        private bool? _lazyIsPrimitive = null;
 
         /// <summary>
         /// 类型声明
@@ -40,16 +41,20 @@ namespace ICS.XFramework.Reflection
         {
             get
             {
-                if (!_gTypesReaded)
-                {
-                    if (_type.IsGenericType && _gTypes == null)
-                    {
-                        _gTypes = _type.GetGenericArguments();
-                        _gTypesReaded = true;
-                    }
-                }
+                if (_genericArguments == null && _type.IsGenericType) _genericArguments = _type.GetGenericArguments();
+                return _genericArguments;
+            }
+        }
 
-                return _gTypes;
+        /// <summary>
+        /// 泛型类型的类型
+        /// </summary>
+        public Type GenericTypeDefinition
+        {
+            get
+            {
+                if (_type.IsGenericType && _genericTypeDefinition == null) _genericTypeDefinition = _type.GetGenericTypeDefinition();
+                return _genericTypeDefinition;
             }
         }
 
@@ -70,17 +75,26 @@ namespace ICS.XFramework.Reflection
         }
 
         /// <summary>
-        /// 泛型类型的类型
+        /// 是否编译生成的类型
         /// </summary>
-        public Type GenericTypeDefinition
+        public bool IsCompilerGenerated
         {
             get
             {
-                if (_type.IsGenericType && _genericTypeDefinition == null)
-                {
-                    _genericTypeDefinition = _type.GetGenericTypeDefinition();
-                }
-                return _genericTypeDefinition;
+                if (_lazyIsCompilerGenerated == null) _lazyIsCompilerGenerated = TypeUtils.IsCompilerGenerated(_type);
+                return _lazyIsCompilerGenerated.Value;
+            }
+        }
+
+        /// <summary>
+        /// 判断给定类型是否是ORM支持的基元类型
+        /// </summary>
+        public bool IsPrimitive
+        {
+            get
+            {
+                if (_lazyIsPrimitive == null) _lazyIsPrimitive = TypeUtils.IsPrimitive(_type);
+                return _lazyIsPrimitive.Value;
             }
         }
 

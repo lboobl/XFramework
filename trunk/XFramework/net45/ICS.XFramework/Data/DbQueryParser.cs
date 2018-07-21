@@ -227,10 +227,6 @@ namespace ICS.XFramework.Data
                     if (exp.NodeType == ExpressionType.Lambda) exp = (exp as LambdaExpression).Body;
                     else if (exp.NodeType == ExpressionType.Call) exp = (exp as MethodCallExpression).Object;
                     if (exp.Type.IsGenericType) checkListNavgation = true;
-                    //{
-                    //    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(exp.Type);
-                    //    if(typeRuntime.GenericTypeDefinition == typeof(List<>)) checkListNavgation = true;
-                    //} //&& exp.Type.GetGenericTypeDefinition() == typeof(List<>)) checkListNavgation = true;
                     if (checkListNavgation) break;
                 }
                 if (!checkListNavgation) checkListNavgation = initExpression != null && CheckListNavigation<TElement>(initExpression);
@@ -248,6 +244,7 @@ namespace ICS.XFramework.Data
                     {
                         initExpression = Expression.MemberInit(newExpression, bindings);
                         lambdaExpression = Expression.Lambda(initExpression, lambdaExpression.Parameters);
+                        // 简化内层选择器，只选择最小字段
                         qQuery.Expression = new DbExpression(DbExpressionType.Select, lambdaExpression);
                     }
                     qQuery.IsListNavigationQuery = true;
@@ -261,8 +258,7 @@ namespace ICS.XFramework.Data
                     qOuter.OrderBy = new List<DbExpression>();
                     qOuter.Include = include;
                     qOuter.HaveListNavigation = true;
-
-                    //return qOuter;
+                    
                     qQuery = qOuter;
                 }
             }

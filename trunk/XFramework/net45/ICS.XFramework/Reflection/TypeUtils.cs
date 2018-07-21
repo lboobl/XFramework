@@ -162,7 +162,10 @@ namespace ICS.XFramework.Reflection
             }
         }
 
-        bool IsCompilerGenerated(Type t)
+        /// <summary>
+        /// 是否编译生成的类型
+        /// </summary>
+        public static  bool IsCompilerGenerated(Type t)
         {
             if (t == null)
                 return false;
