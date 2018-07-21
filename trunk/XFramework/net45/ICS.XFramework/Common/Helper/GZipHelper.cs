@@ -12,9 +12,7 @@ namespace ICS.XFramework
     {
         /// <summary>  
         /// 压缩字符串  
-        /// </summary>  
-        /// <param name="text"></param>  
-        /// <returns></returns>  
+        /// </summary> 
         public static string Compress(string text)
         {
             // convert text to bytes  
@@ -45,8 +43,6 @@ namespace ICS.XFramework
         /// <summary>  
         /// 解压字符串  
         /// </summary>  
-        /// <param name="compressedText"></param>  
-        /// <returns></returns>  
         public static string Uncompress(string compressedText)
         {
             // get string as bytes  

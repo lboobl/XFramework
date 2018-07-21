@@ -122,11 +122,35 @@
     <Compile Include="..\..\net45\ICS.XFramework\Data\BulkInfo.cs">
       <Link>Data\BulkInfo.cs</Link>
     </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbCommandInterceptor.cs">
+      <Link>Data\Core\IDbCommandInterceptor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryable.cs">
+      <Link>Data\Core\IDbQueryable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryableInfo.cs">
+      <Link>Data\Core\IDbQueryableInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryableInfo_Insert.cs">
+      <Link>Data\Core\IDbQueryableInfo_Insert.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryableInfo`1.cs">
+      <Link>Data\Core\IDbQueryableInfo`1.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryable`1.cs">
+      <Link>Data\Core\IDbQueryable`1.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Core\IDbQueryProvider.cs">
+      <Link>Data\Core\IDbQueryProvider.cs</Link>
+    </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\DataContext.cs">
       <Link>Data\DataContext.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\DbCommandInterceptor.cs">
       <Link>Data\DbCommandInterceptor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\DbExpression.cs">
+      <Link>Data\DbExpression.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\DbExpressionType.cs">
       <Link>Data\DbExpressionType.cs</Link>
@@ -139,6 +163,9 @@
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\DbQueryableInfo.cs">
       <Link>Data\DbQueryableInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\DbQueryableInfo_Delete.cs">
+      <Link>Data\DbQueryableInfo_Delete.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\DbQueryableInfo_Insert.cs">
       <Link>Data\DbQueryableInfo_Insert.cs</Link>
@@ -187,30 +214,6 @@
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\ExpressionVisitor\WhereExpressionVisitor.cs">
       <Link>Data\ExpressionVisitor\WhereExpressionVisitor.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Extensions\ExpressionExtensions.cs">
-      <Link>Data\Extensions\ExpressionExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Interface\IDbCommandInterceptor.cs">
-      <Link>Data\Interface\IDbCommandInterceptor.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Interface\IDbQueryable.cs">
-      <Link>Data\Interface\IDbQueryable.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Interface\IDbQueryableInfo.cs">
-      <Link>Data\Interface\IDbQueryableInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Interface\IDbQueryableInfo_Insert.cs">
-      <Link>Data\Interface\IDbQueryableInfo_Insert.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Interface\IDbQueryableInfo`1.cs">
-      <Link>Data\Interface\IDbQueryableInfo`1.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Interface\IDbQueryable`1.cs">
-      <Link>Data\Interface\IDbQueryable`1.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Interface\IDbQueryProvider.cs">
-      <Link>Data\Interface\IDbQueryProvider.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\Mapping\ColumnAttribute.cs">
       <Link>Data\Mapping\ColumnAttribute.cs</Link>
@@ -310,10 +313,8 @@
     </Compile>
     <Compile Include="Common\Helper\SerializeHelper.cs" />
     <Compile Include="Common\Helper\WebHelper .cs" />
-    <Compile Include="Data\DbExpression.cs" />
-    <Compile Include="Data\DbQueryableInfo_Delete.cs" />
+    <Compile Include="Data\DbQueryableExtensions.cs" />
     <Compile Include="Data\DbQueryableInfo_Update.cs" />
-    <Compile Include="Data\Extensions\DbQueryableExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
