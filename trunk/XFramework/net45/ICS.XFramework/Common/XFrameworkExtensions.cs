@@ -11,6 +11,11 @@ namespace ICS.XFramework
     {
         #region 表达式树
 
+        private static readonly string _anonymousName = "<>h__TransparentIdentifier";
+        private static readonly string _groupingName = "IGrouping`2";
+        private static Func<string, bool> _isGrouping = g => g == _groupingName;
+        private static Func<string, bool> _isAnonymous = name => !string.IsNullOrEmpty(name) && name.StartsWith(_anonymousName, StringComparison.Ordinal);
+
         /// <summary>
         /// 返回真表达式
         /// </summary>
@@ -58,7 +63,7 @@ namespace ICS.XFramework
         }
 
         /// <summary>
-        /// reduce unaryExpression
+        /// 去掉一元表达式的操作符
         /// </summary>
         /// <returns></returns>
         public static Expression ReduceUnary(this Expression exp)
@@ -103,8 +108,6 @@ namespace ICS.XFramework
         /// <summary>
         /// 计算表达式的值
         /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
         public static ConstantExpression Evaluate(this Expression e)
         {
             ConstantExpression node = null;
@@ -125,6 +128,133 @@ namespace ICS.XFramework
 
             // 返回最终处理的常量表达式s
             return node;
+        }       
+
+        /// <summary>
+        /// 判断属性访问表达式是否有系统动态生成前缀
+        /// <code>
+        /// h__TransparentIdentifier.a.CompanyName
+        /// </code>
+        /// </summary>
+        public static bool IsAnonymous(this Expression node)
+        {
+            // <>h__TransparentIdentifier => h__TransparentIdentifier.a.CompanyName
+            Expression exp = node;
+            ParameterExpression paramExp = exp.NodeType == ExpressionType.Lambda
+                ? (node as LambdaExpression).Parameters[0]
+                : exp as ParameterExpression;
+            if (paramExp != null) return _isAnonymous(paramExp.Name);
+
+            if (exp.NodeType == ExpressionType.MemberAccess)    // <>h__TransparentIdentifier.a.CompanyName
+            {
+                MemberExpression memExp = exp as MemberExpression;
+                if (_isAnonymous(memExp.Member.Name)) return true;
+
+                return IsAnonymous(memExp.Expression);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 判断是否是分组表达式
+        /// </summary>
+        public static bool IsGrouping(this Expression node)
+        {
+            //g.Key
+            //g.Key.CompanyName
+            //g.Max()
+            //g=>g.xxx
+            //g.Key.CompanyId.Length
+            //g.Key.Length 
+
+            // g | g=>g.xx
+            Expression exp = node;
+            ParameterExpression paramExp = exp.NodeType == ExpressionType.Lambda
+                ? (node as LambdaExpression).Parameters[0]
+                : exp as ParameterExpression;
+            if (paramExp != null) return _isGrouping(paramExp.Type.Name);
+
+            // g.Max
+            MethodCallExpression callExp = exp as MethodCallExpression;
+            if (callExp != null) return _isGrouping(callExp.Arguments[0].Type.Name);
+
+
+            MemberExpression memExp = exp as MemberExpression;
+            if (memExp != null)
+            {
+                // g.Key
+                var g1 = memExp.Member.Name == "Key" && _isGrouping(memExp.Expression.Type.Name);
+                if (g1) return g1;
+
+                // g.Key.Length | g.Key.Company | g.Key.CompanyId.Length
+                memExp = memExp.Expression as MemberExpression;
+                if (memExp != null)
+                {
+                    g1 = memExp.Member.Name == "Key" && _isGrouping(memExp.Expression.Type.Name) && memExp.Type.Namespace == null; //匿名类没有命令空间
+                    if (g1) return g1;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 在递归访问 MemberAccess 表达式时，判定节点是否能够被继续递归访问
+        /// </summary>
+        public static bool Acceptable(this Expression node)
+        {
+            // a 
+            // <>h__TransparentIdentifier.a
+            // <>h__TransparentIdentifier0.<>h__TransparentIdentifier1.a
+
+            if (node.NodeType == ExpressionType.Parameter) return false;
+
+            if (node.NodeType == ExpressionType.MemberAccess)
+            {
+                MemberExpression m = node as MemberExpression;
+                if (m.Expression.NodeType == ExpressionType.Parameter)
+                {
+                    string name = (m.Expression as ParameterExpression).Name;
+                    if (_isAnonymous(name)) return false;
+                }
+
+                if (m.Expression.NodeType == ExpressionType.MemberAccess)
+                {
+                    string name = (m.Expression as MemberExpression).Member.Name;
+                    if (_isAnonymous(name)) return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 取剔除掉系统动态生成前缀后的表达式
+        /// </summary>
+        public static string GetKeyWidthoutAnonymous(this MemberExpression node, bool isDesciptor = false)
+        {
+            List<string> segs = new List<string>();
+            segs.Add(node.Member.Name);
+
+            Expression expression = node.Expression;
+            while (expression.Acceptable())
+            {
+                MemberExpression memberExpression = null;
+                if (expression.NodeType == ExpressionType.MemberAccess) memberExpression = (MemberExpression)expression;
+                else if (expression.NodeType == ExpressionType.Call) memberExpression = (expression as MethodCallExpression).Object as MemberExpression;
+
+                segs.Add(memberExpression.Member.Name);
+                expression = memberExpression.Expression;
+            }
+
+            // 如果读取
+            if (expression.NodeType == ExpressionType.Parameter) segs.Add(isDesciptor ? expression.Type.Name : (expression as ParameterExpression).Name);
+            if (expression.NodeType == ExpressionType.MemberAccess) segs.Add((expression as MemberExpression).Member.Name);
+
+            segs.Reverse();
+            string result = string.Join(".", segs);
+            return result;
         }
 
         #endregion

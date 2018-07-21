@@ -385,6 +385,7 @@ namespace ICS.XFramework.Data
                 string key = memberExpression.GetKeyWidthoutAnonymous();
                 stack.Push(new KeyValuePair<string, MemberExpression>(key, memberExpression));
                 node = memberExpression.Expression;
+                if (node.NodeType == ExpressionType.Call) node = (node as MethodCallExpression).Object;
             }
 
             if (stack != null && stack.Count > 0)

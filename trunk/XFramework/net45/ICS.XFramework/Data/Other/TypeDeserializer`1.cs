@@ -266,6 +266,7 @@ namespace ICS.XFramework.Data
                     }
 
                     // TODO 1:n:n 关系未实现
+                    if (navTypeRuntime.GenericTypeDefinition == typeof(List<>)) navTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navTypeRuntime.GenericArguments[0]);
                     if (navTypeRuntime.NavWrappers.Count > 0) Deserialize_Navigation(prevModel, navModel, keyName, isLine);
                 }
             }

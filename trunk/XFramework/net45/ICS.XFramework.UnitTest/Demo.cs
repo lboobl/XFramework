@@ -66,22 +66,23 @@ namespace ICS.XFramework.UnitTest
                 from a in context
                     .GetTable<Inte_CRM.CRM_SaleOrder>()
                     //join b in context.GetTable< Inte_CRM.Client>() on a.ClientId equals b.ClientId
+                    .Include(a => a.Client.AccountList)
                     .Include(a => a.Client.AccountList[0].Client)
-                    //.Include(a => a.Client.CloudServer)
+                    .Include(a => a.Client.CloudServer)
                     //join b in context.GetTable<Inte_CRM.CloudServer>() on a.ClientId equals b.CloudServerId into u_b
                     //from b in u_b.DefaultIfEmpty()
-                where a.OrderId > 0
+                where a.OrderId >0
                 orderby a.OrderId
-                select new Inte_CRM.CRM_SaleOrder//(a)
+                select new Inte_CRM.CRM_SaleOrder(a)
                 {
                     OrderId = a.OrderId,
                     ClientId = a.ClientId,
-                    //HeavyBuyer = new Inte_CRM.Client(a.Client)
-                    //{
-                    //    ClientId = a.Client.ClientId,
-                    //    AccountList = a.Client.AccountList,
-                    //    CloudServer = a.HeavyBuyer.CloudServer
-                    //}
+                    HeavyBuyer = new Inte_CRM.Client(a.Client)
+                    {
+                        ClientId = a.Client.ClientId,
+                        AccountList = a.Client.AccountList,
+                        CloudServer = a.Client.CloudServer
+                    }
                 };
             var result3 = query3.ToList();
 

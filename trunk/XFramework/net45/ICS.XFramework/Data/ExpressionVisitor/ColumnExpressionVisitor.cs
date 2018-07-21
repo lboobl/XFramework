@@ -477,54 +477,60 @@ namespace ICS.XFramework.Data
                 MemberExpression memberExpression = exp as MemberExpression;
                 if (memberExpression == null) throw new XFrameworkException("Include expression body must be 'MemberExpression'.");
 
-                //// 解析导航属性链
-                //List<Expression> chain = new List<Expression>();
-                //while (memberExpression != null)
-                //{
-                //    // a.Client 要求 <Client> 必须标明 ForeignKeyAttribute
-                //    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(memberExpression.Expression.Type);
-                //    ForeignKeyAttribute attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(memberExpression.Member.Name);
-                //    if (attribute == null) throw new XFrameworkException("Include member {{{0}}} must mark 'ForeignKeyAttribute'.", memberExpression);
-
-                //    chain.Add(memberExpression);
-                //    var m = memberExpression.Expression as MemberExpression;
-                //    if (m == null) chain.Add(memberExpression.Expression);
-                //    memberExpression = m;
-                //}
-
-                //// 生成导航属性描述信息
-                //string keyName = string.Empty;
-                //for (int i = chain.Count - 1; i >= 0; i--)
-                //{
-                //    Expression expression = chain[i];
-                //    memberExpression = expression as MemberExpression;
-                //    if (memberExpression == null)
-                //    {
-                //        keyName = expression.Type.Name;
-                //        continue;
-                //    }
-
-                //    keyName = keyName + "." + memberExpression.Member.Name;
-                //    if (!_navDescriptors.ContainsKey(keyName))
-                //    {
-                //        // fix issue# XC 列占一个位
-                //        NavigationDescriptor descriptor = new NavigationDescriptor(keyName, memberExpression.Member);
-                //        descriptor.Start = _columns.Count; //i == 0 ? _columns.Count : -1;
-                //        descriptor.FieldCount = i == 0 ? (GetFieldCount(exp) + 1) : 1;//-1;
-                //        _navDescriptors.Add(keyName, descriptor);
-                //    }
-                //}
-
+                // 例：Include(a => a.Client.AccountList[0].Client)
                 // 解析导航属性链
-                string keyName = memberExpression.GetKeyWidthoutAnonymous(true);
-                if (!_navDescriptors.ContainsKey(keyName))
+                List<Expression> chain = new List<Expression>();
+                while (memberExpression != null)
                 {
-                    // fix issue# XC 列占一个位
-                    NavigationDescriptor descriptor = new NavigationDescriptor(keyName, memberExpression.Member);
-                    descriptor.Start = _columns.Count; //i == 0 ? _columns.Count : -1;
-                    descriptor.FieldCount = (GetFieldCount(exp) + 1);
-                    _navDescriptors.Add(keyName, descriptor);
+                    // a.Client 要求 <Client> 必须标明 ForeignKeyAttribute
+                    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(memberExpression.Expression.Type);
+                    ForeignKeyAttribute attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(memberExpression.Member.Name);
+                    if (attribute == null) throw new XFrameworkException("Include member {{{0}}} must mark 'ForeignKeyAttribute'.", memberExpression);
+
+                    MemberExpression m = null;
+                    chain.Add(memberExpression);
+                    if (memberExpression.Expression.NodeType == ExpressionType.MemberAccess) m = (MemberExpression)memberExpression.Expression;
+                    else if (memberExpression.Expression.NodeType == ExpressionType.Call) m = (memberExpression.Expression as MethodCallExpression).Object as MemberExpression;
+
+                    //var m = memberExpression.Expression as MemberExpression;
+                    if (m == null) chain.Add(memberExpression.Expression);
+                    memberExpression = m;
                 }
+
+                // 生成导航属性描述信息
+                string keyName = string.Empty;
+                for (int i = chain.Count - 1; i >= 0; i--)
+                {
+                    Expression expression = chain[i];
+                    memberExpression = expression as MemberExpression;
+                    if (memberExpression == null) continue;
+                    //{
+                    //    keyName = expression.Type.Name;
+                    //    continue;
+                    //}
+
+                    //keyName = keyName + "." + memberExpression.Member.Name;
+                    keyName = memberExpression.GetKeyWidthoutAnonymous(true);
+                    if (!_navDescriptors.ContainsKey(keyName))
+                    {
+                        // fix issue# XC 列占一个位
+                        NavigationDescriptor descriptor = new NavigationDescriptor(keyName, memberExpression.Member);
+                        descriptor.Start = i == 0 ? _columns.Count : -1;//_columns.Count; 
+                        descriptor.FieldCount = i == 0 ? (GetFieldCount(exp) + 1) : -1; //i == 0 ? (GetFieldCount(exp) + 1) : 1;//-1;
+                        _navDescriptors.Add(keyName, descriptor);
+                    }
+                }
+
+                //// 解析导航属性链
+                //string keyName = memberExpression.GetKeyWidthoutAnonymous(true);
+                //if (!_navDescriptors.ContainsKey(keyName))
+                //{
+                //    // fix issue# XC 列占一个位
+                //    NavigationDescriptor descriptor = new NavigationDescriptor(keyName, memberExpression.Member);
+                //    descriptor.Start = _columns.Count; //i == 0 ? _columns.Count : -1;
+                //    descriptor.FieldCount = (GetFieldCount(exp) + 1);
+                //    _navDescriptors.Add(keyName, descriptor);
+                //}
 
                 this.VisitNavigation(memberExpression, true);
             }

@@ -107,7 +107,6 @@
     <Compile Include="Data\ExpressionVisitor\UpdateExpressionVisitor.cs" />
     <Compile Include="Data\ExpressionVisitor\WhereExpressionVisitor.cs" />
     <Compile Include="Data\Extensions\DbQueryableExtensions.cs" />
-    <Compile Include="Data\Extensions\ExpressionExtensions.cs" />
     <Compile Include="Data\Interface\IDbCommandInterceptor.cs" />
     <Compile Include="Data\Interface\IDbQueryable.cs" />
     <Compile Include="Data\Interface\IDbQueryableInfo.cs" />

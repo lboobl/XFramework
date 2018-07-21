@@ -225,11 +225,12 @@ namespace ICS.XFramework.Data
                 {
                     Expression exp = d.Expressions[0];
                     if (exp.NodeType == ExpressionType.Lambda) exp = (exp as LambdaExpression).Body;
-                    if (exp.Type.IsGenericType)
-                    {
-                        TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(exp.Type);
-                        if(typeRuntime.GenericTypeDefinition == typeof(List<>)) checkListNavgation = true;
-                    } //&& exp.Type.GetGenericTypeDefinition() == typeof(List<>)) checkListNavgation = true;
+                    else if (exp.NodeType == ExpressionType.Call) exp = (exp as MethodCallExpression).Object;
+                    if (exp.Type.IsGenericType) checkListNavgation = true;
+                    //{
+                    //    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(exp.Type);
+                    //    if(typeRuntime.GenericTypeDefinition == typeof(List<>)) checkListNavgation = true;
+                    //} //&& exp.Type.GetGenericTypeDefinition() == typeof(List<>)) checkListNavgation = true;
                     if (checkListNavgation) break;
                 }
                 if (!checkListNavgation) checkListNavgation = initExpression != null && CheckListNavigation<TElement>(initExpression);
