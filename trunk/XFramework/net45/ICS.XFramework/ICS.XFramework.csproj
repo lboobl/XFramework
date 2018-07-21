@@ -141,7 +141,7 @@
     <Compile Include="Reflection\Core\IConstructorInvoker.cs" />
     <Compile Include="Reflection\Core\IMethodInvoker.cs" />
     <Compile Include="Reflection\Emit\ConstructorInvoker.cs" />
-    <Compile Include="Reflection\Emit\Hepler.cs" />
+    <Compile Include="Reflection\Emit\Helper.cs" />
     <Compile Include="Reflection\Emit\MemberAccess_Method.cs" />
     <Compile Include="Reflection\MemberAccess.cs" />
     <Compile Include="Reflection\MemberInfoComparer.cs" />

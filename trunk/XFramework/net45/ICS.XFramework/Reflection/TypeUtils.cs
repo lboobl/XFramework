@@ -161,5 +161,14 @@ namespace ICS.XFramework.Reflection
                     throw new XFrameworkException("Unkown type ", clrType.FullName);
             }
         }
+
+        bool IsCompilerGenerated(Type t)
+        {
+            if (t == null)
+                return false;
+
+            return t.IsDefined(typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute), false)
+                || IsCompilerGenerated(t.DeclaringType);
+        }
     }
 }
