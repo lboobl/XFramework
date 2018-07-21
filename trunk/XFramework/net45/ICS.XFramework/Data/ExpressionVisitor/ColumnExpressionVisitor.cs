@@ -160,7 +160,7 @@ namespace ICS.XFramework.Data
         }
 
         // {new App() {Id = p.Id}} 
-        private Expression VisitMemberInitImpl(MemberInitExpression node, bool isTopBinding)
+        private Expression VisitMemberInitImpl(MemberInitExpression node, bool isTop)
         {
             // 如果有一对多的导航属性会产生嵌套的SQL，这时需要强制主表选择的列里面必须包含导航外键
             // TODO #对 Bindings 进行排序，保证导航属性的赋值一定要最后面#
@@ -199,17 +199,12 @@ namespace ICS.XFramework.Data
 
                 else
                 {
-                    // TODO 显式指定join不需要外键
-                    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(binding.Member.DeclaringType);
-                    var attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(binding.Member.Name);
-                    if (attribute == null) throw new XFrameworkException("Complex property must mark 'ForeignKeyAttribute' ");
-
-                    // 如果是主记录并且有一对多的导航记录，必须强制主表选择的列里面必须包含导航外键
-                    // TODO 表达式链上任何的外键
-                    if (isTopBinding && HaveListNavigation)
+                    // 非显式指定的导航属性需要有 ForeignKeyAttribute
+                    if (!binding.Expression.Acceptable())
                     {
-                        if (attribute.InnerKeys.Any(x => !_columns.Any(w => w.Value.Name == x)))
-                            throw new XFrameworkException("Select columns must contains 'ForeignKeyAttribute' keys. {{{0}}}", String.Join(",", attribute.InnerKeys));
+                        TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(binding.Member.DeclaringType);
+                        var attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(binding.Member.Name);
+                        if (attribute == null) throw new XFrameworkException("Complex property {{{0}}} must mark 'ForeignKeyAttribute' ", binding.Member.Name);
                     }
 
                     // 生成导航属性描述集合，以类名.属性名做为键值
@@ -221,13 +216,14 @@ namespace ICS.XFramework.Data
                     {
                         // fix issue# XC 列占一个位
                         descriptor.Start = _columns.Count;
-                        descriptor.FieldCount = GetFieldCount(binding.Expression) + (binding.Expression.NodeType == ExpressionType.MemberAccess ? 1 : 0);
+                        descriptor.FieldCount = GetFieldCount(binding.Expression) + (binding.Expression.NodeType == ExpressionType.MemberAccess && binding.Expression.Acceptable() ? 1 : 0);
                         _navDescriptors.Add(keyName, descriptor);
                         _navChainHopper.Add(keyName);
                     }
 
-
-                    if (binding.Expression.NodeType == ExpressionType.MemberAccess) this.VisitNavigation(binding.Expression as MemberExpression, true);
+                    // 1.不显式指定导航属性，例：a.Client.ClientList
+                    // 2.表达式里显式指定导航属性，例：b
+                    if (binding.Expression.NodeType == ExpressionType.MemberAccess) this.VisitNavigation(binding.Expression as MemberExpression, binding.Expression.Acceptable());
                     else if (binding.Expression.NodeType == ExpressionType.New) this.VisitNewImpl(binding.Expression as NewExpression);
                     else if (binding.Expression.NodeType == ExpressionType.MemberInit) this.VisitMemberInitImpl(binding.Expression as MemberInitExpression, false);
 
@@ -521,17 +517,6 @@ namespace ICS.XFramework.Data
                     }
                 }
 
-                //// 解析导航属性链
-                //string keyName = memberExpression.GetKeyWidthoutAnonymous(true);
-                //if (!_navDescriptors.ContainsKey(keyName))
-                //{
-                //    // fix issue# XC 列占一个位
-                //    NavigationDescriptor descriptor = new NavigationDescriptor(keyName, memberExpression.Member);
-                //    descriptor.Start = _columns.Count; //i == 0 ? _columns.Count : -1;
-                //    descriptor.FieldCount = (GetFieldCount(exp) + 1);
-                //    _navDescriptors.Add(keyName, descriptor);
-                //}
-
                 this.VisitNavigation(memberExpression, true);
             }
         }
@@ -539,19 +524,6 @@ namespace ICS.XFramework.Data
         // 添加额外列，用来判断整个（左）连接记录是否为空
         private void AppendNullColumn(System.Reflection.MemberInfo member, string alias)
         {
-            //string caseWhen = string.Empty;
-            //if (!_visitedNavigations.ContainsKey(navKey))
-            //{
-            //    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(member.DeclaringType);
-            //    var foreignKey = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(member.Name);
-            //    string keyName = foreignKey.OuterKeys[0];
-            //    caseWhen = string.Format("CASE WHEN {0}.{1} IS NULL THEN NULL ELSE {0}.{1} END", alias, keyName);
-            //}
-            //else
-            //{
-            //    caseWhen = _visitedNavigations[navKey];
-            //}
-
             TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(member.DeclaringType);
             var foreignKey = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(member.Name);
             string keyName = foreignKey.OuterKeys[0];

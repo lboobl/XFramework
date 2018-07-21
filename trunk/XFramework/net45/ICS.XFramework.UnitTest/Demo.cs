@@ -62,6 +62,27 @@ namespace ICS.XFramework.UnitTest
                 };
             var result0 = query0.ToList();
 
+            query0 =
+                from a in context
+                    .GetTable<Inte_CRM.CRM_SaleOrder>()
+                    join b in context.GetTable< Inte_CRM.Client> () on a.ClientId equals b.ClientId into u_b
+                    from b in u_b.DefaultIfEmpty()
+                where a.OrderId > 0
+                orderby a.OrderId
+                select new Inte_CRM.CRM_SaleOrder(a)
+                {
+                    OrderId = a.OrderId,
+                    ClientId = a.ClientId,
+                    Client = b
+                    //Client = new Inte_CRM.Client(a.Client)
+                    //{
+                    //    //ClientId = a.Client.ClientId,
+                    //    CloudServer = a.Client.CloudServer,
+                    //    AccountList = a.Client.AccountList,
+                    //}
+                };
+            result0 = query0.ToList();
+
             var query3 =
                 from a in context
                     .GetTable<Inte_CRM.CRM_SaleOrder>()
