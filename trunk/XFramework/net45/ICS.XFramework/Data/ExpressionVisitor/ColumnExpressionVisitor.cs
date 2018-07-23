@@ -200,7 +200,7 @@ namespace ICS.XFramework.Data
                 else
                 {
                     // 非显式指定的导航属性需要有 ForeignKeyAttribute
-                    if (binding.Expression.Acceptable())
+                    if (binding.Expression.NodeType == ExpressionType.MemberAccess && binding.Expression.Acceptable())
                     {
                         TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(binding.Member.DeclaringType);
                         var attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(binding.Member.Name);
