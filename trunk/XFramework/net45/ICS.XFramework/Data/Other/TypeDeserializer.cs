@@ -33,7 +33,7 @@ namespace ICS.XFramework.Data
         /// </summary>
         public List<T> Deserialize<T>()
         {
-            bool isTop = true;
+            //bool isTop = true;
             bool isLine = false;
             object prevLine = null;
             List<T> collection = new List<T>();
@@ -41,11 +41,14 @@ namespace ICS.XFramework.Data
             while (_reader.Read())
             {
                 T model = deserializer.Deserialize(prevLine, out isLine);
-
-                if (!isLine) collection.Add(model);
-                if (prevLine == null) prevLine = model;
-                if (!isLine && !isTop) prevLine = null;
-                isTop = false;
+                if (!isLine)
+                {
+                    collection.Add(model);
+                    prevLine = model;
+                }
+                //if (prevLine == null) 
+                //if (!isLine && !isTop) prevLine = null;
+                //isTop = false;
             }
             return collection;
         }

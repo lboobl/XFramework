@@ -1,14 +1,8 @@
 ﻿
-using System;
-using System.Linq;
 using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.Collections.Generic;
-
-using ICS.XFramework.Reflection.Emit;
 
 namespace ICS.XFramework.Data
 {
@@ -22,7 +16,7 @@ namespace ICS.XFramework.Data
         /// </summary>
         public async Task<List<T>> DeserializeAsync<T>()
         {
-            bool isTop = true;
+            //bool isTop = true;
             bool isLine = false;
             object prevLine = null;
             List<T> collection = new List<T>();
@@ -30,11 +24,11 @@ namespace ICS.XFramework.Data
             while (await (_reader as DbDataReader).ReadAsync())
             {
                 T model = deserializer.Deserialize(prevLine, out isLine);
-
-                if (!isLine) collection.Add(model);
-                if (prevLine == null) prevLine = model;
-                if (!isLine && !isTop) prevLine = null;
-                isTop = false;
+                if (!isLine)
+                {
+                    collection.Add(model);
+                    prevLine = model;
+                }
             }
             return collection;
         }
