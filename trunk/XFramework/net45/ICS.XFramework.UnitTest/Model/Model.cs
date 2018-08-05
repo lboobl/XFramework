@@ -435,6 +435,23 @@ namespace ICS.XFramework.UnitTest
 
             [Column(IsKey = true)]
             public int RoleId { get; set; }
+
+            [ForeignKey(new string[] { "UserId", "RoleId" })]
+            public List<UserRoleModule> RoleModules { get; set; }
+        }
+
+
+        [Table(Name = "Sys_UserRoleModule")]
+        public class UserRoleModule
+        {
+            [Column(IsKey = true)]
+            public int UserId { get; set; }
+
+            [Column(IsKey = true)]
+            public int RoleId { get; set; }
+
+            [Column(IsKey = true)]
+            public int ModuleId { get; set; }
         }
 
         [Table(Name = "Sys_UserModule")]

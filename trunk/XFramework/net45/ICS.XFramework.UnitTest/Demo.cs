@@ -173,6 +173,14 @@ namespace ICS.XFramework.UnitTest
                 .Where(a => a.UserId == 1);
             var r4 = q4.ToList();
 
+            var q5 = context
+                .GetTable<Inte_CRM.User>()
+                .Include(a => a.Roles)
+                .Include(a => a.Roles[0].RoleModules)
+                .Include(a => a.Modules)
+                .Where(a => a.UserId > 0);
+                        var r5 = q5.ToList();
+
             // 查询表达式
             var query = from a in context.GetTable<Inte_CRM.Demo>()
                         where a.DemoByte_Nullable != null &&

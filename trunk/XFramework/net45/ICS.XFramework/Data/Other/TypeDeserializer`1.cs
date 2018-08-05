@@ -37,7 +37,7 @@ namespace ICS.XFramework.Data
         private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
         private Func<IDataRecord, object> _modelDeserializer = null;
         private Dictionary<string, HashSet<string>> _listNavigationKeys = null;
-        private int? _listNavigationNumber = null;
+        private int? _listNavigationCount = null;
 
         internal TypeDeserializer(IDataReader reader, CommandDefinition define)
         {
@@ -200,6 +200,7 @@ namespace ICS.XFramework.Data
                 {
                     if (list == null)
                     {
+                        // 非集合型导航属性
                         navWrapper.Set(model, navModel);
                         //
                         //
@@ -207,23 +208,18 @@ namespace ICS.XFramework.Data
                     }
                     else
                     {
-                        // 此时的 navTypeRuntime 是 List<> 类型的运行时
-                        // 先添加 List 列表
-                        var myAddMethod = navTypeRuntime.GetWrapper("Add");
-                        myAddMethod.Invoke(list, navModel);
-
-                        #region 合并列表
-
-                        // 再判断如果属于同一个主表，则合并到上一行的当前明细列表
+                        // 集合型导航属性
                         if (prevModel != null && isLine)
                         {
+                            #region 合并列表
+
+                            // 判断如果属于同一个主表，则合并到上一行的当前明细列表
                             // 例：CRM_SaleOrder.Client.AccountList
                             string[] keys = keyName.Split('.');
                             TypeRuntimeInfo curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
                             Type curType = curTypeRuntime.Type;
                             Reflection.MemberAccessWrapper curWrapper = null;
                             object curModel = prevModel;
-                            //object prevList = null;
 
                             for (int i = 1; i < keys.Length; i++)
                             {
@@ -236,7 +232,7 @@ namespace ICS.XFramework.Data
                                 //if (i == keys.Length - 1) prevList = curModel;
 
                                 // <<<<<<<<<<< 一对多对多关系 >>>>>>>>>>
-                                if(curType.IsGenericType && i != keys.Length - 1)
+                                if (curType.IsGenericType && i != keys.Length - 1)
                                 {
                                     curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(curType);
                                     if (curTypeRuntime.GenericTypeDefinition == typeof(List<>))
@@ -268,8 +264,8 @@ namespace ICS.XFramework.Data
                                 bool isAny = false;
                                 if (_define.NavigationDescriptors.Count > 1)
                                 {
-                                    if (_listNavigationNumber == null) _listNavigationNumber = _define.NavigationDescriptors.Count(x => FilterListNavigation(x.Value.Member));
-                                    if (_listNavigationNumber!=null&& _listNavigationNumber.Value > 1)
+                                    if (_listNavigationCount == null) _listNavigationCount = _define.NavigationDescriptors.Count(x => FilterListNavigation(x.Value.Member));
+                                    if (_listNavigationCount != null && _listNavigationCount.Value > 1)
                                     {
                                         if (!_listNavigationKeys.ContainsKey(keyName)) _listNavigationKeys[keyName] = new HashSet<string>();
                                         curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navModel.GetType());
@@ -296,13 +292,33 @@ namespace ICS.XFramework.Data
                                 if (!isAny)
                                 {
                                     // 如果列表中不存在，则添加到上一行的相同导航列表中去
-                                    myAddMethod = navTypeRuntime.GetWrapper("Add");
+                                    var myAddMethod = navTypeRuntime.GetWrapper("Add");
                                     myAddMethod.Invoke(curModel, navModel);
                                 }
                             }
-                        }
 
-                        #endregion
+                            #endregion
+                        }
+                        else
+                        {
+                            // 此时的 navTypeRuntime 是 List<> 类型的运行时
+                            // 先添加 List 列表
+                            var myAddMethod = navTypeRuntime.GetWrapper("Add");
+                            myAddMethod.Invoke(list, navModel);
+
+                            var curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navModel.GetType());
+                            StringBuilder keyBuilder = new StringBuilder(64);
+
+                            foreach (var key in curTypeRuntime.KeyWrappers)
+                            {
+                                var wrapper = key.Value;
+                                var value = wrapper.Get(navModel);
+                                keyBuilder.AppendFormat("{0}={1};", key.Key, (value ?? string.Empty).ToString());
+                            }
+                            string hash = keyBuilder.ToString();
+                            if (!_listNavigationKeys.ContainsKey(keyName)) _listNavigationKeys[keyName] = new HashSet<string>();
+                            if (!_listNavigationKeys[keyName].Contains(hash)) _listNavigationKeys[keyName].Add(hash);
+                        }
                     }
 
                     // TODO 1:n:n 关系未实现
@@ -403,7 +419,7 @@ namespace ICS.XFramework.Data
             var func = (Func<IDataRecord, object>)dynamicMethod.CreateDelegate(typeof(Func<IDataRecord, object>));
             return func;
         }
-        
+
         static bool FilterListNavigation(MemberInfo member)
         {
             PropertyInfo property = member as PropertyInfo;

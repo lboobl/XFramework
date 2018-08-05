@@ -82,3 +82,35 @@ CREATE TABLE [dbo].[Sys_ThinIdentity](
 ) ON [PRIMARY]
 
 GO
+
+CREATE TABLE [dbo].[Sys_UserModule](
+	[UserId] [int] NOT NULL,
+	[ModuleId] [int] NOT NULL,
+ CONSTRAINT [PK_Sys_UserModule] PRIMARY KEY CLUSTERED 
+(
+	[UserId] ASC,
+	[ModuleId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+Delete Sys_UserModule 
+ Go
+Insert Into [Sys_UserModule] ([UserId],[ModuleId]) Values (1,1)
+Insert Into [Sys_UserModule] ([UserId],[ModuleId]) Values (1,2)
+Insert Into [Sys_UserModule] ([UserId],[ModuleId]) Values (1,3)
+Insert Into [Sys_UserModule] ([UserId],[ModuleId]) Values (1,4)
+Insert Into [Sys_UserModule] ([UserId],[ModuleId]) Values (1,6)
+ Go
+
+ CREATE TABLE [dbo].[Sys_UserRoleModule](
+	[UserId] [int] NOT NULL,
+	[RoleId] [int] NOT NULL,
+	[ModuleId] [int] NOT NULL,
+ CONSTRAINT [PK_Sys_UserRoleModule] PRIMARY KEY CLUSTERED 
+(
+	[UserId] ASC,
+	[RoleId] ASC,
+	[ModuleId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
