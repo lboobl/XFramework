@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Text;
 using System.Linq;
 using System.Data;
 using System.Reflection;
@@ -35,12 +36,15 @@ namespace ICS.XFramework.Data
         private CommandDefinition _define = null;
         private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
         private Func<IDataRecord, object> _modelDeserializer = null;
+        private Dictionary<string, HashSet<string>> _listNavigationKeys = null;
+        private int? _listNavigationNumber = null;
 
         internal TypeDeserializer(IDataReader reader, CommandDefinition define)
         {
             _reader = reader;
             _define = define;
             _deserializers = new Dictionary<string, Func<IDataRecord, object>>(8);
+            _listNavigationKeys = new Dictionary<string, HashSet<string>>(8);
         }
 
         /// <summary>
@@ -122,18 +126,12 @@ namespace ICS.XFramework.Data
                 {
                     isLine = true;
                     TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
-                    Func<KeyValuePair<string, Reflection.MemberAccessWrapper>, bool> predicate =
-                        x => (x.Value as MemberAccessWrapper) != null && (x.Value as MemberAccessWrapper).Column != null && (x.Value as MemberAccessWrapper).Column.IsKey;
-                    var keys =
-                        typeRuntime
-                        .Wrappers
-                        .Where(predicate)
-                        .Select(x => x.Value);
-                    foreach (var wrapper in keys)
+                    foreach (var key in typeRuntime.KeyWrappers)
                     {
-                        var key1 = wrapper.Get(prevModel);
-                        var key2 = wrapper.Get(model);
-                        isLine = isLine && key1.Equals(key2);
+                        var wrapper = key.Value;
+                        var value1 = wrapper.Get(prevModel);
+                        var value2 = wrapper.Get(model);
+                        isLine = isLine && value1.Equals(value2);
                         if (!isLine) break;
                     }
                 }
@@ -209,56 +207,98 @@ namespace ICS.XFramework.Data
                     }
                     else
                     {
-                        var method = navTypeRuntime.GetWrapper("Add");
-                        method.Invoke(list, navModel);
+                        // 此时的 navTypeRuntime 是 List<> 类型的运行时
+                        // 先添加 List 列表
+                        var myAddMethod = navTypeRuntime.GetWrapper("Add");
+                        myAddMethod.Invoke(list, navModel);
 
                         #region 合并列表
 
-                        // 合并列表 
+                        // 再判断如果属于同一个主表，则合并到上一行的当前明细列表
                         if (prevModel != null && isLine)
                         {
                             // 例：CRM_SaleOrder.Client.AccountList
                             string[] keys = keyName.Split('.');
-                            TypeRuntimeInfo pTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
-                            Reflection.MemberAccessWrapper pWrapper = null;
-                            object pModel = prevModel;
-                            object prevList = null;
+                            TypeRuntimeInfo curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
+                            Type curType = curTypeRuntime.Type;
+                            Reflection.MemberAccessWrapper curWrapper = null;
+                            object curModel = prevModel;
+                            //object prevList = null;
 
                             for (int i = 1; i < keys.Length; i++)
                             {
-                                pWrapper = pTypeRuntime.GetWrapper(keys[i]);
-                                pModel = pWrapper.Get(pModel);
-                                if (i == keys.Length - 1) prevList = pModel;
+                                curWrapper = curTypeRuntime.GetWrapper(keys[i]);
+                                curModel = curWrapper.Get(curModel);
+                                if (curModel == null) continue;
 
-                                Type objType = pModel.GetType();
-                                if(objType.IsGenericType)// && objType.GetGenericTypeDefinition() == typeof(List<>))
+                                curType = curModel.GetType();
+                                curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(curType);
+                                //if (i == keys.Length - 1) prevList = curModel;
+
+                                // <<<<<<<<<<< 一对多对多关系 >>>>>>>>>>
+                                if(curType.IsGenericType && i != keys.Length - 1)
                                 {
-                                    // 取最后一个记录
-                                    TypeRuntimeInfo objTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(objType);
-                                    if (objTypeRuntime.GenericTypeDefinition == typeof(List<>))
+                                    curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(curType);
+                                    if (curTypeRuntime.GenericTypeDefinition == typeof(List<>))
                                     {
-                                        var wrapper = objTypeRuntime.GetWrapper("get_Count");
-                                        int count = Convert.ToInt32(wrapper.Invoke(pModel));
+                                        var wrapper = curTypeRuntime.GetWrapper("get_Count");
+                                        int count = Convert.ToInt32(wrapper.Invoke(curModel));      // List.Count
                                         if (count > 0)
                                         {
                                             var wrapper2 = navTypeRuntime.GetWrapper("get_Item");
-                                            pModel = wrapper2.Invoke(pModel, count - 1);
+                                            curModel = wrapper2.Invoke(curModel, count - 1);        // List[List.Count-1]
+                                            curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(curModel.GetType());
                                         }
                                         else
                                         {
-                                            pModel = null;
+                                            // user.Roles.RoleFuncs=>Roles 列表有可能为空
+                                            curModel = null;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+
+                            if (curModel != null)
+                            {
+                                // 如果有两个以上的一对多关系的导航属性，那么在加入列表之前就需要剔除重复的实体
+
+
+                                bool isAny = false;
+                                if (_define.NavigationDescriptors.Count > 1)
+                                {
+                                    if (_listNavigationNumber == null) _listNavigationNumber = _define.NavigationDescriptors.Count(x => FilterListNavigation(x.Value.Member));
+                                    if (_listNavigationNumber!=null&& _listNavigationNumber.Value > 1)
+                                    {
+                                        if (!_listNavigationKeys.ContainsKey(keyName)) _listNavigationKeys[keyName] = new HashSet<string>();
+                                        curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navModel.GetType());
+                                        StringBuilder keyBuilder = new StringBuilder(64);
+
+                                        foreach (var key in curTypeRuntime.KeyWrappers)
+                                        {
+                                            var wrapper = key.Value;
+                                            var value = wrapper.Get(navModel);
+                                            keyBuilder.AppendFormat("{0}={1};", key.Key, (value ?? string.Empty).ToString());
+                                        }
+                                        string hash = keyBuilder.ToString();
+                                        if (_listNavigationKeys[keyName].Contains(hash))
+                                        {
+                                            isAny = true;
+                                        }
+                                        else
+                                        {
+                                            _listNavigationKeys[keyName].Add(hash);
                                         }
                                     }
                                 }
 
-                                // issue#上一个列表为空列表
-                                if (pModel != null) pTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(pModel.GetType());
-                            }
-                            if (pModel != null)
-                            {
-                                // 则添加到上一行的相同导航列表中去
-                                method = navTypeRuntime.GetWrapper("Add");
-                                method.Invoke(prevList, navModel);
+                                if (!isAny)
+                                {
+                                    // 如果列表中不存在，则添加到上一行的相同导航列表中去
+                                    myAddMethod = navTypeRuntime.GetWrapper("Add");
+                                    myAddMethod.Invoke(curModel, navModel);
+                                }
                             }
                         }
 
@@ -362,6 +402,16 @@ namespace ICS.XFramework.Data
 
             var func = (Func<IDataRecord, object>)dynamicMethod.CreateDelegate(typeof(Func<IDataRecord, object>));
             return func;
+        }
+        
+        static bool FilterListNavigation(MemberInfo member)
+        {
+            PropertyInfo property = member as PropertyInfo;
+            if (property == null) return false;
+            if (!property.PropertyType.IsGenericType) return false;
+
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(property.PropertyType);
+            return typeRuntime.GenericTypeDefinition == typeof(List<>);
         }
 
         private static MethodInfo GetReaderMethod(Type fieldType)

@@ -20,10 +20,10 @@ namespace ICS.XFramework.Data
         private TableAttribute _table = null;
         private bool _attReaded = false;
         private Type _type = null;
-        private IDictionary<string, MemberAccessWrapper> _navWrappers = null;
         private int _fieldCount = 0;
+        private IDictionary<string, MemberAccessWrapper> _navWrappers = null;
         private Dictionary<string, Reflection.MemberAccessWrapper> _wrappers = null;
-        //private Func<System.Data.IDataRecord, IDictionary<string, Column>, int, int, object> _deserializer;
+        private Dictionary<string, MemberAccessWrapper> _keyWrappers = null;
 
         /// <summary>
         /// 类型对应的数据表
@@ -82,6 +82,27 @@ namespace ICS.XFramework.Data
                 }
 
                 return _navWrappers;
+            }
+        }
+
+        /// <summary>
+        /// 主键属性成员
+        /// </summary>
+        public IDictionary<string, MemberAccessWrapper> KeyWrappers
+        {
+            get
+            {
+                if (_keyWrappers == null)
+                {
+                    Func<MemberAccessWrapper, bool> predicate = x => x != null && x.Column != null && x.Column.IsKey;
+                    _keyWrappers = new Dictionary<string, MemberAccessWrapper>();
+                    foreach (var w in this.Wrappers)
+                    {
+                        if (predicate(w.Value as MemberAccessWrapper)) _keyWrappers.Add(w.Key, w.Value as MemberAccessWrapper);
+                    }
+                }
+
+                return _keyWrappers;
             }
         }
 

@@ -301,7 +301,7 @@ namespace ICS.XFramework.Data
                 {
                     TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(pType);
                     if (typeRuntime.GenericTypeDefinition == typeof(List<>)) return true;
-                } //&& pType.GetGenericTypeDefinition() == typeof(List<>)) return true;
+                } 
 
                 MemberAssignment memberAssignment = node.Bindings[i] as MemberAssignment;
                 if (memberAssignment != null && memberAssignment.Expression.NodeType == ExpressionType.MemberInit)

@@ -61,7 +61,7 @@ namespace ICS.XFramework.UnitTest
             [Column(IsKey = true)]
             public int DemoId { get; set; }
 
-            [Column(NoMapped=true)]
+            [Column(NoMapped = true)]
             public bool Editable { get; set; }
 
             /// <summary>
@@ -367,11 +367,13 @@ namespace ICS.XFramework.UnitTest
 
             }
 
+            [Column(IsKey = true)]
             public int ClientId { get; set; }
 
             [ForeignKey("ClientId")]
             public Client Client { get; set; }
 
+            [Column(IsKey = true)]
             public string AccountId { get; set; }
 
             public string AccountCode { get; set; }
@@ -382,6 +384,7 @@ namespace ICS.XFramework.UnitTest
         [Table(Name = "Sys_CloudServer")]
         public class CloudServer
         {
+            [Column(IsKey = true)]
             public int CloudServerId { get; set; }
 
             public string CloudServerCode { get; set; }
@@ -406,6 +409,42 @@ namespace ICS.XFramework.UnitTest
             public int ThinId { get; set; }
 
             public string ThinName { get; set; }
+        }
+
+        [Table(Name = "Sys_User")]
+        public class User
+        {
+            [Column(IsKey = true)]
+            public int UserId { get; set; }
+
+            public string UserName { get; set; }
+
+            [ForeignKey("UserId")]
+            public List<UserRole> Roles { get; set; }
+
+
+            [ForeignKey("UserId")]
+            public List<UserModule> Modules { get; set; }
+        }
+
+        [Table(Name = "Sys_UserRole")]
+        public class UserRole
+        {
+            [Column(IsKey = true)]
+            public int UserId { get; set; }
+
+            [Column(IsKey = true)]
+            public int RoleId { get; set; }
+        }
+
+        [Table(Name = "Sys_UserModule")]
+        public class UserModule
+        {
+            [Column(IsKey = true)]
+            public int UserId { get; set; }
+
+            [Column(IsKey = true)]
+            public int ModuleId { get; set; }
         }
     }
 
