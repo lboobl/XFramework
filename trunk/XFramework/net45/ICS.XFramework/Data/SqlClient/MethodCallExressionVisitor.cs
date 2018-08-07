@@ -266,7 +266,7 @@ namespace ICS.XFramework.Data.SqlClient
             return m;
         }
 
-        private Expression VisitStrMethodCall_SubString(MethodCallExpression m, ExpressionVisitorBase visitor)
+        private Expression VisitStrMethodCall_Substring(MethodCallExpression m, ExpressionVisitorBase visitor)
         {
             if (m != null)
             {
