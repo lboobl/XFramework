@@ -875,7 +875,7 @@ namespace ICS.XFramework.UnitTest
             //t0.[Remark] = N'001.TAN'
             //FROM [Bas_Client] AS [t0]
             //LEFT JOIN [Sys_CloudServer] t1 ON t0.[CloudServerId] = t1.[CloudServerId]
-            //WHERE t1.[CloudServerId] <> 0
+            //WHERE t1.[CloudServerId] <> 0 
         }
 
         // 性能测试
