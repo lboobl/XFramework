@@ -886,17 +886,18 @@ namespace ICS.XFramework.UnitTest
 
 
             Stopwatch stop = new Stopwatch();
-            stop.Start();
+            //stop.Start();
 
-            for (int i = 0; i < 100; i++)
-            {
-                var result = context
-                    .GetTable<Prd_Center.Product>()
-                    .Include(a => a.Client)
-                    .ToList();
-            }
-            Console.WriteLine(stop.ElapsedMilliseconds);
-            Console.WriteLine(stop.Elapsed);
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    var result = context
+            //        .GetTable<Prd_Center.Product>()
+            //        .Include(a => a.Client)
+            //        .ToList();
+            //}
+            //Console.WriteLine(stop.ElapsedMilliseconds);
+            //Console.WriteLine(stop.Elapsed);
+            Console.WriteLine("Enter to Begin");
             Console.ReadLine();
 
             connString = "Server=.;Database=Inte_CRM;uid=sa;pwd=123456";
