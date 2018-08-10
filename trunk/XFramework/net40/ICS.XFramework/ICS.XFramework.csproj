@@ -278,23 +278,23 @@
     <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\EmitHelper.cs">
       <Link>Reflection\Emit\EmitHelper.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\FieldAccess.cs">
-      <Link>Reflection\Emit\FieldAccess.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\FieldInvoker.cs">
+      <Link>Reflection\Emit\FieldInvoker.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\MethodAccess.cs">
-      <Link>Reflection\Emit\MethodAccess.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\MethodInvoker.cs">
+      <Link>Reflection\Emit\MethodInvoker.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\PropertyAccess.cs">
-      <Link>Reflection\Emit\PropertyAccess.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberAccessBase.cs">
-      <Link>Reflection\MemberAccessBase.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberAccessWrapper.cs">
-      <Link>Reflection\MemberAccessWrapper.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\PropertyInvoker.cs">
+      <Link>Reflection\Emit\PropertyInvoker.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberInfoComparer.cs">
       <Link>Reflection\MemberInfoComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberInvokerBase.cs">
+      <Link>Reflection\MemberInvokerBase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberInvokerWrapper.cs">
+      <Link>Reflection\MemberInvokerWrapper.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Reflection\TypeRuntimeInfo.cs">
       <Link>Reflection\TypeRuntimeInfo.cs</Link>

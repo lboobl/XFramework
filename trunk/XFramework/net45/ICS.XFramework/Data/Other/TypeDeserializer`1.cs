@@ -129,8 +129,8 @@ namespace ICS.XFramework.Data
                     foreach (var key in typeRuntime.KeyWrappers)
                     {
                         var wrapper = key.Value;
-                        var value1 = wrapper.Get(prevModel);
-                        var value2 = wrapper.Get(model);
+                        var value1 = wrapper.Invoke(prevModel);
+                        var value2 = wrapper.Invoke(model);
                         isLine = isLine && value1.Equals(value2);
                         if (!isLine) break;
                     }
@@ -180,11 +180,11 @@ namespace ICS.XFramework.Data
                 if (navType.IsGenericType && navTypeRuntime.GenericTypeDefinition == typeof(List<>))
                 {
                     // 1：n关系，导航属性为 List<T>
-                    list = navWrapper.Get(model);
+                    list = navWrapper.Invoke(model);
                     if (list == null)
                     {
                         list = navTypeRuntime.ConstructInvoker.Invoke();
-                        navWrapper.Set(model, list);
+                        navWrapper.Invoke(model, list);
                     }
                 }
 
@@ -201,7 +201,7 @@ namespace ICS.XFramework.Data
                     if (list == null)
                     {
                         // 非集合型导航属性
-                        navWrapper.Set(model, navModel);
+                        navWrapper.Invoke(model, navModel);
                         //
                         //
                         // 
@@ -224,7 +224,7 @@ namespace ICS.XFramework.Data
                             for (int i = 1; i < keys.Length; i++)
                             {
                                 curWrapper = curTypeRuntime.GetWrapper(keys[i]);
-                                curModel = curWrapper.Get(curModel);
+                                curModel = curWrapper.Invoke(curModel);
                                 if (curModel == null) continue;
 
                                 curType = curModel.GetType();
@@ -274,7 +274,7 @@ namespace ICS.XFramework.Data
                                         foreach (var key in curTypeRuntime.KeyWrappers)
                                         {
                                             var wrapper = key.Value;
-                                            var value = wrapper.Get(navModel);
+                                            var value = wrapper.Invoke(navModel);
                                             keyBuilder.AppendFormat("{0}={1};", key.Key, (value ?? string.Empty).ToString());
                                         }
                                         string hash = keyBuilder.ToString();
@@ -312,7 +312,7 @@ namespace ICS.XFramework.Data
                             foreach (var key in curTypeRuntime.KeyWrappers)
                             {
                                 var wrapper = key.Value;
-                                var value = wrapper.Get(navModel);
+                                var value = wrapper.Invoke(navModel);
                                 keyBuilder.AppendFormat("{0}={1};", key.Key, (value ?? string.Empty).ToString());
                             }
                             string hash = keyBuilder.ToString();

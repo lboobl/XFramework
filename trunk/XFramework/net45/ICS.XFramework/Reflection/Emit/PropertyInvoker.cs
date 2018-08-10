@@ -119,7 +119,7 @@ namespace ICS.XFramework.Reflection.Emit
         // 初始化 Set 动态方法
         static Action<object, object> InitializeSetInvoke(PropertyInvoker invoke)
         {
-            MethodInfo method = invoke.GetMethod;
+            MethodInfo method = invoke.SetMethod;
             DynamicMethod dynamicMethod = new DynamicMethod(method.Name, null, new Type[] { typeof(object), typeof(object) }, method.Module);
             ILGenerator g = dynamicMethod.GetILGenerator();
             Type paramType = method.GetParameters()[0].ParameterType;

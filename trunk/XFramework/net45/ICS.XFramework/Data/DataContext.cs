@@ -475,7 +475,7 @@ namespace ICS.XFramework.Data
                 {
                     index += 1;
                     int identity = identitys[index];
-                    info.AutoIncrement.Set(info.Entity, identity);
+                    info.AutoIncrement.Invoke(info.Entity, identity);
                 }
             }
         }

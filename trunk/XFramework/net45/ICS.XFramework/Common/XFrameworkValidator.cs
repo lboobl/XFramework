@@ -40,7 +40,7 @@ namespace ICS.XFramework
 
                     if (XFrameworkValidator._store.GetPropertyValidationAttributes(context2).Any<ValidationAttribute>())
                     {
-                        result.Add(context2, wrapper.Get(instance));
+                        result.Add(context2, wrapper.Invoke(instance));
                     }
                 }
             }

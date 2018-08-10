@@ -168,7 +168,7 @@ namespace ICS.XFramework.Reflection
         {
             MemberInvokerWrapper wrapper = this.GetWrapper(memberName);
             if (wrapper == null) throw new XFrameworkException("[{0}.{1}] doesn't exists", _type.Name, memberName);
-            return wrapper.Get(target);
+            return wrapper.Invoke(target);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace ICS.XFramework.Reflection
         public void Set(object target, string memberName, object value)
         {
             MemberInvokerWrapper wrapper = this.GetWrapper(memberName);
-            wrapper.Set(target, value);
+            wrapper.Invoke(target, value);
         }
 
         /// <summary>

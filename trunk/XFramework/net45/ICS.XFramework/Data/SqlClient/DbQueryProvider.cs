@@ -439,7 +439,7 @@ namespace ICS.XFramework.Data.SqlClient
                         columns.AppendMember(wrapper.Member.Name);
                         columns.Append(',');
 
-                        var value = wrapper.Get(entity);
+                        var value = wrapper.Invoke(entity);
                         string seg = this.GetSqlSeg(value);
                         values.Append(seg);
                         values.Append(',');
@@ -527,7 +527,7 @@ namespace ICS.XFramework.Data.SqlClient
                     if (column != null && column.IsKey)
                     {
                         useKey = true;
-                        var value = wrapper.Get(entity);
+                        var value = wrapper.Invoke(entity);
                         var seg = this.GetSqlSeg(value);
                         builder.AppendMember("t0", wrapper.Member.Name);
                         builder.Append(" = ");
@@ -585,7 +585,7 @@ namespace ICS.XFramework.Data.SqlClient
                     builder.AppendMember("t0", wrapper.Member.Name);
                     builder.Append(" = ");
 
-                    var value = wrapper.Get(entity);
+                    var value = wrapper.Invoke(entity);
                     var seg = this.GetSqlSeg(value); ;
                     builder.Append(seg);
                     length = builder.Length;
