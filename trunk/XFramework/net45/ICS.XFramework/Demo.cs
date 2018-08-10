@@ -912,7 +912,7 @@ namespace ICS.XFramework
             {
                 var result = context
                     .GetTable<Inte_CRM.Client>()
-                    .Include(a => a.AccountList)
+                    //.Include(a => a.AccountList)
                     .ToList();
             }
             Console.WriteLine(stop.ElapsedMilliseconds);

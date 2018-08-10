@@ -32,6 +32,9 @@ namespace ICS.XFramework.Data
         static MethodInfo _getString = typeof(IDataRecord).GetMethod("GetString", new Type[] { typeof(int) });
         static MethodInfo _getValue = typeof(IDataRecord).GetMethod("GetValue", new Type[] { typeof(int) });
 
+        // 第1层序列化器ID：TypeFullName_FieldNames_Descriptors
+        // 第2层序列化器ID：Descriptors
+
         private IDataReader _reader = null;
         private CommandDefinition _define = null;
         private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
@@ -190,7 +193,7 @@ namespace ICS.XFramework.Data
 
                 if (!_deserializers.TryGetValue(keyName, out deserializer))
                 {
-                    deserializer = GetDeserializer(navType.IsGenericType ? navType.GetGenericArguments()[0] : navType, _reader, _define.Columns, start, end);
+                    deserializer = GetDeserializer(navType.IsGenericType ? navTypeRuntime.GenericArguments[0] : navType, _reader, _define.Columns, start, end);
                     _deserializers[keyName] = deserializer;
                 }
 

@@ -19,13 +19,11 @@ namespace ICS.XFramework.Data
     {
         private IDataReader _reader = null;
         private CommandDefinition _define = null;
-        private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
 
         public TypeDeserializer(IDataReader reader, CommandDefinition define)
         {
             _define = define;
             _reader = reader;
-            _deserializers = new Dictionary<string, Func<IDataRecord, object>>(8);
         }
 
         /// <summary>
