@@ -42,7 +42,7 @@ namespace ICS.XFramework.Reflection.Emit
         public override void Set(object target, object value)
         {
             _setter = _setter ?? MemberAccess_Field.InitializeSetter(_member);
-            value = value ?? Helper.GetNullValue(_member.FieldType);
+            value = value ?? EmitHelper.GetNullValue(_member.FieldType);
             _setter(target, value);
         }
 

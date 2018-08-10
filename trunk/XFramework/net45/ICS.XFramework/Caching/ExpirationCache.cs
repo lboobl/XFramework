@@ -97,7 +97,7 @@ namespace ICS.XFramework.Caching
             try
             {
                 CacheItem obj;
-                if (this._cache.TryGetValue(key, out obj))
+                if (this._innerCache.TryGetValue(key, out obj))
                 {
                     obj.SetLastAccess();
                     return obj.Value;
@@ -115,7 +115,7 @@ namespace ICS.XFramework.Caching
             try
             {
                 CacheItem obj1;
-                if (this._cache.TryGetValue(key, out obj1))
+                if (this._innerCache.TryGetValue(key, out obj1))
                 {
                     obj1.SetLastAccess();
                     return obj1.Value;
@@ -124,7 +124,7 @@ namespace ICS.XFramework.Caching
                 obj1 = new CacheItem { LastAccessTime = DateTime.Now };
                 obj1.Key = key;
                 obj1.Value = creator(key);
-                this._cache[key] = obj1;
+                this._innerCache[key] = obj1;
                 return obj1.Value;
             }
             finally
@@ -142,7 +142,7 @@ namespace ICS.XFramework.Caching
             try
             {
                 CacheItem obj;
-                if (!this._cache.TryGetValue(key, out obj))
+                if (!this._innerCache.TryGetValue(key, out obj))
                 {
                     if (creator == null)
                         return default(TValue);
@@ -150,7 +150,7 @@ namespace ICS.XFramework.Caching
                     CacheItem obj1 = new CacheItem { LastAccessTime = DateTime.Now };
                     obj1.Key = key;
                     obj1.Value = creator(key);
-                    this._cache[key] = obj1;
+                    this._innerCache[key] = obj1;
                     return obj1.Value;
                 }
                 else
@@ -161,7 +161,7 @@ namespace ICS.XFramework.Caching
                     TValue obj2 = updator(key);
                     obj.Value = obj2;
                     obj.SetLastAccess();
-                    this._cache[key] = obj;
+                    this._innerCache[key] = obj;
                     return obj2;
                 }
             }
@@ -180,7 +180,7 @@ namespace ICS.XFramework.Caching
             try
             {
                 CacheItem obj;
-                if (this._cache.TryGetValue(key, out obj))
+                if (this._innerCache.TryGetValue(key, out obj))
                 {
                     obj.SetLastAccess();
                     value = obj.Value;
@@ -205,8 +205,8 @@ namespace ICS.XFramework.Caching
                 this._rwLock.EnterWriteLock();
                 try
                 {
-                    array = new CacheItem[this._cache.Count];
-                    this._cache.Values.CopyTo(array, 0);
+                    array = new CacheItem[this._innerCache.Count];
+                    this._innerCache.Values.CopyTo(array, 0);
                     //Buffer.BlockCopy(this._cache.Values, 0, array, 0, array.Length);
                 }
                 finally

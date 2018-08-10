@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 
 namespace ICS.XFramework.Reflection.Emit
 {
-    internal static class Helper
+    internal static class EmitHelper
     {
         public static void EmitBoxIfNeeded(this ILGenerator g, Type type)
         {

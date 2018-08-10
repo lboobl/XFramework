@@ -8,7 +8,7 @@ namespace ICS.XFramework.Reflection
     /// </summary>
     public static class TypeRuntimeInfoCache
     {
-        private static readonly ICache<Type, TypeRuntimeInfo> _cache = new ReaderWriterCache<Type, TypeRuntimeInfo>(MemberInfoComparer<Type>.Default);
+        private static readonly ICache<Type, TypeRuntimeInfo> _typeRuntimeCache = new ReaderWriterCache<Type, TypeRuntimeInfo>(MemberInfoComparer<Type>.Default);
 
         /// <summary>
         /// 取指定类型的运行时元数据
@@ -17,7 +17,7 @@ namespace ICS.XFramework.Reflection
         /// <returns></returns>
         public static TypeRuntimeInfo GetRuntimeInfo(Type type)
         {
-            return _cache.GetOrAdd(type, p => new TypeRuntimeInfo(p));
+            return _typeRuntimeCache.GetOrAdd(type, p => new TypeRuntimeInfo(p));
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace ICS.XFramework.Reflection
         /// </summary>
         public static void Clear()
         {
-            IDisposable d = _cache as IDisposable;
+            IDisposable d = _typeRuntimeCache as IDisposable;
             if (d != null) d.Dispose();
         }
     }

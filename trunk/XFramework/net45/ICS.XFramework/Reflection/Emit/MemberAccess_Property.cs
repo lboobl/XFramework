@@ -46,7 +46,7 @@ namespace ICS.XFramework.Reflection.Emit
             if (!_member.CanWrite) throw new XFrameworkException("this property [{0}] is unwritable", base.FullName);
 
             _setter = _setter ?? MemberAccess_Property.InitializeSetter(_member);
-            _setter(target, value ?? Helper.GetNullValue(_member.PropertyType));
+            _setter(target, value ?? EmitHelper.GetNullValue(_member.PropertyType));
         }
 
         // 初始化 Get 动态方法

@@ -10,7 +10,7 @@ namespace ICS.XFramework.Caching
     public class ReaderWriterCache<TKey, TValue> : ICache<TKey, TValue>, IDisposable
     {
         protected readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
-        protected readonly IDictionary<TKey, TValue> _cache;
+        protected readonly IDictionary<TKey, TValue> _innerCache;
 
         /// <summary>
         /// 缓存内容
@@ -19,7 +19,7 @@ namespace ICS.XFramework.Caching
         {
             get
             {
-                return this._cache;
+                return this._innerCache;
             }
         }
 
@@ -33,7 +33,7 @@ namespace ICS.XFramework.Caching
                 this._rwLock.EnterReadLock();
                 try
                 {
-                    return this._cache.Count;
+                    return this._innerCache.Count;
                 }
                 finally
                 {
@@ -55,7 +55,7 @@ namespace ICS.XFramework.Caching
         /// </summary>
         public ReaderWriterCache(IEqualityComparer<TKey> comparer)
         {
-            this._cache = new Dictionary<TKey, TValue>(comparer);
+            this._innerCache = new Dictionary<TKey, TValue>(comparer);
         }
 
         /// <summary>
@@ -63,11 +63,15 @@ namespace ICS.XFramework.Caching
         /// </summary>
         public virtual TValue GetOrAdd(TKey key, Func<TKey, TValue> creator = null)
         {
-            this._rwLock.EnterReadLock();
+            // <<<<<<<<< 尝试在不加锁的情况下读取记录 >>>>>>>>>>>
+            TValue obj;
+            if (this._innerCache.TryGetValue(key, out obj))
+                return obj;
+
             try
             {
-                TValue obj;
-                if (this._cache.TryGetValue(key, out obj)) 
+                this._rwLock.EnterReadLock();
+                if (this._innerCache.TryGetValue(key, out obj)) 
                     return obj;
             }
             finally
@@ -78,15 +82,15 @@ namespace ICS.XFramework.Caching
             if (creator == null) 
                 return default(TValue);
 
-            this._rwLock.EnterWriteLock();
             try
             {
+                this._rwLock.EnterWriteLock();
                 TValue obj1;
-                if (this._cache.TryGetValue(key, out obj1)) 
+                if (this._innerCache.TryGetValue(key, out obj1)) 
                     return obj1;
                 
                 TValue obj2 = creator(key);
-                this._cache[key] = obj2;
+                this._innerCache[key] = obj2;
                 return obj2;
             }
             finally
@@ -104,13 +108,13 @@ namespace ICS.XFramework.Caching
             try
             {
                 TValue value;
-                if (!this._cache.TryGetValue(key, out value))
+                if (!this._innerCache.TryGetValue(key, out value))
                 {
                     if (creator == null)
                         return default(TValue);
                     
                     TValue obj1 = creator(key);
-                    this._cache[key] = obj1;
+                    this._innerCache[key] = obj1;
                     return obj1;
                 }
                 else
@@ -119,7 +123,7 @@ namespace ICS.XFramework.Caching
                         return default(TValue);
                     
                     TValue obj2 = updator(key);
-                    this._cache[key] = obj2;
+                    this._innerCache[key] = obj2;
                     return obj2;
                 }
             }
@@ -137,7 +141,7 @@ namespace ICS.XFramework.Caching
             this._rwLock.EnterReadLock();
             try
             {
-                if (this._cache.TryGetValue(key, out value))
+                if (this._innerCache.TryGetValue(key, out value))
                     return true;
             }
             finally
@@ -155,7 +159,7 @@ namespace ICS.XFramework.Caching
             this._rwLock.EnterWriteLock();
             try
             {
-                this._cache.Remove(key);
+                this._innerCache.Remove(key);
             }
             finally
             {
@@ -182,7 +186,7 @@ namespace ICS.XFramework.Caching
                 this._rwLock.EnterWriteLock();
                 try
                 {
-                    this._cache.Clear();
+                    this._innerCache.Clear();
                 }
                 finally
                 {
