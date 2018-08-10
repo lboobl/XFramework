@@ -14,13 +14,13 @@ namespace ICS.XFramework.Data.SqlClient
     /// </summary>
     public class MethodCallExressionVisitor : ICS.XFramework.Data.MethodCallExressionVisitorBase
     {
-        static IDictionary<string, MemberAccess_Method> _methods = null;
+        static IDictionary<string, MethodInvoker> _methods = null;
         static MethodCallExressionVisitor()
         {
             BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic;
             _methods = typeof(MethodCallExressionVisitor)
                 .GetMethods(bindingAttr)
-                .ToDictionary(m => m.Name, m => new MemberAccess_Method(m));
+                .ToDictionary(m => m.Name, m => new MethodInvoker(m));
         }
 
         #region 重写方法
@@ -88,7 +88,7 @@ namespace ICS.XFramework.Data.SqlClient
 
             if (!string.IsNullOrEmpty(methodName))
             {
-                MemberAccess_Method invoker = null;
+                MethodInvoker invoker = null;
                 MethodCallExressionVisitor._methods.TryGetValue(methodName + node.Method.Name, out invoker);
                 if (invoker != null)
                 {
@@ -116,7 +116,7 @@ namespace ICS.XFramework.Data.SqlClient
 
             if (!string.IsNullOrEmpty(methodName))
             {
-                MemberAccess_Method invoker = null;
+                MethodInvoker invoker = null;
                 MethodCallExressionVisitor._methods.TryGetValue(methodName + node.Member.Name, out invoker);
                 if (invoker != null)
                 {

@@ -10,7 +10,7 @@ namespace ICS.XFramework.Reflection.Emit
     /// <summary>
     /// 构造函数访问器
     /// </summary>
-    public class ConstructorInvoker : IConstructorInvoker
+    public class ConstructorInvoker
     {
         private Func<object[], object> _invoker = null;
         private ConstructorInfo _ctor = null;
@@ -21,7 +21,7 @@ namespace ICS.XFramework.Reflection.Emit
         public ConstructorInfo Constructor { get { return _ctor; } }
 
         /// <summary>
-        /// 初始化 <see cref="MemberAccess"/> 类的新实例
+        /// 初始化 <see cref="MemberInvokerBase"/> 类的新实例
         /// </summary>
         /// <param name="ctor">构造函数</param>
         public ConstructorInvoker(ConstructorInfo ctor)

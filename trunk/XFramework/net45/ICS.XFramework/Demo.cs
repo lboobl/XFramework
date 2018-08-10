@@ -9,6 +9,8 @@ using ICS.XFramework;
 using ICS.XFramework.Data;
 using ICS.XFramework.Caching;
 using System.Threading;
+using System.Reflection;
+using ICS.XFramework.Reflection.Emit;
 
 namespace ICS.XFramework
 {
@@ -19,8 +21,12 @@ namespace ICS.XFramework
 
         public static void Run()
         {
-            ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
-
+            Inte_CRM.Client client = new Inte_CRM.Client { Remark = "K" };
+            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(typeof(Inte_CRM.Client));
+            PropertyInfo property = typeof(Inte_CRM.Client).GetProperty("Remark");
+            PropertyInvoker pa = new PropertyInvoker(property);
+            var s = pa.Invoke(client, "ABC", "DEF");
+            var g = pa.Invoke(client);
 
             //Query();
             //Join();

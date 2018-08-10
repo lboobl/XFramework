@@ -19,7 +19,7 @@ namespace ICS.XFramework.Reflection
 
         private object[] _customAttributes;
         private ConstructorInvoker _ctorInvoker = null;
-        private Dictionary<string, MemberAccessWrapper> _wrappers = null;
+        private Dictionary<string, MemberInvokerWrapper> _wrappers = null;
         private Type[] _genericArguments = null;
         private Type _genericTypeDefinition = null;
         private bool? _lazyIsCompilerGenerated = null;
@@ -100,7 +100,7 @@ namespace ICS.XFramework.Reflection
         /// <summary>
         /// 成员包装器集合
         /// </summary>
-        public Dictionary<string, MemberAccessWrapper> Wrappers
+        public Dictionary<string, MemberInvokerWrapper> Wrappers
         {
             get { return (_wrappers = _wrappers ?? this.InitializeWrapper(_type)); }
         }
@@ -137,9 +137,9 @@ namespace ICS.XFramework.Reflection
         /// </summary>
         /// <param name="memberName"></param>
         /// <returns></returns>
-        public MemberAccessWrapper GetWrapper(string memberName)
+        public MemberInvokerWrapper GetWrapper(string memberName)
         {
-            MemberAccessWrapper wrapper = null;
+            MemberInvokerWrapper wrapper = null;
             this.Wrappers.TryGetValue(memberName, out wrapper);
 
             //if (wrapper == null) throw new XfwException("member [{0}.{1}] doesn't exists", _type.Name, memberName);
@@ -154,7 +154,7 @@ namespace ICS.XFramework.Reflection
         /// <returns></returns>
         public TAttribute GetWrapperAttribute<TAttribute>(string memberName) where TAttribute : Attribute
         {
-            MemberAccessWrapper wrapper = this.GetWrapper(memberName);
+            MemberInvokerWrapper wrapper = this.GetWrapper(memberName);
             return wrapper != null ? wrapper.GetCustomAttribute<TAttribute>() : null;
         }
 
@@ -166,7 +166,7 @@ namespace ICS.XFramework.Reflection
         /// <returns></returns>
         public object Get(object target, string memberName)
         {
-            MemberAccessWrapper wrapper = this.GetWrapper(memberName);
+            MemberInvokerWrapper wrapper = this.GetWrapper(memberName);
             if (wrapper == null) throw new XFrameworkException("[{0}.{1}] doesn't exists", _type.Name, memberName);
             return wrapper.Get(target);
         }
@@ -180,7 +180,7 @@ namespace ICS.XFramework.Reflection
         /// <returns></returns>
         public void Set(object target, string memberName, object value)
         {
-            MemberAccessWrapper wrapper = this.GetWrapper(memberName);
+            MemberInvokerWrapper wrapper = this.GetWrapper(memberName);
             wrapper.Set(target, value);
         }
 
@@ -202,16 +202,16 @@ namespace ICS.XFramework.Reflection
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        protected virtual Dictionary<string, MemberAccessWrapper> InitializeWrapper(Type type)
+        protected virtual Dictionary<string, MemberInvokerWrapper> InitializeWrapper(Type type)
         {
             // 静态/实例 私有/公有
             BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-            IEnumerable<MemberAccessWrapper> wrappers = type.GetMembers(bindingAttr)
+            IEnumerable<MemberInvokerWrapper> wrappers = type.GetMembers(bindingAttr)
                 .Where(p => p.MemberType == MemberTypes.Property || p.MemberType == MemberTypes.Field || p.MemberType == MemberTypes.Method)
-                .Select(p => new MemberAccessWrapper(p));
+                .Select(p => new MemberInvokerWrapper(p));
 
             // fix issue # overide method
-            Dictionary<string, MemberAccessWrapper> d = new Dictionary<string, MemberAccessWrapper>();
+            Dictionary<string, MemberInvokerWrapper> d = new Dictionary<string, MemberInvokerWrapper>();
             foreach (var p in wrappers)
             {
                 if (!d.ContainsKey(p.Member.Name)) d.Add(p.Member.Name, p);

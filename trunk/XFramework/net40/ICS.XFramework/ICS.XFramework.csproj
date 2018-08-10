@@ -272,29 +272,23 @@
     <Compile Include="..\..\net45\ICS.XFramework\Data\TableAliasCache.cs">
       <Link>Data\TableAliasCache.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Contract\IConstructorInvoker.cs">
-      <Link>Reflection\Contract\IConstructorInvoker.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Contract\IMethodInvoker.cs">
-      <Link>Reflection\Contract\IMethodInvoker.cs</Link>
-    </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\ConstructorInvoker.cs">
       <Link>Reflection\Emit\ConstructorInvoker.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\Helper.cs">
-      <Link>Reflection\Emit\Helper.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\EmitHelper.cs">
+      <Link>Reflection\Emit\EmitHelper.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\MemberAccess_Field.cs">
-      <Link>Reflection\Emit\MemberAccess_Field.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\FieldAccess.cs">
+      <Link>Reflection\Emit\FieldAccess.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\MemberAccess_Method.cs">
-      <Link>Reflection\Emit\MemberAccess_Method.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\MethodAccess.cs">
+      <Link>Reflection\Emit\MethodAccess.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\MemberAccess_Property.cs">
-      <Link>Reflection\Emit\MemberAccess_Property.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\PropertyAccess.cs">
+      <Link>Reflection\Emit\PropertyAccess.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberAccess.cs">
-      <Link>Reflection\MemberAccess.cs</Link>
+    <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberAccessBase.cs">
+      <Link>Reflection\MemberAccessBase.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberAccessWrapper.cs">
       <Link>Reflection\MemberAccessWrapper.cs</Link>

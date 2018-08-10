@@ -8,19 +8,19 @@ namespace ICS.XFramework.Reflection.Emit
     /// <summary>
     /// 方法成员访问器
     /// </summary>
-    public sealed class MemberAccess_Method : MemberAccess//, IMethodInvoker
+    public sealed class MethodInvoker : MemberInvokerBase
     {
         private Func<object, object[], object> _invoker;
         private MethodInfo _member = null;
 
         /// <summary>
-        /// 初始化 <see cref="MemberAccess_Method"/> 类的新实例
+        /// 初始化 <see cref="MethodInvoker"/> 类的新实例
         /// </summary>
-        /// <param name="mi">方法元数据</param>
-        public MemberAccess_Method(MethodInfo mi)
-            :base(mi)
+        /// <param name="method">方法元数据</param>
+        public MethodInvoker(MethodInfo method)
+            :base(method)
         {
-            _member = mi;
+            _member = method;
         }
 
         /// <summary>
@@ -31,27 +31,27 @@ namespace ICS.XFramework.Reflection.Emit
         /// <returns></returns>
         public override object Invoke(object target, params object[] parameters)
         {
-            _invoker = _invoker ?? MemberAccess_Method.InitializeInvoker(_member);
+            if(_invoker== null) _invoker= MethodInvoker.InitializeInvoker(_member);
             return _invoker(target, parameters);
         }
 
         // 初始化方法调用器
-        private static Func<object, object[], object> InitializeInvoker(MethodInfo mi)
+        private static Func<object, object[], object> InitializeInvoker(MethodInfo method)
         {
             //DynamicMethod dynamicMethod = mi.IsPublic
             //    ? new DynamicMethod(mi.Name, typeof(object), new Type[2] { typeof(object), typeof(object[]) }, typeof(TypeRuntimeInfoCache),true) //mi.Module)
             //    : new DynamicMethod(mi.Name, typeof(object), new Type[2] { typeof(object), typeof(object[]) }, typeof(TypeRuntimeInfoCache), true);
 
             // TypeDeserializer`1 动态调用List的方法
-            DynamicMethod dynamicMethod = new DynamicMethod(mi.Name, typeof(object), new Type[2] { typeof(object), typeof(object[]) }, typeof(TypeRuntimeInfoCache), true);
+            DynamicMethod dynamicMethod = new DynamicMethod(method.Name, typeof(object), new Type[2] { typeof(object), typeof(object[]) }, typeof(TypeRuntimeInfoCache), true);
             ILGenerator g = dynamicMethod.GetILGenerator();
-            ParameterInfo[] parameters = mi.GetParameters();
-            Type[] parameterTypes = new Type[parameters.Length + (!mi.IsStatic ? 1 : 0)];
+            ParameterInfo[] parameters = method.GetParameters();
+            Type[] parameterTypes = new Type[parameters.Length + (!method.IsStatic ? 1 : 0)];
 
             for (int index = 0; index < parameterTypes.Length; ++index)
             {
                 parameterTypes[index] = index == parameters.Length
-                    ? mi.DeclaringType
+                    ? method.DeclaringType
                     : (parameters[index].ParameterType.IsByRef ? parameters[index].ParameterType.GetElementType() : parameters[index].ParameterType);
             }
             LocalBuilder[] local = new LocalBuilder[parameterTypes.Length];
@@ -68,12 +68,12 @@ namespace ICS.XFramework.Reflection.Emit
                 g.Emit(OpCodes.Stloc, local[index]);
             }
 
-            if (!mi.IsStatic)
+            if (!method.IsStatic)
             {
                 g.Emit(OpCodes.Ldarg_0);
-                if (mi.DeclaringType.IsValueType)
+                if (method.DeclaringType.IsValueType)
                 {
-                    g.Emit(OpCodes.Unbox_Any, mi.DeclaringType);
+                    g.Emit(OpCodes.Unbox_Any, method.DeclaringType);
                     g.Emit(OpCodes.Stloc, local[local.Length - 1]);
                     g.Emit(OpCodes.Ldloca_S, local.Length - 1);
                 }
@@ -87,14 +87,14 @@ namespace ICS.XFramework.Reflection.Emit
                     g.Emit(OpCodes.Ldloc, local[index]);
             }
 
-            if (mi.IsVirtual)
-                g.EmitCall(OpCodes.Callvirt, mi, null);
+            if (method.IsVirtual)
+                g.EmitCall(OpCodes.Callvirt, method, null);
             else
-                g.EmitCall(OpCodes.Call, mi, null);
-            if (mi.ReturnType == typeof(void))
+                g.EmitCall(OpCodes.Call, method, null);
+            if (method.ReturnType == typeof(void))
                 g.Emit(OpCodes.Ldnull);
             else
-                g.EmitBoxIfNeeded(mi.ReturnType);
+                g.EmitBoxIfNeeded(method.ReturnType);
 
             for (int index = 0; index < parameters.Length; ++index)
             {

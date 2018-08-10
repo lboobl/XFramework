@@ -22,7 +22,7 @@ namespace ICS.XFramework.Data
         private Type _type = null;
         private int _fieldCount = 0;
         private IDictionary<string, MemberAccessWrapper> _navWrappers = null;
-        private Dictionary<string, Reflection.MemberAccessWrapper> _wrappers = null;
+        private Dictionary<string, Reflection.MemberInvokerWrapper> _wrappers = null;
         private Dictionary<string, MemberAccessWrapper> _keyWrappers = null;
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace ICS.XFramework.Data
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        protected override Dictionary<string, Reflection.MemberAccessWrapper> InitializeWrapper(Type type)
+        protected override Dictionary<string, Reflection.MemberInvokerWrapper> InitializeWrapper(Type type)
         {
             // fix issue#多线程下导致 FieldCount 不正确
             // 单个实例只初始化一次
@@ -135,7 +135,7 @@ namespace ICS.XFramework.Data
                 {
                     if (!isInitialize)
                     {
-                        _wrappers = new Dictionary<string, Reflection.MemberAccessWrapper>();
+                        _wrappers = new Dictionary<string, Reflection.MemberInvokerWrapper>();
                         Func<MemberInfo, bool> predicate = x => x.MemberType == MemberTypes.Method || x.MemberType == MemberTypes.Field ||
                             (x.MemberType == MemberTypes.Property && (x as PropertyInfo).CanRead && (this.IsAnonymousType ? true : (x as PropertyInfo).CanWrite));
                         IEnumerable<MemberAccessWrapper> members =

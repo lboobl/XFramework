@@ -218,7 +218,7 @@ namespace ICS.XFramework.Data
                             string[] keys = keyName.Split('.');
                             TypeRuntimeInfo curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
                             Type curType = curTypeRuntime.Type;
-                            Reflection.MemberAccessWrapper curWrapper = null;
+                            Reflection.MemberInvokerWrapper curWrapper = null;
                             object curModel = prevModel;
 
                             for (int i = 1; i < keys.Length; i++)

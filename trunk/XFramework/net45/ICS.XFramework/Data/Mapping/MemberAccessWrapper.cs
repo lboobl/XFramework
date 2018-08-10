@@ -6,7 +6,7 @@ namespace ICS.XFramework.Data
     /// 类属性访问包装器
     /// </summary>
     /// <remarks>适用Data命名空间下的类属性和数据库字段的映射</remarks>
-    public class MemberAccessWrapper : ICS.XFramework.Reflection.MemberAccessWrapper
+    public class MemberAccessWrapper : ICS.XFramework.Reflection.MemberInvokerWrapper
     {
         private ColumnAttribute _column = null;
         private bool _columnReaded = false;

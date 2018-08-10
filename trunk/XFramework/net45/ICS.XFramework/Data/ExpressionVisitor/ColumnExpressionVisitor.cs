@@ -412,7 +412,7 @@ namespace ICS.XFramework.Data
         private Expression VisitAllMember(Type type, string alias, Expression node = null)
         {
             TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
-            Dictionary<string, Reflection.MemberAccessWrapper> wrappers = typeRuntime.Wrappers;
+            Dictionary<string, Reflection.MemberInvokerWrapper> wrappers = typeRuntime.Wrappers;
 
             foreach (var w in wrappers)
             {

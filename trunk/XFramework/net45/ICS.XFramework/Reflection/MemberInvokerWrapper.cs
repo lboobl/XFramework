@@ -10,18 +10,15 @@ using System.Collections.Generic;
 namespace ICS.XFramework.Reflection
 {
     /// <summary>
-    /// 类成员访问包装器 Facade
+    /// 成员访问包装器 Facade
     /// </summary>
-    public class MemberAccessWrapper
+    public class MemberInvokerWrapper
     {
-        private MemberAccess _memberAccess = null;
+        private MemberInvokerBase _invoker = null;
         private object[] _customAttributes = null;
         private MemberInfo _member = null;
         private Type _dataType = null;
         private MethodInfo _setMethod = null;
-        //private FieldInfo _fieldInfo = null;
-        //private PropertyInfo _propertyInfo = null;
-        //private MethodInfo _methodInfo = null;
 
         /// <summary>
         /// 成员元数据
@@ -50,7 +47,7 @@ namespace ICS.XFramework.Reflection
         public MethodInfo MethodInfo { get { return _member as MethodInfo; } }
 
         /// <summary>
-        /// 成员元数据类型
+        /// 成员数据类型
         /// </summary>
         public Type DataType
         {
@@ -74,11 +71,7 @@ namespace ICS.XFramework.Reflection
         {
             get
             {
-                if (_setMethod == null && _member.MemberType == MemberTypes.Property)
-                {
-                    _setMethod = (_member as PropertyInfo).GetSetMethod();
-                }
-
+                if (_setMethod == null && _member.MemberType == MemberTypes.Property) _setMethod = (_invoker as PropertyInvoker).SetMethod;
                 return _setMethod;
             }
         }
@@ -95,37 +88,17 @@ namespace ICS.XFramework.Reflection
         }
 
         /// <summary>
-        /// 初始化 <see cref="MemberAccessWrapper"/> 类的新实例
+        /// 初始化 <see cref="MemberInvokerWrapper"/> 类的新实例
         /// </summary>
         /// <param name="member">成员元数据</param>
-        public MemberAccessWrapper(MemberInfo member)
+        public MemberInvokerWrapper(MemberInfo member)
         {
             _member = member;
-            if (_member.MemberType == MemberTypes.Property) _memberAccess = new MemberAccess_Property((PropertyInfo)_member);
-            else if (_member.MemberType == MemberTypes.Field) _memberAccess = new MemberAccess_Field((FieldInfo)_member);
-            else if (_member.MemberType == MemberTypes.Method) _memberAccess = new MemberAccess_Method((MethodInfo)_member);
+            if (_member.MemberType == MemberTypes.Property) _invoker = new PropertyInvoker((PropertyInfo)_member);
+            else if (_member.MemberType == MemberTypes.Field) _invoker = new FieldInvoker((FieldInfo)_member);
+            else if (_member.MemberType == MemberTypes.Method) _invoker = new MethodInvoker((MethodInfo)_member);
 
-            if (_memberAccess == null) throw new XFrameworkException("member {0} not support", member.ToString());
-        }
-
-        /// <summary>
-        /// Get 属性/字段 值
-        /// </summary>
-        /// <param name="target">拥有该成员的类实例</param>
-        /// <returns></returns>
-        public object Get(object target)
-        {
-            return _memberAccess.Get(target);
-        }
-
-        /// <summary>
-        /// Set 属性/字段 值
-        /// </summary>
-        /// <param name="target">拥有该成员的类实例</param>
-        /// <param name="value">字段/属性值</param>
-        public void Set(object target, object value)
-        {
-            _memberAccess.Set(target, value);
+            if (_invoker == null) throw new XFrameworkException("member {0} not supported", member.ToString());
         }
 
         /// <summary>
@@ -136,7 +109,7 @@ namespace ICS.XFramework.Reflection
         /// <returns></returns>
         public virtual object Invoke(object target, params object[] parameters)
         {
-            return _memberAccess.Invoke(target, parameters);
+            return _invoker.Invoke(target, parameters);
         }
 
         /// <summary>
