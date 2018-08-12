@@ -16,20 +16,32 @@ namespace ICS.XFramework.Data
         /// </summary>
         public async Task<List<T>> DeserializeAsync<T>()
         {
-            //bool isTop = true;
             bool isLine = false;
             object prevLine = null;
             List<T> collection = new List<T>();
-            TypeDeserializer<T> deserializer = new TypeDeserializer<T>(_reader, _define as CommandDefinition);
+
+            object obj = null;
+            string key = GetDeserializerKey<T>(_reader, _define);
+            _deserializers.TryGet(key, out obj);
+            if (obj == null) obj = new TypeDeserializer<T>();
+            TypeDeserializer<T> deserializer = (TypeDeserializer<T>)obj;
+            deserializer.Reader = _reader;
+            deserializer.CommandDefinition = _define;
+
             while (await (_reader as DbDataReader).ReadAsync())
             {
-                T model = deserializer.Deserialize(prevLine, out isLine);
+                T model = ((TypeDeserializer<T>)deserializer).Deserialize(prevLine, out isLine);
                 if (!isLine)
                 {
                     collection.Add(model);
                     prevLine = model;
                 }
             }
+
+            // 添加映射器到缓存
+            _deserializers.GetOrAdd(key, x => deserializer);
+
+            // 返回结果
             return collection;
         }
     }

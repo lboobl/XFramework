@@ -17,10 +17,10 @@ namespace ICS.XFramework.UnitTest
 
         public static void Run()
         {
-            Query();
-            Join();
-            Other();
-            Rabbit();
+            //Query();
+            //Join();
+            //Other();
+            Horse();
         }
 
         // 单表查询
@@ -879,7 +879,7 @@ namespace ICS.XFramework.UnitTest
         }
 
         // 性能测试
-        static void Rabbit()
+        static void Horse()
         {
             string connString = "Server=192.168.34.170;Database=ProductCenter;uid=testuser;pwd=123456";
             var context = new DataContext(new ICS.XFramework.Data.SqlClient.DbQueryProvider(connString));
@@ -897,20 +897,21 @@ namespace ICS.XFramework.UnitTest
             //}
             //Console.WriteLine(stop.ElapsedMilliseconds);
             //Console.WriteLine(stop.Elapsed);
-            Console.WriteLine("Enter to Begin");
-            Console.ReadLine();
+            //Console.WriteLine("Enter to Begin");
+            //Console.ReadLine();
 
             connString = "Server=.;Database=Inte_CRM;uid=sa;pwd=123456";
             context = new DataContext(new ICS.XFramework.Data.SqlClient.DbQueryProvider(connString));
             stop = new Stopwatch();
             stop.Start();
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 2000; i++)
             {
                 var result = context
                     .GetTable<Inte_CRM.Client>()
                     .Include(a => a.AccountList)
                     .ToList();
             }
+            stop.Stop();
             Console.WriteLine(stop.ElapsedMilliseconds);
             Console.WriteLine(stop.Elapsed);
             Console.ReadLine();

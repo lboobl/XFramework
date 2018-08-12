@@ -9,16 +9,19 @@ using System.Reflection.Emit;
 using System.Collections.Generic;
 
 using ICS.XFramework.Reflection.Emit;
+using System.Text;
+using ICS.XFramework.Caching;
 
 namespace ICS.XFramework.Data
 {
     /// <summary>
-    /// <see cref="IDataReader"/> 转实体反序列化器
+    /// <see cref="IDataReader"/> 转实体映射
     /// </summary>
     public partial class TypeDeserializer
     {
         private IDataReader _reader = null;
         private CommandDefinition _define = null;
+        static ICache<string, object> _deserializers = new ReaderWriterCache<string, object>();
 
         public TypeDeserializer(IDataReader reader, CommandDefinition define)
         {
@@ -31,11 +34,18 @@ namespace ICS.XFramework.Data
         /// </summary>
         public List<T> Deserialize<T>()
         {
-            //bool isTop = true;
             bool isLine = false;
             object prevLine = null;
             List<T> collection = new List<T>();
-            TypeDeserializer<T> deserializer = new TypeDeserializer<T>(_reader, _define);
+
+            object obj = null;
+            string key = GetDeserializerKey<T>(_reader, _define);
+            _deserializers.TryGet(key, out obj);
+            if(obj == null) obj = new TypeDeserializer<T>();
+            TypeDeserializer<T> deserializer = (TypeDeserializer<T>)obj;
+            deserializer.Reader = _reader;
+            deserializer.CommandDefinition = _define;
+
             while (_reader.Read())
             {
                 T model = deserializer.Deserialize(prevLine, out isLine);
@@ -46,17 +56,28 @@ namespace ICS.XFramework.Data
                 }
             }
 
+            // 添加映射器到缓存
+            _deserializers.GetOrAdd(key, x => obj);
+
+            // 返回结果
             return collection;
         }
-
-        static bool FilterListNavigation(MemberInfo member)
+        
+        static  string GetDeserializerKey<T>(IDataReader reader, CommandDefinition define)
         {
-            PropertyInfo property = member as PropertyInfo;
-            if (property == null) return false;
-            if (!property.PropertyType.IsGenericType) return false;
+            var keyBuilder = new StringBuilder(typeof(T).FullName);
+            if (define != null)
+            {
+                if (define.Columns != null) foreach (var kv in define.Columns) keyBuilder.AppendFormat("_{0}", kv.Key);
+                if (define.NavigationDescriptors != null) foreach (var kv in define.NavigationDescriptors) keyBuilder.AppendFormat("_{0}<{1},{2}>", kv.Key, kv.Value.Start,kv.Value.Start + kv.Value.FieldCount);
+            }
+            else
+            {
+                for (int i = 0; i < reader.FieldCount; i++) keyBuilder.AppendFormat("_{0}", reader.GetName(i));
+            }
 
-            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(property.PropertyType);
-            return typeRuntime.GenericTypeDefinition == typeof(List<>);
+            string key = keyBuilder.ToString();
+            return key;
         }
     }
 }

@@ -32,9 +32,6 @@ namespace ICS.XFramework.Data
         static MethodInfo _getString = typeof(IDataRecord).GetMethod("GetString", new Type[] { typeof(int) });
         static MethodInfo _getValue = typeof(IDataRecord).GetMethod("GetValue", new Type[] { typeof(int) });
 
-        // 第1层序列化器ID：TypeFullName_FieldNames_Descriptors
-        // 第2层序列化器ID：Descriptors
-
         private IDataReader _reader = null;
         private CommandDefinition _define = null;
         private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
@@ -42,10 +39,22 @@ namespace ICS.XFramework.Data
         private Dictionary<string, HashSet<string>> _listNavigationKeys = null;
         private int? _listNavigationCount = null;
 
-        internal TypeDeserializer(IDataReader reader, CommandDefinition define)
+        internal IDataReader Reader
         {
-            _reader = reader;
-            _define = define;
+            get { return _reader; }
+            set { _reader = value; }
+        }
+
+        internal CommandDefinition CommandDefinition
+        {
+            get { return _define; }
+            set { _define = value; }
+        }
+
+        internal TypeDeserializer()//(IDataReader reader, CommandDefinition define)
+        {
+            //_reader = reader;
+            //_define = define;
             _deserializers = new Dictionary<string, Func<IDataRecord, object>>(8);
             _listNavigationKeys = new Dictionary<string, HashSet<string>>(8);
         }
