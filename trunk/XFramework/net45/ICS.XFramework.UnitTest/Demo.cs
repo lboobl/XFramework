@@ -904,13 +904,22 @@ namespace ICS.XFramework.UnitTest
             context = new DataContext(new ICS.XFramework.Data.SqlClient.DbQueryProvider(connString));
             stop = new Stopwatch();
             stop.Start();
-            for (int i = 0; i < 2000; i++)
+            //for (int i = 0; i < 2000; i++)
+            //{
+            //    var result = context
+            //        .GetTable<Inte_CRM.Client>()
+            //        .Include(a => a.AccountList)
+            //        .ToList();
+            //}
+            var beginDate = DateTime.Now;
+            for (int i = 0; i < 1; i++)
             {
                 var result = context
-                    .GetTable<Inte_CRM.Client>()
-                    .Include(a => a.AccountList)
+                    .GetTable<Inte_CRM.Test>()
+                    //.Include(a => a.AccountList)
                     .ToList();
             }
+            Console.Write("总计：" + (DateTime.Now - beginDate).TotalMilliseconds / 1000.0);
             stop.Stop();
             Console.WriteLine(stop.ElapsedMilliseconds);
             Console.WriteLine(stop.Elapsed);
