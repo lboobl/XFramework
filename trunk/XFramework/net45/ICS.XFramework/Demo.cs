@@ -901,9 +901,8 @@ namespace ICS.XFramework
             //}
             //Console.WriteLine(stop.ElapsedMilliseconds);
             //Console.WriteLine(stop.Elapsed);
-            Console.WriteLine("Enter to Begin");
-            Console.ReadLine();
 
+            Console.WriteLine("2000 * 5000 = 1000w 单表记录");
             connString = "Server=.;Database=Inte_CRM;uid=sa;pwd=123456";
             context = new DataContext(new ICS.XFramework.Data.SqlClient.DbQueryProvider(connString));
             stop = new Stopwatch();
