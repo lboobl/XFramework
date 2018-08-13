@@ -25,10 +25,11 @@ namespace ICS.XFramework.UnitTest
 
     public enum State
     {
-        None = 0,
-        OK = 1
+        Executing = 0,
+        Complete = 1
     }
-    public class Inte_CRM
+
+    public class Model
     {
         /// <summary>
         /// sys_demo
@@ -261,58 +262,36 @@ namespace ICS.XFramework.UnitTest
                 get;
                 set;
             }
-            [ForeignKey("ClientId")]
-            public ICollection<Client> Buyers { get; set; }
         }
 
-        public class CRM_SaleOrder
+        [Table(Name = "Sys_DemoPerformance")]
+        public class Test
         {
-            #region 构造函数
-
-            public CRM_SaleOrder()
-            {
-
-            }
-
-            public CRM_SaleOrder(int orderId, string orderNo)
-            {
-
-            }
-
-            public CRM_SaleOrder(CRM_SaleOrder model)
-            {
-
-            }
-
-            #endregion
-
-            /// <summary>
-            /// orderid
-            /// </summary>
             [Column(IsKey = true)]
-            public int OrderId
-            {
-                get;
-                set;
-            }
 
-            /// <summary>
-            /// orderno
-            /// </summary>
-            public string OrderNo
-            {
-                get;
-                set;
-            }
+            public int Id { get; set; }
 
-            public int ClientId { get; set; }
+            public byte? F_Byte { get; set; }
 
-            [ForeignKey("ClientId")]
-            public Client Client { get; set; }
+            public Int16? F_Int16 { get; set; }
 
-            [ForeignKey("ClientId")]
-            public Client HeavyBuyer { get; set; }
+            public int? F_Int32 { get; set; }
 
+            public long? F_Int64 { get; set; }
+
+            public double? F_Double { get; set; }
+
+            public float? F_Float { get; set; }
+
+            public decimal? F_Decimal { get; set; }
+
+            public bool? F_Bool { get; set; }
+
+            public DateTime? F_DateTime { get; set; }
+
+            public Guid? F_Guid { get; set; }
+
+            public string F_String { get; set; }
         }
 
         [Table(Name = "Bas_Client")]
@@ -350,8 +329,11 @@ namespace ICS.XFramework.UnitTest
             [ForeignKey("CloudServerId")]
             public CloudServer CloudServer { get; set; }
 
+            [ForeignKey("CloudServerId")]
+            public CloudServer LocalServer { get; set; }
+
             [ForeignKey("ClientId")]
-            public List<Account> AccountList { get; set; }
+            public List<Account> Accounts { get; set; }
         }
 
         [Table(Name = "Bas_ClientAccount")]
@@ -370,15 +352,48 @@ namespace ICS.XFramework.UnitTest
             [Column(IsKey = true)]
             public int ClientId { get; set; }
 
-            [ForeignKey("ClientId")]
-            public Client Client { get; set; }
-
             [Column(IsKey = true)]
             public string AccountId { get; set; }
 
             public string AccountCode { get; set; }
 
             public string AccountName { get; set; }
+
+            [ForeignKey("ClientId")]
+            public Client Client { get; set; }
+
+            [ForeignKey(new[] { "ClientId" , "AccountId" })]
+            public List<AccountMarket> Markets { get; set; }
+        }
+
+        [Table(Name = "Bas_ClientAccountMarket")]
+        public class AccountMarket
+        {
+            public AccountMarket()
+            {
+
+            }
+
+            public AccountMarket(AccountMarket model)
+            {
+
+            }
+
+            [Column(IsKey = true)]
+            public int ClientId { get; set; }
+
+            [Column(IsKey = true)]
+            public string AccountId { get; set; }
+
+            [Column(IsKey = true)]
+            public int MarketId { get; set; }
+
+            [ForeignKey("ClientId")]
+            public Client Client { get; set; }
+
+            public string MarketCode { get; set; }
+
+            public string MarketName { get; set; }
         }
 
         [Table(Name = "Sys_CloudServer")]
@@ -391,206 +406,5 @@ namespace ICS.XFramework.UnitTest
 
             public string CloudServerName { get; set; }
         }
-
-
-        [Table(Name = "Sys_Thin")]
-        public class Thin
-        {
-            [Column(IsKey = true)]
-            public int ThinId { get; set; }
-
-            public string ThinName { get; set; }
-        }
-
-        [Table(Name = "Sys_ThinIdentity")]
-        public class ThinIdentity
-        {
-            [Column(IsKey = true, IsIdentity = true)]
-            public int ThinId { get; set; }
-
-            public string ThinName { get; set; }
-        }
-
-        [Table(Name = "Sys_User")]
-        public class User
-        {
-            [Column(IsKey = true)]
-            public int UserId { get; set; }
-
-            public string UserName { get; set; }
-
-            [ForeignKey("UserId")]
-            public List<UserRole> Roles { get; set; }
-
-
-            [ForeignKey("UserId")]
-            public List<UserModule> Modules { get; set; }
-        }
-
-        [Table(Name = "Sys_UserRole")]
-        public class UserRole
-        {
-            [Column(IsKey = true)]
-            public int UserId { get; set; }
-
-            [Column(IsKey = true)]
-            public int RoleId { get; set; }
-
-            [ForeignKey(new string[] { "UserId", "RoleId" })]
-            public List<UserRoleModule> RoleModules { get; set; }
-        }
-
-
-        [Table(Name = "Sys_UserRoleModule")]
-        public class UserRoleModule
-        {
-            [Column(IsKey = true)]
-            public int UserId { get; set; }
-
-            [Column(IsKey = true)]
-            public int RoleId { get; set; }
-
-            [Column(IsKey = true)]
-            public int ModuleId { get; set; }
-        }
-
-        [Table(Name = "Sys_UserModule")]
-        public class UserModule
-        {
-            [Column(IsKey = true)]
-            public int UserId { get; set; }
-
-            [Column(IsKey = true)]
-            public int ModuleId { get; set; }
-        }
-
-        [Table(Name = "Test")]
-        public class Test
-        {
-            [Column(IsKey = true)]
-            public int Id { get; set; }
-            public byte? F_Byte { get; set; }
-            public Int16? F_Int16 { get; set; }
-            public int? F_Int32 { get; set; }
-            public long? F_Int64 { get; set; }
-            public double? F_Double { get; set; }
-            public float? F_Float { get; set; }
-            public decimal? F_Decimal { get; set; }
-            public bool? F_Bool { get; set; }
-            public DateTime? F_DateTime { get; set; }
-            public Guid? F_Guid { get; set; }
-            public string F_String { get; set; }
-        }
-    }
-
-
-    public class Prd_Center
-    {
-        public class Product
-        {
-            public Product()
-            {
-
-            }
-
-            public Product(Product model)
-            {
-
-            }
-
-            public int ProductID { get; set; }
-
-            public string SKU { get; set; }
-
-            public string Title { get; set; }
-
-            public int ClientID { get; set; }
-
-            [ForeignKey("ClientID")]
-            public virtual Client Client { get; set; }
-        }
-
-        public class Client
-        {
-            public Client()
-            {
-
-            }
-
-            public Client(Client model)
-            {
-
-            }
-
-            public int ClientID { get; set; }
-
-            public string ClientCode { get; set; }
-
-            public string ClientName { get; set; }
-        }
-    }
-
-    /// <summary>
-    /// 单据状态
-    /// </summary>
-    public enum OrderState
-    {
-        /// <summary>
-        /// 无状态
-        /// </summary>
-        None = 0,
-
-        /// <summary>
-        /// 错误
-        /// </summary>
-        Error = 1,
-
-        /// <summary>
-        /// 未支付
-        /// </summary>
-        NoPay = 2,
-
-        /// <summary>
-        /// 未激活
-        /// </summary>
-        WaitActive = 10,
-
-        /// <summary>
-        /// 未使用
-        /// </summary>
-        Ready = 20,
-
-        /// <summary>
-        /// 使用中
-        /// </summary>
-        Inuse = 25,
-
-        /// <summary>
-        /// 已过期
-        /// </summary>
-        Expired = 30,
-
-        /// <summary>
-        /// 已取消
-        /// </summary>
-        Cancel = 35
-    }
-
-    public enum AllowusedState
-    {
-        /// <summary>
-        /// 禁用
-        /// </summary>
-        Disabled = 0,
-
-        /// <summary>
-        /// 启用
-        /// </summary>
-        Enabled = 1,
-
-        /// <summary>
-        /// 删除
-        /// </summary>
-        Delete = 2
     }
 }

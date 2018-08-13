@@ -32,7 +32,7 @@ namespace ICS.XFramework
         {
             var context = new DataContext();
 
-            var q10=
+            var q10 =
                 from a in context.GetTable<Inte_CRM.CRM_SaleOrder>()
                 group a by a.ClientId into g
                 select new { ClientId = g.Key };
@@ -45,8 +45,8 @@ namespace ICS.XFramework
             var query2 =
                 from a in context.GetTable<Inte_CRM.CRM_SaleOrder>()
                 group a by a.ClientId into g
-                select new { ClientId= g.Key};
-            var m2 = query2.Max(a=>a.ClientId);
+                select new { ClientId = g.Key };
+            var m2 = query2.Max(a => a.ClientId);
 
             query0 =
                 from a in context
@@ -69,8 +69,8 @@ namespace ICS.XFramework
             query0 =
                 from a in context
                     .GetTable<Inte_CRM.CRM_SaleOrder>()
-                    join b in context.GetTable< Inte_CRM.Client> () on a.ClientId equals b.ClientId into u_b
-                    from b in u_b.DefaultIfEmpty()
+                join b in context.GetTable<Inte_CRM.Client>() on a.ClientId equals b.ClientId into u_b
+                from b in u_b.DefaultIfEmpty()
                 where a.OrderId > 0
                 orderby a.OrderId
                 select new Inte_CRM.CRM_SaleOrder(a)
@@ -96,7 +96,7 @@ namespace ICS.XFramework
                     .Include(a => a.Client.CloudServer)
                     //join b in context.GetTable<Inte_CRM.CloudServer>() on a.ClientId equals b.CloudServerId into u_b
                     //from b in u_b.DefaultIfEmpty()
-                where a.OrderId >0
+                where a.OrderId > 0
                 orderby a.OrderId
                 select new Inte_CRM.CRM_SaleOrder(a)
                 {
@@ -128,7 +128,7 @@ namespace ICS.XFramework
                         CloudServer = a.Client.CloudServer
                     }
                 };
-            query3 = query3.Where(a=>a.Client.ClientId>0);
+            query3 = query3.Where(a => a.Client.ClientId > 0);
             query3 = query3.Where(a => a.Client.CloudServer.CloudServerId > 0);
             result3 = query3.Skip(10).Take(20).ToList();
 
@@ -149,7 +149,7 @@ namespace ICS.XFramework
                 .OrderBy(a => a.OrderId)
                 .Skip(5)
                 .Take(1);
-                var result4 = qg.ToList();
+            var result4 = qg.ToList();
             var m1 = qg.Max(a => a.OrderId);
 
             var q1 =
@@ -183,7 +183,7 @@ namespace ICS.XFramework
                 .Include(a => a.Roles[0].RoleModules)
                 .Include(a => a.Modules)
                 .Where(a => a.UserId > 0);
-                        var r5 = q5.ToList();
+            var r5 = q5.ToList();
 
             // 查询表达式
             var query = from a in context.GetTable<Inte_CRM.Demo>()
@@ -889,7 +889,23 @@ namespace ICS.XFramework
             var context = new DataContext(new ICS.XFramework.Data.SqlClient.DbQueryProvider(connString));
 
 
+            connString = "Server=.;Database=Inte_CRM;uid=sa;pwd=123456";
+            context = new DataContext(new ICS.XFramework.Data.SqlClient.DbQueryProvider(connString));
+            var beginDate = DateTime.Now;
+            for (int i = 0; i < 10; i++)
+            {
+                var beginDate1 = DateTime.Now;
+                var result = context
+                    .GetTable<Inte_CRM.Test>()
+                    //.Include(a => a.AccountList)
+                    .ToList();
+                Console.WriteLine("第 " + (i + 1) + " 次：" + (DateTime.Now - beginDate1).TotalMilliseconds / 1000.0);
+            }
+            Console.WriteLine("总计：" + (DateTime.Now - beginDate).TotalMilliseconds / 1000.0);
+
+
             Stopwatch stop = new Stopwatch();
+
             //stop.Start();
 
             //for (int i = 0; i < 100; i++)
