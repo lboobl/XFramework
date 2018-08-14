@@ -7,7 +7,7 @@ namespace ICS.XFramework.Data
     /// <summary>
     /// 提供对数据类型未知的特定数据源进行 &lt;查&gt; 操作的语义表示
     /// </summary>
-    public class DbQueryableInfo_Select<T> : DbQueryableInfo<T>
+    public class DbQueryableInfo_Select<T> : DbQueryableInfo<T>, IDbQueryableInfo_Select
     {
         private List<DbExpression> _join = null;
         private List<DbExpression> _orderBy = null;

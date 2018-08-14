@@ -110,6 +110,7 @@ namespace ICS.XFramework.Data.SqlClient
             // 4.分组再分页时需要使用嵌套查询，此时子查询不需要 'OrderBy' 子句，但最外层则需要
             // 5.'Skip' 'Take' 子句视为语义结束符，在其之后的子句将使用嵌套查询
             // 6.导航属性中有 1:n 关系的，需要使用嵌套查询，否则分页查询会有问题
+            // 7.todo 越来越复杂化了 :(
 
 
             // 导航属性中有1:n关系，只统计主表
@@ -199,20 +200,18 @@ namespace ICS.XFramework.Data.SqlClient
                 if (!qQuery.HaveAny)
                 {
                     // SELECT 范围
-                    ColumnExpressionVisitor visitor = new ColumnExpressionVisitor(this, aliases, qQuery.Expression, qQuery.GroupBy, false, null, qQuery.Include);
-                    visitor.HaveListNavigation = qQuery.HaveListNavigation;
+                    ColumnExpressionVisitor visitor = new ColumnExpressionVisitor(this, aliases, qQuery);
                     visitor.Write(jf);
 
                     cd.Columns = visitor.Columns;
-                    cd.NavigationDescriptors = (visitor as ColumnExpressionVisitor).NavigationDescriptors;
+                    cd.NavigationDescriptors = visitor.NavigationDescriptors;
                     cd.AddNavigation(visitor.Navigations);
 
                     // 如果有统计，选择列中还要追加统计的列
                     if (useStatis && willNest && !string.IsNullOrEmpty(sColumnName))
                     {
                         if (cd.Columns.Count > 0) jf.Append(",");
-                        visitor = new ColumnExpressionVisitor(this, aliases, qQuery.Statis, qQuery.GroupBy, true, cd.Columns);
-                        visitor.HaveListNavigation = qQuery.HaveListNavigation;
+                        visitor = new ColumnExpressionVisitor(this, aliases, qQuery, true, cd.Columns);
                         visitor.Write(jf);
 
                         cd.AddNavigation(visitor.Navigations);

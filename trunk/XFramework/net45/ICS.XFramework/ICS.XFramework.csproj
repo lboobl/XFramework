@@ -83,6 +83,7 @@
     <Compile Include="Common\XFrameworkException.cs" />
     <Compile Include="Common\XFrameworkValidator.cs" />
     <Compile Include="Data\BulkInfo.cs" />
+    <Compile Include="Data\Contract\IDbQueryableInfo_Select.cs" />
     <Compile Include="Data\DataContext45.cs" />
     <Compile Include="Data\DataContext.cs" />
     <Compile Include="Data\DbCommandInterceptor.cs" />

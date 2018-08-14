@@ -12,20 +12,18 @@ namespace ICS.XFramework.Data
     /// </summary>
     public class ColumnExpressionVisitor : ExpressionVisitorBase
     {
-        // TODO 所有LEFT JOIN都应检查是否为空 ???
-        // 若是，会否跟 Client = new Inte_CRM.Client(a.Client) 这种表达式表达的语义有冲突
-
+        private static IDictionary<DbExpressionType, string> _statisMethods = null;
         private DbQueryProviderBase _provider = null;
         private TableAliasCache _aliases = null;
+        private IDbQueryableInfo_Select _qQuery = null;
         private DbExpression _groupBy = null;
         private List<DbExpression> _include = null;
-        private static IDictionary<DbExpressionType, string> _statisMethods = null;
 
         private IDictionary<string, Column> _columns = null;
         private IDictionary<string, string> _visitedNavigations = null;
         private NavigationDescriptorCollection _navDescriptors = null;
         private List<string> _navChainHopper = null;
-        private bool _mOnly = false;
+        private bool _addStatisColumn = false; // 标记有统计列需要追加到选择的列集合中
 
         public static string NullFieldName = "NULL";
 
@@ -44,14 +42,15 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 初始化 <see cref="ColumnExpressionVisitor"/> 类的新实例
         /// </summary>
-        public ColumnExpressionVisitor(DbQueryProviderBase provider, TableAliasCache aliases, DbExpression exp, DbExpression groupBy = null, bool mOnly = false, IDictionary<string, Column> columns = null, List<DbExpression> include = null)
-            : base(provider, aliases, exp.Expressions != null ? exp.Expressions[0] : null)
+        public ColumnExpressionVisitor(DbQueryProviderBase provider, TableAliasCache aliases, IDbQueryableInfo_Select qQuery, bool addStatisColumn = false, IDictionary<string, Column> columns = null)
+            : base(provider, aliases, qQuery.Expression.Expressions != null ? qQuery.Expression.Expressions[0] : null)
         {
             _provider = provider;
             _aliases = aliases;
-            _groupBy = groupBy;
-            _include = include;
-            _mOnly = mOnly;
+            _qQuery = qQuery;
+            _groupBy = qQuery.GroupBy;
+            _include = qQuery.Include;
+            _addStatisColumn = addStatisColumn;
 
             _columns = columns;
             if (_columns == null) _columns = new Dictionary<string, Column>();
@@ -100,11 +99,6 @@ namespace ICS.XFramework.Data
         }
 
         /// <summary>
-        /// 表达式是否包含 1:n 类型的导航属性
-        /// </summary>
-        public bool HaveListNavigation { get; set; }
-
-        /// <summary>
         /// SELECT 字段
         /// Column 对应实体的原始属性
         /// </summary>
@@ -149,7 +143,7 @@ namespace ICS.XFramework.Data
                     : this.VisitAllMember(type, _aliases.GetTableAlias(lambda.Body), node);
             }
 
-            if (_mOnly) _mOnly = false;
+            if (_addStatisColumn) _addStatisColumn = false;
             return base.VisitLambda(node);
         }
 
@@ -400,7 +394,7 @@ namespace ICS.XFramework.Data
 
             // 分组后再分页，子查询不能有OrderBy子句，此时要将OrderBy字段添加到选择字段中，抛给外层查询使用
             var newNode = base.VisitMember(node);
-            if (_mOnly)
+            if (_addStatisColumn)
             {
                 string newName = AddColumn(_columns, node.Member.Name);
                 _builder.AppendAs(newName);

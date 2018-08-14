@@ -532,8 +532,30 @@ namespace ICS.XFramework.UnitTest
             //LEFT JOIN [Bas_ClientAccountMarket] t2 ON t1.[ClientId] = t2.[ClientId] AND t1.[AccountId] = t2.[AccountId]
             //LEFT JOIN [Bas_Client] t3 ON t2.[ClientId] = t3.[ClientId]
 
+
+            query =
+                from a in context.GetTable<Model.Client>()
+                group a by new { a.ClientId, a.ClientCode, a.ClientName } into g
+                select new Model.Client
+                {
+                    ClientId = g.Key.ClientId,
+                    ClientCode = g.Key.ClientCode,
+                    ClientName = g.Key.ClientName
+                };
+            query = query
+                .Where(a => a.ClientId > 0)
+                .OrderBy(a => a.ClientId)
+                .Include(g => g.Accounts)
+                .Include(g => g.Accounts[0].Markets)
+                .Include(g => g.Accounts[0].Markets[0].Client)
+                .Skip(10)
+                .Take(20);
+
+            result = query.ToList();
+            var max = query.Max(a => a.ClientId);
+
             // CROSS JOIN
-           var query1 =
+            var query2 =
                 context
                 .GetTable<Model.Demo>()
                 .SelectMany(a => context.GetTable<Model.Demo>(), (a, b) => new
@@ -541,7 +563,7 @@ namespace ICS.XFramework.UnitTest
                     a.DemoId,
                     b.DemoName
                 });
-            var result1 = query1.ToList();
+            var result2 = query2.ToList();
             //SQL=>
             //SELECT
             //t0.[DemoId] AS[DemoId],
@@ -571,19 +593,19 @@ namespace ICS.XFramework.UnitTest
             //WHERE t1.[CloudServerName] IS NOT NULL
 
 
-            var query2 =
+            var query3 =
                  from a in context.GetTable<Model.Client>()
                  join b in context.GetTable<Model.CloudServer>() on a.CloudServerId equals b.CloudServerId into u_c
                  from b in u_c.DefaultIfEmpty()
                  select a;
-            var query3 =
-                query2.SelectMany(c => context.GetTable<Model.CloudServer>(), (a, c) => new
+            var query4=
+                query3.SelectMany(c => context.GetTable<Model.CloudServer>(), (a, c) => new
                 {
                     ClientId = a.ClientId,
                     CloudServerName = a.CloudServer.CloudServerName,
                     CloudServerCode = c.CloudServerCode
                 });
-            var result3 = query3.ToList();
+            var result4 = query4.ToList();
             //SQL=>
             //SELECT
             //t0.[ClientId] AS[ClientId],
@@ -597,8 +619,8 @@ namespace ICS.XFramework.UnitTest
             var q1 = context.GetTable<Model.Client>().Where(x => x.ClientId == 1);
             var q2 = context.GetTable<Model.Client>().Where(x => x.ClientId == 1);
             var q3 = context.GetTable<Model.Client>().Where(x => x.ClientId == 1);
-            var q4 = q1.Union(q2).Union(q3);
-            var result4 = q4.ToList();
+            var q5 = q1.Union(q2).Union(q3);
+            var result5 = q5.ToList();
             //SQL=>
             //SELECT
             //t0.[ClientId] AS[ClientId],
@@ -623,28 +645,7 @@ namespace ICS.XFramework.UnitTest
             //...
             //FROM[Bas_Client] t0
             //WHERE t0.[ClientId] = 1
-
-            
-
-            //var qg =
-            //    from a in context.GetTable<Model.CRM_SaleOrder>()
-            //        .Include(g => g.Client.AccountList)
-            //        .Include(g => g.Client.CloudServer)
-            //    group a by new { a.OrderId, a.OrderNo, a.ClientId } into g
-            //    select new Model.CRM_SaleOrder
-            //    {
-            //        OrderId = g.Key.OrderId,
-            //        OrderNo = g.Key.OrderNo,
-            //        ClientId = g.Key.ClientId
-            //        //ClientId = g.Max(a => a.OrderId)
-            //    };
-            //qg =
-            //    qg
-            //    .OrderBy(a => a.OrderId)
-            //    .Skip(5)
-            //    .Take(1);
-            //    var result4 = qg.ToList();
-            //var m1 = qg.Max(a => a.OrderId);
+           
 
             //var q1 =
             //    from a in context.GetTable<Model.Demo>()

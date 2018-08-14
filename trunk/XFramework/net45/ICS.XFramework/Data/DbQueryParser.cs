@@ -220,6 +220,7 @@ namespace ICS.XFramework.Data
                 LambdaExpression lambdaExpression = expression as LambdaExpression;
                 if (lambdaExpression != null) expression = lambdaExpression.Body;
                 MemberInitExpression initExpression = expression as MemberInitExpression;
+                NewExpression newExpression = expression as NewExpression;
 
                 foreach (DbExpression d in include)
                 {
@@ -233,16 +234,16 @@ namespace ICS.XFramework.Data
 
                 if (checkListNavgation)
                 {
-                    NewExpression newExpression = initExpression != null ? initExpression.NewExpression : null;
+                    NewExpression constructor = initExpression != null ? initExpression.NewExpression : newExpression;
                     IEnumerable<MemberBinding> bindings = initExpression != null
                         ? initExpression
                           .Bindings
                           .Where(x => Reflection.TypeUtils.IsPrimitive((x.Member as System.Reflection.PropertyInfo).PropertyType))
                         : new List<MemberBinding>();
 
-                    if (newExpression != null || bindings.Count() > 0)
+                    if (constructor != null || bindings.Count() > 0)
                     {
-                        initExpression = Expression.MemberInit(newExpression, bindings);
+                        initExpression = Expression.MemberInit(constructor, bindings);
                         lambdaExpression = Expression.Lambda(initExpression, lambdaExpression.Parameters);
                         // 简化内层选择器，只选择最小字段
                         qQuery.Expression = new DbExpression(DbExpressionType.Select, lambdaExpression);
