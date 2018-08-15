@@ -764,9 +764,13 @@ namespace ICS.XFramework.Data
 
                 for (int i = 1; i <= pages; i++)
                 {
-                    var sqls = sqlList
-                        .Skip((i - 1) * _executeSize)
-                        .Take(_executeSize);
+                    var sqls =
+                        sqlList.Count > _executeSize
+                        ?
+                         sqlList
+                         .Skip((i - 1) * _executeSize)
+                         .Take(_executeSize)
+                        : sqlList;
 
                     string commandText = string.Join(Environment.NewLine, sqls);
                     cmd = this.CreateCommand(commandText, trans);

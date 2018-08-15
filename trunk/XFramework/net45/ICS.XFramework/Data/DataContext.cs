@@ -232,7 +232,7 @@ namespace ICS.XFramework.Data
             int count = _dbQueryables.Count;
             if (count == 0) return 0;
 
-            List<string> sqlList = this.Resolve(true);
+            List<string> sqlList = this.Resolve(false);
             List<int> identitys = new List<int>();
             IDataReader reader = null;
 
@@ -264,6 +264,7 @@ namespace ICS.XFramework.Data
             finally
             {
                 if (reader != null) reader.Dispose();
+                this.Dispose();
             }
 
             return count;

@@ -399,6 +399,7 @@ namespace ICS.XFramework.Data
 
                 if (nullUnderlyingType != null)
                 {
+                    // new Nullable<int>()
                     g.Emit(OpCodes.Newobj, memberType.GetConstructor(new[] { nullUnderlyingType }));
                 }
 

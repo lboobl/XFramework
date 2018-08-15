@@ -376,8 +376,8 @@ namespace ICS.XFramework.Data.SqlClient
 
             #region 嵌套导航
 
-            //if (qQuery.HaveListNavigation && innerQuery != null && innerQuery.OrderBy.Count > 0 && innerQuery.Statis == null && !(innerQuery.Skip > 0 || innerQuery.Take > 0))
-            if (qQuery.HaveListNavigation && innerQuery != null && innerQuery.OrderBy.Count > 0 && innerQuery.Statis == null && qQuery.Statis == null)
+            if (qQuery.HaveListNavigation && innerQuery != null && innerQuery.OrderBy.Count > 0 && innerQuery.Statis == null && !(innerQuery.Skip > 0 || innerQuery.Take > 0))
+            //if (qQuery.HaveListNavigation && innerQuery != null && innerQuery.OrderBy.Count > 0 && innerQuery.Statis == null && qQuery.Statis == null)
             {
                 string sql = cd.CommandText;
                 visitorBase = new OrderByExpressionVisitor(this, aliases, innerQuery.OrderBy, null, "t0");
@@ -577,7 +577,7 @@ namespace ICS.XFramework.Data.SqlClient
                 {
                     var wrapper = kv.Value as MemberAccessWrapper;
                     var column = wrapper.Column;
-                    if (column != null && column.IsIdentity) continue;
+                    if (column != null && column.IsIdentity) goto gotoLabel; // fix issue# 自增列同时又是主键
                     if (column != null && column.NoMapped) continue;
                     if (wrapper.ForeignKey != null) continue;
                     if (wrapper.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
@@ -585,12 +585,17 @@ namespace ICS.XFramework.Data.SqlClient
                     builder.AppendMember("t0", wrapper.Member.Name);
                     builder.Append(" = ");
 
+                    gotoLabel:
                     var value = wrapper.Invoke(entity);
-                    var seg = this.GetSqlSeg(value); ;
-                    builder.Append(seg);
-                    length = builder.Length;
-                    builder.Append(',');
-                    builder.AppendNewLine();
+                    var seg = this.GetSqlSeg(value);
+
+                    if (column == null || !column.IsIdentity)
+                    {
+                        builder.Append(seg);
+                        length = builder.Length;
+                        builder.Append(',');
+                        builder.AppendNewLine();
+                    }
 
                     if (column != null && column.IsKey)
                     {

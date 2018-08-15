@@ -59,7 +59,7 @@ namespace ICS.XFramework.UnitTest
             /// <summary>
             /// demoid
             /// </summary>
-            [Column(IsKey = true)]
+            [Column(IsKey = true,IsIdentity = true)]
             public int DemoId { get; set; }
 
             [Column(NoMapped = true)]
@@ -265,7 +265,7 @@ namespace ICS.XFramework.UnitTest
         }
 
         [Table(Name = "Sys_DemoPerformance")]
-        public class Test
+        public class DemoPerformance
         {
             [Column(IsKey = true)]
 
