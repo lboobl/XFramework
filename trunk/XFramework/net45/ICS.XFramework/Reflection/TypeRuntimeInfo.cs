@@ -159,32 +159,6 @@ namespace ICS.XFramework.Reflection
         }
 
         /// <summary>
-        /// 取指定成员的值
-        /// </summary>
-        /// <param name="target">拥有该成员的类实例</param>
-        /// <param name="memberName">成员名称</param>
-        /// <returns></returns>
-        public object Get(object target, string memberName)
-        {
-            MemberInvokerWrapper wrapper = this.GetWrapper(memberName);
-            if (wrapper == null) throw new XFrameworkException("[{0}.{1}] doesn't exists", _type.Name, memberName);
-            return wrapper.Invoke(target);
-        }
-
-        /// <summary>
-        /// 设置指定成员的值
-        /// </summary>
-        /// <param name="target">拥有该成员的类实例</param>
-        /// <param name="memberName">成员名称</param>
-        /// <param name="value">成员值</param>
-        /// <returns></returns>
-        public void Set(object target, string memberName, object value)
-        {
-            MemberInvokerWrapper wrapper = this.GetWrapper(memberName);
-            wrapper.Invoke(target, value);
-        }
-
-        /// <summary>
         /// 获取指定的自定义特性。
         /// </summary>
         /// <typeparam name="TAttribute">自定义特性</typeparam>

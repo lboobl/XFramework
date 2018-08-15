@@ -532,27 +532,30 @@ namespace ICS.XFramework.UnitTest
             //LEFT JOIN [Bas_ClientAccountMarket] t2 ON t1.[ClientId] = t2.[ClientId] AND t1.[AccountId] = t2.[AccountId]
             //LEFT JOIN [Bas_Client] t3 ON t2.[ClientId] = t3.[ClientId]
 
-
-            query =
-                from a in context.GetTable<Model.Client>()
-                group a by new { a.ClientId, a.ClientCode, a.ClientName } into g
-                select new Model.Client
+            var query1 =
+                from a in
+                    context
+                    .GetTable<Model.Client>()
+                    .Include(a => a.Accounts)
+                    .Include(a => a.Accounts[0].Markets)
+                    .Include(a => a.Accounts[0].Markets[0].Client)
+                join b in context.GetTable<Model.CloudServer>() on a.CloudServerId equals b.CloudServerId
+                group a by new { a.ClientId, a.ClientCode, a.ClientName, b.CloudServerName } into g
+                select new
                 {
                     ClientId = g.Key.ClientId,
                     ClientCode = g.Key.ClientCode,
-                    ClientName = g.Key.ClientName
+                    ClientName = g.Key.ClientName,
+                    CloudServerName = g.Key.CloudServerName
                 };
-            query = query
+            query1 = query1
                 .Where(a => a.ClientId > 0)
                 .OrderBy(a => a.ClientId)
-                .Include(g => g.Accounts)
-                .Include(g => g.Accounts[0].Markets)
-                .Include(g => g.Accounts[0].Markets[0].Client)
                 .Skip(10)
                 .Take(20);
 
-            result = query.ToList();
-            var max = query.Max(a => a.ClientId);
+            var result1 = query1.ToList();
+            var max1 = query1.Max(a => a.ClientId);
 
             // CROSS JOIN
             var query2 =

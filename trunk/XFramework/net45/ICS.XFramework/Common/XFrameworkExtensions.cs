@@ -12,8 +12,7 @@ namespace ICS.XFramework
         #region 表达式树
 
         private static readonly string _anonymousName = "<>h__TransparentIdentifier";
-        private static readonly string _groupingName = "IGrouping`2";
-        private static Func<string, bool> _isGrouping = g => g == _groupingName;
+        private static Func<Type, bool> _isGrouping = t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IGrouping<,>);
         private static Func<string, bool> _isAnonymous = name => !string.IsNullOrEmpty(name) && name.StartsWith(_anonymousName, StringComparison.Ordinal);
 
         /// <summary>
@@ -173,25 +172,25 @@ namespace ICS.XFramework
             ParameterExpression paramExp = exp.NodeType == ExpressionType.Lambda
                 ? (node as LambdaExpression).Parameters[0]
                 : exp as ParameterExpression;
-            if (paramExp != null) return _isGrouping(paramExp.Type.Name);
+            if (paramExp != null) return _isGrouping(paramExp.Type);
 
             // g.Max
             MethodCallExpression callExp = exp as MethodCallExpression;
-            if (callExp != null) return _isGrouping(callExp.Arguments[0].Type.Name);
+            if (callExp != null) return _isGrouping(callExp.Arguments[0].Type);
 
 
             MemberExpression memExp = exp as MemberExpression;
             if (memExp != null)
             {
                 // g.Key
-                var g1 = memExp.Member.Name == "Key" && _isGrouping(memExp.Expression.Type.Name);
+                var g1 = memExp.Member.Name == "Key" && _isGrouping(memExp.Expression.Type);
                 if (g1) return g1;
 
                 // g.Key.Length | g.Key.Company | g.Key.CompanyId.Length
                 memExp = memExp.Expression as MemberExpression;
                 if (memExp != null)
                 {
-                    g1 = memExp.Member.Name == "Key" && _isGrouping(memExp.Expression.Type.Name) && memExp.Type.Namespace == null; //匿名类没有命令空间
+                    g1 = memExp.Member.Name == "Key" && _isGrouping(memExp.Expression.Type) && memExp.Type.Namespace == null; //匿名类没有命令空间
                     if (g1) return g1;
                 }
             }

@@ -115,8 +115,8 @@ namespace ICS.XFramework.Data.SqlClient
 
             // 导航属性中有1:n关系，只统计主表
             // 例：AccountList = a.Client.AccountList,
-            DbQueryableInfo_Select<T> nQuery = qQuery.NestedQuery as DbQueryableInfo_Select<T>;
-            if (qQuery.HaveListNavigation && nQuery != null && nQuery.Statis != null) qQuery = nQuery;
+            DbQueryableInfo_Select<T> innerQuery = qQuery.InnerQuery as DbQueryableInfo_Select<T>;
+            if (qQuery.HaveListNavigation && innerQuery != null && innerQuery.Statis != null) qQuery = innerQuery;
 
             bool willNest = qQuery.HaveDistinct || qQuery.GroupBy != null || qQuery.Skip > 0 || qQuery.Take > 0;
             bool useStatis = qQuery.Statis != null;
@@ -239,18 +239,18 @@ namespace ICS.XFramework.Data.SqlClient
             // FROM 子句
             jf.AppendNewLine();
             jf.Append("FROM ");
-            if (qQuery.NestedQuery != null)
+            if (qQuery.InnerQuery != null)
             {
                 // 子查询
                 jf.Append("(");
-                CommandBase define = this.ParseSelectCommand<T>(qQuery.NestedQuery as DbQueryableInfo_Select<T>, indent + 1);
+                CommandBase define = this.ParseSelectCommand<T>(qQuery.InnerQuery as DbQueryableInfo_Select<T>, indent + 1);
                 jf.Append(define.CommandText);
                 jf.AppendNewLine();
                 jf.Append(")");
             }
             else
             {
-                jf.AppendMember(TypeRuntimeInfoCache.GetRuntimeInfo(qQuery.DefinitionType).TableName);
+                jf.AppendMember(TypeRuntimeInfoCache.GetRuntimeInfo(qQuery.FromType).TableName);
             }
             jf.Append(" t0 ");
             if (!string.IsNullOrEmpty(DbQueryProvider.WITHNOLOCK)) jf.Append(DbQueryProvider.WITHNOLOCK);
@@ -376,10 +376,12 @@ namespace ICS.XFramework.Data.SqlClient
 
             #region 嵌套导航
 
-            if (qQuery.HaveListNavigation && nQuery != null && nQuery.OrderBy.Count > 0 && nQuery.Statis == null && !(nQuery.Skip > 0 || nQuery.Take > 0))
+            //if (qQuery.HaveListNavigation && innerQuery != null && innerQuery.OrderBy.Count > 0 && innerQuery.Statis == null && !(innerQuery.Skip > 0 || innerQuery.Take > 0))
+            if (qQuery.HaveListNavigation && innerQuery != null && innerQuery.OrderBy.Count > 0 && innerQuery.Statis == null)//&& !(innerQuery.Skip > 0 || innerQuery.Take > 0))
             {
+                // fix issue# 除非另外还指定了 TOP、OFFSET 或 FOR XML，否则，ORDER BY 子句在视图、内联函数、派生表、子查询和公用表表达式中无效。
                 string sql = cd.CommandText;
-                visitorBase = new OrderByExpressionVisitor(this, aliases, nQuery.OrderBy, null, "t0");
+                visitorBase = new OrderByExpressionVisitor(this, aliases, innerQuery.OrderBy, null, "t0");
                 visitorBase.Write(jf);
             }
 

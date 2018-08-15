@@ -36,6 +36,11 @@ namespace ICS.XFramework.Data
         private int _explicit = 0;
 
         /// <summary>
+        /// 显式指定的别名数量
+        /// </summary>
+        public int ExplicitNum { get { return _explicit; } }
+
+        /// <summary>
         /// 实例化 <see cref="TableAliasCache"/> 类的新实例
         /// </summary>
         public TableAliasCache() : this(0) { }

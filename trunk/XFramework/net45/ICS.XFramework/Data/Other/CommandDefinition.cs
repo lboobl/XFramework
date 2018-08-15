@@ -13,12 +13,21 @@ namespace ICS.XFramework.Data
     /// </summary>
     public class CommandDefinition : CommandBase
     {
+        private bool _haveListNavigation = false;
         private CommandBuilder _builder = null;
 
         /// <summary>
-        /// 表达式是否包含 1:n 类型的导航属性
+        /// 表达式是否包含 一对多 类型的导航属性
         /// </summary>
-        public bool HaveListNavigation { get; set; }
+        public bool HaveListNavigation
+        {
+            get { return _haveListNavigation; }
+            set
+            {
+                _haveListNavigation = value;
+                _builder._haveListNavigation = value;
+            }
+        }
 
         /// <summary>
         /// 针对数据源运行的文本命令
@@ -82,6 +91,7 @@ namespace ICS.XFramework.Data
             private SqlBuilder _whereFragment = null;
             private TableAliasCache _aliases = null;
             private IDbQueryProvider _provider = null;
+            internal bool _haveListNavigation = false;
 
             /// <summary>
             /// SQL 命令
@@ -145,6 +155,8 @@ namespace ICS.XFramework.Data
             {
                 if (this._navigations == null || this._navigations.Count == 0) return;
 
+                // 如果有一对多的导航属性，肯定会产生嵌套查询。那么内层查询别名肯定是t0，所以需要清掉
+                if (_haveListNavigation) _aliases = new TableAliasCache(_aliases.ExplicitNum);
                 //开始产生LEFT JOIN 子句
                 SqlBuilder builder = this.JoinFragment;
                 foreach (var kvp in _navigations)

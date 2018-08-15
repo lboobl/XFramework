@@ -57,12 +57,12 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 指示 SELECT FROM 子句表对应类型
         /// </summary>
-        Type DefinitionType { get; set; }
+        Type FromType { get; set; }
 
         /// <summary>
-        /// SELECT 字段表达式，空表示选取 <see cref="DefinitionType"/> 的所有字段
+        /// SELECT 字段表达式，空表示选取 <see cref="FromType"/> 的所有字段
         /// </summary>
-        DbExpression Expression { get; set; }
+        DbExpression Select { get; set; }
 
         /// <summary>
         /// WHERE 表达式

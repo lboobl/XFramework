@@ -43,7 +43,7 @@ namespace ICS.XFramework.Data
         /// 初始化 <see cref="ColumnExpressionVisitor"/> 类的新实例
         /// </summary>
         public ColumnExpressionVisitor(DbQueryProviderBase provider, TableAliasCache aliases, IDbQueryableInfo_Select qQuery, bool addStatisColumn = false, IDictionary<string, Column> columns = null)
-            : base(provider, aliases, qQuery.Expression.Expressions != null ? qQuery.Expression.Expressions[0] : null)
+            : base(provider, aliases, qQuery.Select.Expressions != null ? qQuery.Select.Expressions[0] : null)
         {
             _provider = provider;
             _aliases = aliases;
@@ -405,23 +405,32 @@ namespace ICS.XFramework.Data
         // 选择所有的字段
         private Expression VisitAllMember(Type type, string alias, Expression node = null)
         {
-            TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
-            Dictionary<string, Reflection.MemberInvokerWrapper> wrappers = typeRuntime.Wrappers;
-
-            foreach (var w in wrappers)
+            if (_groupBy != null && node != null && node.IsGrouping())
             {
-                var wrapper = w.Value as MemberAccessWrapper;
-                if (wrapper != null && wrapper.Column != null && wrapper.Column.NoMapped) continue;
-                if (wrapper != null && wrapper.ForeignKey != null) continue; // 不加载导航属性
-                if (wrapper.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
+                // select g.Key
+                LambdaExpression keySelector = _groupBy.Expressions[0] as LambdaExpression;
+                return this.Visit(keySelector.Body);
+            }
+            else
+            {
+                TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
+                Dictionary<string, Reflection.MemberInvokerWrapper> wrappers = typeRuntime.Wrappers;
 
-                _builder.AppendMember(alias, wrapper.Member.Name);
+                foreach (var w in wrappers)
+                {
+                    var wrapper = w.Value as MemberAccessWrapper;
+                    if (wrapper != null && wrapper.Column != null && wrapper.Column.NoMapped) continue;
+                    if (wrapper != null && wrapper.ForeignKey != null) continue; // 不加载导航属性
+                    if (wrapper.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
 
-                // 选择字段
-                string newName = AddColumn(_columns, wrapper.Member.Name);
-                _builder.AppendAs(newName);
-                _builder.Append(",");
-                _builder.AppendNewLine();
+                    _builder.AppendMember(alias, wrapper.Member.Name);
+
+                    // 选择字段
+                    string newName = AddColumn(_columns, wrapper.Member.Name);
+                    _builder.AppendAs(newName);
+                    _builder.Append(",");
+                    _builder.AppendNewLine();
+                }
             }
 
             return node;

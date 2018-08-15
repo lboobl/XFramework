@@ -61,7 +61,7 @@ namespace ICS.XFramework.Data
         public bool HaveAny { get; set; }
 
         /// <summary>
-        /// 表达式是否包含 1:n 类型的导航属性
+        /// 表达式是否包含 一对多 类型的导航属性
         /// </summary>
         public bool HaveListNavigation { get; set; }
 
@@ -78,12 +78,12 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 指示 SELECT FROM 子句表对应类型
         /// </summary>
-        public Type DefinitionType { get; set; }
+        public Type FromType { get; set; }
 
         /// <summary>
-        /// SELECT 字段表达式，空表示选取 <see cref="DefinitionType"/> 的所有字段
+        /// SELECT 字段表达式
         /// </summary>
-        public DbExpression Expression { get; set; }
+        public DbExpression Select { get; set; }
 
         /// <summary>
         /// WHERE 表达式
@@ -104,10 +104,10 @@ namespace ICS.XFramework.Data
         /// 嵌套查询语义
         /// 注意，T 可能不是 参数T 所表示的类型
         /// </summary>
-        public override IDbQueryableInfo<T> NestedQuery { get; set; }
+        public override IDbQueryableInfo<T> InnerQuery { get; set; }
 
         /// <summary>
-        /// 是否是 1:n 类型导航的嵌套查询
+        /// 是否是 一对多 类型导航的嵌套查询
         /// </summary>
         public bool IsListNavigationQuery { get; set; }
 

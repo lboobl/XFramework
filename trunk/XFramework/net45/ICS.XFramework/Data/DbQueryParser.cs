@@ -8,7 +8,7 @@ namespace ICS.XFramework.Data
 {
     internal sealed class DbQueryParser
     {
-        public static IDbQueryableInfo<TElement> Parse<TElement>(IDbQueryable<TElement> query, int start = 0)
+        public static IDbQueryableInfo<TElement> Parse<TElement>(IDbQueryable<TElement> source, int start = 0)
         {
             // 目的：将query 转换成增/删/改/查
             // 1、from a in context.GetTable<T>() select a 此时query里面可能没有SELECT 表达式
@@ -19,7 +19,7 @@ namespace ICS.XFramework.Data
             bool isAny = false;
             int? skip = null;
             int? take = null;
-            int? outer = null;
+            int? outerIndex = null;
             List<Expression> where = new List<Expression>();                  // WHERE
             List<Expression> having = new List<Expression>();                 // HAVING
             List<DbExpression> join = new List<DbExpression>();               // JOIN
@@ -34,20 +34,20 @@ namespace ICS.XFramework.Data
             DbExpression groupBy = null;    // GROUP BY #
             DbExpression statis = null;     // SUM/MAX  #
 
-            for (int index = start; index < query.DbExpressions.Count; ++index)
+            for (int index = start; index < source.DbExpressions.Count; ++index)
             {
-                DbExpression curExp = query.DbExpressions[index];
+                DbExpression curExp = source.DbExpressions[index];
 
                 // Take(n)
                 if (take != null)
                 {
-                    outer = index;
+                    outerIndex = index;
                     break;
                 }
 
                 if (skip != null && curExp.DbExpressionType != DbExpressionType.Take)
                 {
-                    outer = index;
+                    outerIndex = index;
                     break;
                 }
 
@@ -166,8 +166,8 @@ namespace ICS.XFramework.Data
             if (useAllColumn) select = Expression.Constant(type ?? typeof(TElement));
 
             var qQuery = new DbQueryableInfo_Select<TElement>();
-            qQuery.DefinitionType = type;
-            qQuery.Expression = new DbExpression(DbExpressionType.Select, select);
+            qQuery.FromType = type;
+            qQuery.Select = new DbExpression(DbExpressionType.Select, select);
             qQuery.HaveDistinct = isDistinct;
             qQuery.HaveAny = isAny;
             qQuery.Join = join;
@@ -175,8 +175,8 @@ namespace ICS.XFramework.Data
             qQuery.GroupBy = groupBy;
             qQuery.Skip = skip != null ? skip.Value : 0;
             qQuery.Take = take != null ? take.Value : 0;
-            qQuery.Where = new DbExpression(DbExpressionType.Where, DbQueryParser.Combine(where));
-            qQuery.Having = new DbExpression(DbExpressionType.None, DbQueryParser.Combine(having));
+            qQuery.Where = new DbExpression(DbExpressionType.Where, DbQueryParser.CombineWhere(where));
+            qQuery.Having = new DbExpression(DbExpressionType.None, DbQueryParser.CombineWhere(having));
             qQuery.Statis = statis;
             qQuery.Union = union;
             qQuery.Include = include;
@@ -207,84 +207,98 @@ namespace ICS.XFramework.Data
                 var qInsert = new DbQueryableInfo_Insert<TElement>();
                 if (insert.Expressions != null) qInsert.Entity = (insert.Expressions[0] as ConstantExpression).Value;
                 qInsert.SelectInfo = qQuery;
-                query.DbQueryInfo = qInsert;
-                qInsert.Bulk = query.Bulk;
+                source.DbQueryInfo = qInsert;
+                qInsert.Bulk = source.Bulk;
                 return qInsert;
             }
 
-            if (select != null)
-            {
-                // 解析导航属性 如果有 1:n 的导航属性，那么查询的结果集的主记录将会有重复记录，这时就需要使用嵌套语义，先查主记录，再关联导航记录
-                bool checkListNavgation = false;
-                Expression expression = select;
-                LambdaExpression lambdaExpression = expression as LambdaExpression;
-                if (lambdaExpression != null) expression = lambdaExpression.Body;
-                MemberInitExpression initExpression = expression as MemberInitExpression;
-                NewExpression newExpression = expression as NewExpression;
+            // 如果有一对多的导航关系，则产生嵌套语义的查询
+            if (select != null) qQuery = DbQueryParser.TryBuilOuter(qQuery);
 
-                foreach (DbExpression d in include)
-                {
-                    Expression exp = d.Expressions[0];
-                    if (exp.NodeType == ExpressionType.Lambda) exp = (exp as LambdaExpression).Body;
-                    else if (exp.NodeType == ExpressionType.Call) exp = (exp as MethodCallExpression).Object;
-                    if (exp.Type.IsGenericType) checkListNavgation = true;
-                    if (checkListNavgation) break;
-                }
-                if (!checkListNavgation) checkListNavgation = initExpression != null && CheckListNavigation<TElement>(initExpression);
-
-                if (checkListNavgation)
-                {
-                    NewExpression constructor = initExpression != null ? initExpression.NewExpression : newExpression;
-                    IEnumerable<MemberBinding> bindings = initExpression != null
-                        ? initExpression
-                          .Bindings
-                          .Where(x => Reflection.TypeUtils.IsPrimitive((x.Member as System.Reflection.PropertyInfo).PropertyType))
-                        : new List<MemberBinding>();
-
-                    if (constructor != null || bindings.Count() > 0)
-                    {
-                        initExpression = Expression.MemberInit(constructor, bindings);
-                        lambdaExpression = Expression.Lambda(initExpression, lambdaExpression.Parameters);
-                        // 简化内层选择器，只选择最小字段
-                        qQuery.Expression = new DbExpression(DbExpressionType.Select, lambdaExpression);
-                    }
-                    qQuery.IsListNavigationQuery = true;
-                    qQuery.Include = new List<DbExpression>();
-
-                    var qOuter = new DbQueryableInfo_Select<TElement>();
-                    qOuter.DefinitionType = type;
-                    qOuter.Expression = new DbExpression(DbExpressionType.Select, select);
-                    qOuter.NestedQuery = qQuery;
-                    qOuter.Join = new List<DbExpression>();
-                    qOuter.OrderBy = new List<DbExpression>();
-                    qOuter.Include = include;
-                    qOuter.HaveListNavigation = true;
-                    
-                    qQuery = qOuter;
-                }
-            }
-
-            if (outer != null)
+            if (outerIndex != null)
             {
                 // 解析嵌套查询
-                var qOuter = DbQueryParser.Parse<TElement>(query, outer.Value);
+                var qOuter = DbQueryParser.Parse<TElement>(source, outerIndex.Value);
                 var qInsert = qOuter as DbQueryableInfo_Insert<TElement>;
                 if (qInsert != null)
                 {
                     if (insert != null && insert.Expressions != null) qInsert.Entity = (insert.Expressions[0] as ConstantExpression).Value;
                     qInsert.SelectInfo = qQuery;
-                    query.DbQueryInfo = qInsert;
-                    qInsert.Bulk = query.Bulk;
+                    source.DbQueryInfo = qInsert;
+                    qInsert.Bulk = source.Bulk;
                     return qInsert;
                 }
                 else
                 {
-                    qOuter.NestedQuery = qQuery;
+                    qOuter.InnerQuery = qQuery;
                     return qOuter;
                 }
             }
 
             // 查询表达式
+            return qQuery;
+        }
+
+        // 构造由一对多关系产生的嵌套查询
+        private static DbQueryableInfo_Select<TElement> TryBuilOuter<TElement>(DbQueryableInfo_Select<TElement> qQuery)
+        {
+            if (qQuery == null || qQuery.Select == null) return qQuery;
+
+            Expression select = qQuery.Select.Expressions[0];
+            List<DbExpression> include = qQuery.Include;
+            Type type = qQuery.FromType;
+
+            // 解析导航属性 如果有 一对多 的导航属性，那么查询的结果集的主记录将会有重复记录，这时就需要使用嵌套语义，先查主记录，再关联导航记录
+            bool checkListNavgation = false;
+            Expression expression = select;
+            LambdaExpression lambdaExpression = expression as LambdaExpression;
+            if (lambdaExpression != null) expression = lambdaExpression.Body;
+            MemberInitExpression initExpression = expression as MemberInitExpression;
+            NewExpression newExpression = expression as NewExpression;
+
+            foreach (DbExpression d in include)
+            {
+                Expression exp = d.Expressions[0];
+                if (exp.NodeType == ExpressionType.Lambda) exp = (exp as LambdaExpression).Body;
+                else if (exp.NodeType == ExpressionType.Call) exp = (exp as MethodCallExpression).Object;
+
+                // Include 如果包含List<>泛型导航，则可以判定整个查询包含一对多的导航
+                if (exp.Type.IsGenericType && exp.Type.GetGenericTypeDefinition() == typeof(List<>)) checkListNavgation = true;
+                if (checkListNavgation) break;
+            }
+            if (!checkListNavgation) checkListNavgation = initExpression != null && CheckListNavigation<TElement>(initExpression);
+
+            if (checkListNavgation)
+            {
+                NewExpression constructor = initExpression != null ? initExpression.NewExpression : newExpression;
+                IEnumerable<MemberBinding> bindings = initExpression != null
+                    ? initExpression
+                      .Bindings
+                      .Where(x => Reflection.TypeUtils.IsPrimitive((x.Member as System.Reflection.PropertyInfo).PropertyType))
+                    : new List<MemberBinding>();
+
+                if (constructor != null || bindings.Count() > 0)
+                {
+                    initExpression = Expression.MemberInit(constructor, bindings);
+                    lambdaExpression = Expression.Lambda(initExpression, lambdaExpression.Parameters);
+                    // 简化内层选择器，只选择最小字段
+                    qQuery.Select = new DbExpression(DbExpressionType.Select, lambdaExpression);
+                }
+                qQuery.IsListNavigationQuery = true;
+                qQuery.Include = new List<DbExpression>();
+
+                var qOuter = new DbQueryableInfo_Select<TElement>();
+                qOuter.FromType = type;
+                qOuter.Select = new DbExpression(DbExpressionType.Select, select);
+                qOuter.InnerQuery = qQuery;
+                qOuter.Join = new List<DbExpression>();
+                qOuter.OrderBy = new List<DbExpression>();
+                qOuter.Include = include;
+                qOuter.HaveListNavigation = true;
+
+                qQuery = qOuter;
+            }
+
             return qQuery;
         }
 
@@ -294,13 +308,13 @@ namespace ICS.XFramework.Data
             for (int i = 0; i < node.Bindings.Count; i++)
             {
                 // primitive 类型
-                Type pType = (node.Bindings[i].Member as System.Reflection.PropertyInfo).PropertyType;
-                if (Reflection.TypeUtils.IsPrimitive(pType)) continue;
+                Type type = (node.Bindings[i].Member as System.Reflection.PropertyInfo).PropertyType;
+                if (Reflection.TypeUtils.IsPrimitive(type)) continue;
 
                 // complex 类型
-                if (pType.IsGenericType)
+                if (type.IsGenericType)
                 {
-                    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(pType);
+                    TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
                     if (typeRuntime.GenericTypeDefinition == typeof(List<>)) return true;
                 } 
 
@@ -317,7 +331,7 @@ namespace ICS.XFramework.Data
         }
 
         // 合并 'Where' 表达式语义
-        private static Expression Combine(IList<Expression> predicates)
+        private static Expression CombineWhere(IList<Expression> predicates)
         {
             if (predicates.Count == 0) return null;
 
