@@ -148,6 +148,20 @@ namespace ICS.XFramework.Reflection
         }
 
         /// <summary>
+        /// 访问成员
+        /// </summary>
+        /// <param name="memberName"></param>
+        /// <returns></returns>
+        public object Invoke(string memberName, object target, params object[] parameters)
+        {
+            MemberInvokerWrapper wrapper = null;
+            this.Wrappers.TryGetValue(memberName, out wrapper);
+
+            if (wrapper == null) throw new XFrameworkException("[{0}.{1}] doesn't exists", _type.Name, memberName);
+            return wrapper.Invoke(target,parameters);
+        }
+
+        /// <summary>
         /// 取指定的成员包装器自定义特性。
         /// </summary>
         /// <typeparam name="TAttribute">自定义特性</typeparam>
