@@ -532,6 +532,7 @@ namespace ICS.XFramework.UnitTest
             //LEFT JOIN [Bas_ClientAccountMarket] t2 ON t1.[ClientId] = t2.[ClientId] AND t1.[AccountId] = t2.[AccountId]
             //LEFT JOIN [Bas_Client] t3 ON t2.[ClientId] = t3.[ClientId]
 
+            // Include 语法查询 主 从 孙 关系
             var query1 =
                 from a in
                     context
