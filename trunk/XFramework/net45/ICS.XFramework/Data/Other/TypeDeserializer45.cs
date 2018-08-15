@@ -21,8 +21,8 @@ namespace ICS.XFramework.Data
             List<T> collection = new List<T>();
 
             object obj = null;
-            string key = GetDeserializerKey<T>(_reader, _define);
-            _deserializers.TryGet(key, out obj);
+            //string key = GetDeserializerKey<T>(_reader, _define);
+            //_deserializers.TryGet(key, out obj);
             if (obj == null) obj = new TypeDeserializer<T>();
             TypeDeserializer<T> deserializer = (TypeDeserializer<T>)obj;
             deserializer.Reader = _reader;
@@ -39,7 +39,7 @@ namespace ICS.XFramework.Data
             }
 
             // 添加映射器到缓存
-            _deserializers.GetOrAdd(key, x => deserializer);
+            //_deserializers.GetOrAdd(key, x => deserializer);
 
             // 返回结果
             return collection;
