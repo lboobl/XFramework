@@ -18,10 +18,10 @@ namespace ICS.XFramework.UnitTest
 
         public static void Run()
         {
-            //Query();
-            //Join();
-            //Other();
-            Horse();
+            Query();
+            Join();
+            Other();
+            Performance();
         }
 
         // 单表查询
@@ -926,7 +926,7 @@ namespace ICS.XFramework.UnitTest
         }
 
         // 性能测试
-        static void Horse()
+        static void Performance()
         {
             Stopwatch stop = new Stopwatch();
             string connString = "Server=.;Database=Inte_CRM;uid=sa;pwd=123456";
