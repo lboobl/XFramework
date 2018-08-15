@@ -305,7 +305,7 @@ namespace ICS.XFramework.UnitTest
         // 多表查询
         static void Join()
         {
-            var context = new DataContext();
+            var context = new DataContext();            
 
             // INNER JOIN
             var query =
@@ -332,6 +332,20 @@ namespace ICS.XFramework.UnitTest
             //FROM[Bas_Client] t0
             //INNER JOIN[Sys_CloudServer] t1 ON t0.[CloudServerId] = t1.[CloudServerId]
             //WHERE t0.[ClientId] > 0
+            query =
+                context
+                .GetTable<Model.Client>()
+                .Include(a => a.CloudServer);
+            query =
+                from a in query
+                join b in context.GetTable<Model.CloudServer>() on a.CloudServerId equals b.CloudServerId
+                orderby a.ClientId
+                select new Model.Client (a)
+                {
+                    CloudServer = a.CloudServer
+                };
+            result = query.ToList();
+
 
 
             // 更简单的赋值方式 
