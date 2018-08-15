@@ -377,9 +377,8 @@ namespace ICS.XFramework.Data.SqlClient
             #region 嵌套导航
 
             //if (qQuery.HaveListNavigation && innerQuery != null && innerQuery.OrderBy.Count > 0 && innerQuery.Statis == null && !(innerQuery.Skip > 0 || innerQuery.Take > 0))
-            if (qQuery.HaveListNavigation && innerQuery != null && innerQuery.OrderBy.Count > 0 && innerQuery.Statis == null)//&& !(innerQuery.Skip > 0 || innerQuery.Take > 0))
+            if (qQuery.HaveListNavigation && innerQuery != null && innerQuery.OrderBy.Count > 0 && innerQuery.Statis == null && qQuery.Statis == null)
             {
-                // fix issue# 除非另外还指定了 TOP、OFFSET 或 FOR XML，否则，ORDER BY 子句在视图、内联函数、派生表、子查询和公用表表达式中无效。
                 string sql = cd.CommandText;
                 visitorBase = new OrderByExpressionVisitor(this, aliases, innerQuery.OrderBy, null, "t0");
                 visitorBase.Write(jf);

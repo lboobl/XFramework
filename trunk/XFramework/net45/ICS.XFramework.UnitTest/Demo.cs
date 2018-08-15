@@ -552,7 +552,8 @@ namespace ICS.XFramework.UnitTest
                 .Where(a => a.ClientId > 0)
                 .OrderBy(a => a.ClientId)
                 .Skip(10)
-                .Take(20);
+                .Take(20)
+                ;
 
             var result1 = query1.ToList();
             var max1 = query1.Max(a => a.ClientId);
@@ -596,19 +597,19 @@ namespace ICS.XFramework.UnitTest
             //WHERE t1.[CloudServerName] IS NOT NULL
 
 
-            var query3 =
+            query =
                  from a in context.GetTable<Model.Client>()
                  join b in context.GetTable<Model.CloudServer>() on a.CloudServerId equals b.CloudServerId into u_c
                  from b in u_c.DefaultIfEmpty()
                  select a;
-            var query4=
-                query3.SelectMany(c => context.GetTable<Model.CloudServer>(), (a, c) => new
+            var query3=
+                query.SelectMany(c => context.GetTable<Model.CloudServer>(), (a, c) => new
                 {
                     ClientId = a.ClientId,
                     CloudServerName = a.CloudServer.CloudServerName,
                     CloudServerCode = c.CloudServerCode
                 });
-            var result4 = query4.ToList();
+            var result3 = query3.ToList();
             //SQL=>
             //SELECT
             //t0.[ClientId] AS[ClientId],
@@ -648,40 +649,6 @@ namespace ICS.XFramework.UnitTest
             //...
             //FROM[Bas_Client] t0
             //WHERE t0.[ClientId] = 1
-           
-
-            //var q1 =
-            //    from a in context.GetTable<Model.Demo>()
-            //    select new { top = 1 };
-            //var rrr = q1.ToList();
-
-            //var q2 =
-            //from a in context.GetTable<Model.Client>()
-            //join b in context.GetTable<Model.Account>() on a.ClientId equals b.ClientId
-            //select new Model.Account(b)
-            //{
-            //    ClientId = 99,
-            //    Client = new Model.Client
-            //    {
-            //        ClientName = a.ClientName
-            //    }
-            //};
-            //var q2r2 = q2.ToList();
-
-            //var q4 = context
-            //    .GetTable<Model.User>()
-            //    .Include(a => a.Roles)
-            //    .Include(a => a.Modules)
-            //    .Where(a => a.UserId == 1);
-            //var r4 = q4.ToList();
-
-            //var q5 = context
-            //    .GetTable<Model.User>()
-            //    .Include(a => a.Roles)
-            //    .Include(a => a.Roles[0].RoleModules)
-            //    .Include(a => a.Modules)
-            //    .Where(a => a.UserId > 0);
-            //            var r5 = q5.ToList();
         }
 
         //// 其它说明
