@@ -382,17 +382,17 @@ namespace ICS.XFramework.Data
 
                 // member的类型可能与数据库中查出来的数据类型不一样
                 // 如 boolean，数据库类型 是int
-                var method = GetReaderMethod(reader.GetFieldType(index));
+                MethodInfo m = GetMethod(reader.GetFieldType(index));
                 g.Emit(OpCodes.Ldloc, model);
                 g.Emit(OpCodes.Ldarg_0);
                 g.Emit(OpCodes.Ldc_I4, index);
-                g.Emit(OpCodes.Callvirt, method);
+                g.Emit(OpCodes.Callvirt, m);
 
                 Type memberType = wrapper.DataType;
                 Type nullUnderlyingType = memberType.IsGenericType ? Nullable.GetUnderlyingType(memberType) : null;
                 Type unboxType = nullUnderlyingType != null ? nullUnderlyingType : memberType;
 
-                if (unboxType == typeof(byte[]) || (method == _getValue && memberType != typeof(object)))
+                if (unboxType == typeof(byte[]) || (m == _getValue && memberType != typeof(object)))
                 {
                     g.Emit(OpCodes.Castclass, memberType);
                 }
@@ -442,7 +442,7 @@ namespace ICS.XFramework.Data
             return typeRuntime.GenericTypeDefinition == typeof(List<>);
         }
 
-        private static MethodInfo GetReaderMethod(Type fieldType)
+        private static MethodInfo GetMethod(Type fieldType)
         {
             if (fieldType == typeof(char)) return _getChar;
             if (fieldType == typeof(string)) return _getString;
