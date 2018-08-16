@@ -68,13 +68,13 @@ namespace ICS.XFramework
         /// 将时间戳(以刻度数为单位)转成时间
         /// </summary>
         /// <returns></returns>
-        public static DateTime ConvertToDateTime(long d)
+        public static DateTime ConvertToDateTime(long ticks)
         {
-            DateTime dtStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
-            long lTime = long.Parse(d + "0000");
-            TimeSpan toNow = new TimeSpan(lTime);
-            DateTime dtResult = dtStart.Add(toNow);
-            return dtResult;
+            DateTime sDate = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+            ticks = long.Parse(ticks + "0000");
+            TimeSpan ts = new TimeSpan(ticks);
+            DateTime nDate = sDate.Add(ts);
+            return nDate;
         }
 
         /// <summary>
@@ -83,11 +83,11 @@ namespace ICS.XFramework
         /// <returns></returns>
         public static long ConvertToLong(DateTime time)
         {
-            DateTime dtStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
-            TimeSpan toNow = time.Subtract(dtStart);
-            long timeStamp = toNow.Ticks;
-            timeStamp = long.Parse(timeStamp.ToString().Substring(0, timeStamp.ToString().Length - 4));
-            return timeStamp;
+            DateTime sDate = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+            TimeSpan ts = time.Subtract(sDate);
+            long ticks = ts.Ticks;
+            ticks = long.Parse(ticks.ToString().Substring(0, ticks.ToString().Length - 4));
+            return ticks;
         }
 
         /// <summary>
