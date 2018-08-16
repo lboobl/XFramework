@@ -16,12 +16,12 @@ namespace ICS.XFramework.UnitTest
             //{
             //    var a = cmd;
             //}));
-
-            for (int i = 0; i < 20; i++)
-            {
-                Task.Factory.StartNew(() => Demo.Run());
-            }
-            Console.ReadLine();
+            Demo.Run();
+            //for (int i = 0; i < 20; i++)
+            //{
+            //    Task.Factory.StartNew(() => Demo.Run());
+            //}
+            //Console.ReadLine();
         }
     }
 }
