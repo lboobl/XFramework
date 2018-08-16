@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICS.XFramework", "net40\ICS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICS.XFramework.UnitTest", "net40\ICS.XFramework.UnitTest\ICS.XFramework.UnitTest.csproj", "{26A42A18-0632-4EBA-9A39-CFFA834ECF77}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core20", "core20", "{0D7C918B-603D-4847-988A-3EA5F0F446B5}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
