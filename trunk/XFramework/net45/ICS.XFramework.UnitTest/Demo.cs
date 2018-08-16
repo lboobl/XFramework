@@ -21,7 +21,7 @@ namespace ICS.XFramework.UnitTest
             Query();
             Join();
             Other();
-            Performance();
+            //Performance();
         }
 
         // 单表查询

@@ -20,15 +20,15 @@ namespace ICS.XFramework.Data
             object prevLine = null;
             List<T> collection = new List<T>();
 
-            object obj = null;
-            string key = GetDeserializerKey<T>(_reader, _define);
-            _deserializers.TryGet(key, out obj);
-            if (obj == null) obj = new TypeDeserializer<T>(_define);
-            TypeDeserializer<T> deserializer = (TypeDeserializer<T>)obj;
-
+            //object obj = null;
+            //string key = GetDeserializerKey<T>(_reader, _define);
+            //_deserializers.TryGet(key, out obj);
+            //if (obj == null) obj = new TypeDeserializer<T>(_define);
+            //TypeDeserializer<T> deserializer = (TypeDeserializer<T>)obj;
+            TypeDeserializer<T> deserializer = new TypeDeserializer<T>(_reader, _define);
             while (await (_reader as DbDataReader).ReadAsync())
             {
-                T model = deserializer.Deserialize(_reader, prevLine, out isLine);
+                T model = deserializer.Deserialize(prevLine, out isLine);
                 if (!isLine)
                 {
                     collection.Add(model);
@@ -37,7 +37,7 @@ namespace ICS.XFramework.Data
             }
 
             // 添加映射器到缓存
-            _deserializers.GetOrAdd(key, x => deserializer);
+            //_deserializers.GetOrAdd(key, x => deserializer);
 
             // 返回结果
             return collection;
