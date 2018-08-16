@@ -49,6 +49,12 @@ namespace ICS.XFramework
 
         #region 其它方法
 
+        public string GetConnString(string keyName)
+        {
+
+            System.Configuration.GetSection("ApplicationConfiguration")
+        }
+
         /// <summary>
         /// 将时间戳(以刻度数为单位)转成时间
         /// </summary>
