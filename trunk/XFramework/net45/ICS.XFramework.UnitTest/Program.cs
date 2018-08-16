@@ -1,7 +1,8 @@
 ﻿
 using ICS.XFramework.Data;
-
+using System;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 
 namespace ICS.XFramework.UnitTest
 {
@@ -15,7 +16,12 @@ namespace ICS.XFramework.UnitTest
             //{
             //    var a = cmd;
             //}));
-            Demo.Run();
+
+            for (int i = 0; i < 2; i++)
+            {
+                Task.Factory.StartNew(() => Demo.Run());
+            }
+            Console.ReadLine();
         }
     }
 }

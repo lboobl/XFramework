@@ -32,29 +32,16 @@ namespace ICS.XFramework.Data
         static MethodInfo _getString = typeof(IDataRecord).GetMethod("GetString", new Type[] { typeof(int) });
         static MethodInfo _getValue = typeof(IDataRecord).GetMethod("GetValue", new Type[] { typeof(int) });
 
-        private IDataReader _reader = null;
         private CommandDefinition _define = null;
         private IDictionary<string, Func<IDataRecord, object>> _deserializers = null;
         private Func<IDataRecord, object> _modelDeserializer = null;
         private Dictionary<string, HashSet<string>> _listNavigationKeys = null;
         private int? _listNavigationCount = null;
 
-        internal IDataReader Reader
-        {
-            get { return _reader; }
-            set { _reader = value; }
-        }
-
-        internal CommandDefinition CommandDefinition
-        {
-            get { return _define; }
-            set { _define = value; }
-        }
-
-        internal TypeDeserializer()//(IDataReader reader, CommandDefinition define)
+        internal TypeDeserializer(CommandDefinition define)//(IDataReader reader, CommandDefinition define)
         {
             //_reader = reader;
-            //_define = define;
+            _define = define;
             _deserializers = new Dictionary<string, Func<IDataRecord, object>>(8);
             _listNavigationKeys = new Dictionary<string, HashSet<string>>(8);
         }
@@ -64,7 +51,7 @@ namespace ICS.XFramework.Data
         /// </summary>
         /// <param name="prevModel">前一行数据</param>
         /// <param name="isLine">是否同行数据</param>
-        internal T Deserialize(object prevModel, out bool isLine)
+        internal T Deserialize(IDataRecord reader, object prevModel, out bool isLine)
         {
             isLine = false;
 
@@ -72,9 +59,9 @@ namespace ICS.XFramework.Data
 
             if (Reflection.TypeUtils.IsPrimitive(typeof(T)))
             {
-                if (_reader.IsDBNull(0)) return default(T);
+                if (reader.IsDBNull(0)) return default(T);
 
-                var obj = _reader.GetValue(0);
+                var obj = reader.GetValue(0);
                 if (obj.GetType() != typeof(T))
                 {
                     // fix#Nullable<T> issue
@@ -102,8 +89,8 @@ namespace ICS.XFramework.Data
             ICS.XFramework.Reflection.Emit.ConstructorInvoker ctor = runtime.ConstructInvoker;
             if (runtime.IsAnonymousType)
             {
-                object[] values = new object[_reader.FieldCount];
-                _reader.GetValues(values);
+                object[] values = new object[reader.FieldCount];
+                reader.GetValues(values);
                 for (int index = 0; index < values.Length; ++index)
                 {
                     if (values[index] is DBNull) values[index] = null;
@@ -119,20 +106,20 @@ namespace ICS.XFramework.Data
             if (_define == null)
             {
                 // 直接跑SQL,则不解析导航属性
-                if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader);
-                model = (T)_modelDeserializer(_reader);
+                if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), reader);
+                model = (T)_modelDeserializer(reader);
             }
             else if (_define.NavigationDescriptors != null && _define.NavigationDescriptors.Count == 0)
             {
                 // 直接跑SQL,则不解析导航属性
-                if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader, _define.Columns, 0);
-                model = (T)_modelDeserializer(_reader);
+                if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), reader, _define.Columns, 0);
+                model = (T)_modelDeserializer(reader);
             }
             else
             {
                 // 第一层
-                if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), _reader, _define.Columns, 0, _define.NavigationDescriptors.MinIndex);
-                model = (T)_modelDeserializer(_reader);
+                if (_modelDeserializer == null) _modelDeserializer = GetDeserializer(typeof(T), reader, _define.Columns, 0, _define.NavigationDescriptors.MinIndex);
+                model = (T)_modelDeserializer(reader);
                 // 若有 1:n 的导航属性，判断当前行数据与上一行数据是否相同
                 if (prevModel != null && _define.HaveListNavigation)
                 {
@@ -149,7 +136,7 @@ namespace ICS.XFramework.Data
                 }
 
                 // 递归导航属性
-                this.Deserialize_Navigation(isLine ? prevModel : null, model, string.Empty, isLine);
+                this.Deserialize_Navigation(reader, isLine ? prevModel : null, model, string.Empty, isLine);
             }
 
             return model;
@@ -160,7 +147,7 @@ namespace ICS.XFramework.Data
         // 导航属性
         // @prevLine 前一行数据
         // @isLine   是否同一行数据<同一父级>
-        private void Deserialize_Navigation(object prevModel, object model, string typeName, bool isLine)
+        private void Deserialize_Navigation(IDataRecord reader, object prevModel, object model, string typeName, bool isLine)
         {
             // CRM_SaleOrder.Client 
             // CRM_SaleOrder.Client.AccountList
@@ -202,12 +189,12 @@ namespace ICS.XFramework.Data
 
                 if (!_deserializers.TryGetValue(keyName, out deserializer))
                 {
-                    deserializer = GetDeserializer(navType.IsGenericType ? navTypeRuntime.GenericArguments[0] : navType, _reader, _define.Columns, start, end);
+                    deserializer = GetDeserializer(navType.IsGenericType ? navTypeRuntime.GenericArguments[0] : navType, reader, _define.Columns, start, end);
                     _deserializers[keyName] = deserializer;
                 }
 
                 // 如果整个导航链中某一个导航属性为空，则跳出递归
-                object navModel = deserializer(_reader);
+                object navModel = deserializer(reader);
                 if (navModel != null)
                 {
                     if (list == null)
@@ -334,7 +321,7 @@ namespace ICS.XFramework.Data
                     }
 
                     if (navTypeRuntime.GenericTypeDefinition == typeof(List<>)) navTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navTypeRuntime.GenericArguments[0]);
-                    if (navTypeRuntime.NavWrappers.Count > 0) Deserialize_Navigation(prevModel, navModel, keyName, isLine);
+                    if (navTypeRuntime.NavWrappers.Count > 0) Deserialize_Navigation(reader, prevModel, navModel, keyName, isLine);
                 }
             }
         }

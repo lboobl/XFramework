@@ -73,12 +73,14 @@ namespace ICS.XFramework.Data
             {
                 if (_navWrappers == null)
                 {
-                    _navWrappers = new Dictionary<string, MemberAccessWrapper>();
+                    Dictionary<string, MemberAccessWrapper> navWrappers = new Dictionary<string, MemberAccessWrapper>();
                     foreach (var kvp in this.Wrappers)
                     {
                         MemberAccessWrapper m = kvp.Value as MemberAccessWrapper;
-                        if (m.ForeignKey != null) _navWrappers.Add(kvp.Key, m);
+                        if (m.ForeignKey != null) navWrappers.Add(kvp.Key, m);
                     }
+
+                    _navWrappers = navWrappers;
                 }
 
                 return _navWrappers;
@@ -95,11 +97,12 @@ namespace ICS.XFramework.Data
                 if (_keyWrappers == null)
                 {
                     Func<MemberAccessWrapper, bool> predicate = x => x != null && x.Column != null && x.Column.IsKey;
-                    _keyWrappers = new Dictionary<string, MemberAccessWrapper>();
+                    Dictionary<string, MemberAccessWrapper> keyWrappers = new Dictionary<string, MemberAccessWrapper>();
                     foreach (var w in this.Wrappers)
                     {
-                        if (predicate(w.Value as MemberAccessWrapper)) _keyWrappers.Add(w.Key, w.Value as MemberAccessWrapper);
+                        if (predicate(w.Value as MemberAccessWrapper)) keyWrappers.Add(w.Key, w.Value as MemberAccessWrapper);
                     }
+                    _keyWrappers = keyWrappers;
                 }
 
                 return _keyWrappers;

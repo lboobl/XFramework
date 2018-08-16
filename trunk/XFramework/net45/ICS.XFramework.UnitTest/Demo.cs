@@ -677,9 +677,9 @@ namespace ICS.XFramework.UnitTest
             //CROSS JOIN[Sys_CloudServer] t2
 
             // UNION 注意UNION语法不支持OrderBy
-            var q1 = context.GetTable<Model.Client>().Where(x => x.ClientId == 1);
-            var q2 = context.GetTable<Model.Client>().Where(x => x.ClientId == 1);
-            var q3 = context.GetTable<Model.Client>().Where(x => x.ClientId == 1);
+            var q1 = context.GetTable<Model.Client>().Where(x => x.ClientId == 0);
+            var q2 = context.GetTable<Model.Client>().Where(x => x.ClientId == 0);
+            var q3 = context.GetTable<Model.Client>().Where(x => x.ClientId == 0);
             var query6 = q1.Union(q2).Union(q3);
             var result6 = query6.ToList();
             //SQL=>
@@ -917,6 +917,7 @@ namespace ICS.XFramework.UnitTest
 
             // 批量增加
             // 产生 INSERT INTO VALUES(),(),()... 语法。注意这种批量增加的方法并不能给自增列自动赋值
+            context.Delete<Model.Demo>(x => x.DemoId > 0);
             List<Model.Demo> demos = new List<Model.Demo>();
             for (int i = 0; i < 1002; i++)
             {
@@ -930,13 +931,12 @@ namespace ICS.XFramework.UnitTest
                 };
                 demos.Add(d);
             }
-            context.Insert<Model.Demo>(demos);
+            //context.Insert<Model.Demo>(demos);
             context.SubmitChanges();
             //SQL=>
             //INSERT INTO[Sys_Demo]
             //([DemoCode],[DemoName],[DemoChar],[DemoChar_Nullable],[DemoByte],[DemoByte_Nullable],[DemoDateTime],[DemoDateTime_Nullable],[DemoDecimal],[DemoDecimal_Nullable],[DemoFloat],[DemoFloat_Nullable],[DemoReal],[Demo_Nullable],[DemoGuid],[DemoGuid_Nullable],[DemoShort],[DemoShort_Nullable],[DemoInt],[DemoInt_Nullable],[DemoLong],[DemoLong_Nullable])
             //VALUES(...),(),()...
-
         }
 
         // 性能测试
@@ -958,7 +958,7 @@ namespace ICS.XFramework.UnitTest
             }
 
             stop.Stop();
-            Console.WriteLine(string.Format("运行 10 次 100w 行单表数据，用时：{0}", stop.Elapsed));
+            Console.WriteLine(string.Format("{1} 运行 10 次 100w 行单表数据，用时：{0}", stop.Elapsed, System.Threading.Thread.CurrentThread.ManagedThreadId));
             Console.ReadLine();
 
             stop = new Stopwatch();
