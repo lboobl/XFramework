@@ -14,11 +14,10 @@ namespace ICS.XFramework.Data
     /// <remarks>适用Data命名空间，仅包含类型公开的属性元数据</remarks>
     public class TypeRuntimeInfo : ICS.XFramework.Reflection.TypeRuntimeInfo
     {
-        object _lock = new object();
-        bool isInitialize = false;
+        private object _lock = new object();
+        private bool _isInitialize = false;
 
-        private TableAttribute _table = null;
-        private bool _attReaded = false;
+        private TableAttribute _attribute = null;
         private Type _type = null;
         private int _fieldCount = 0;
         private IDictionary<string, MemberAccessWrapper> _navWrappers = null;
@@ -32,12 +31,8 @@ namespace ICS.XFramework.Data
         {
             get
             {
-                if (!_attReaded)
-                {
-                    _table = base.GetCustomAttribute<TableAttribute>();
-                    _attReaded = true;
-                }
-                return _table;
+                if (_attribute == null) _attribute = base.GetCustomAttribute<TableAttribute>();
+                return _attribute;
             }
         }
 
@@ -132,11 +127,11 @@ namespace ICS.XFramework.Data
             //Fixed issue#匿名类的属性不可写
             //匿名类：new{ClientId=a.ClientId}
 
-            if (!isInitialize)
+            if (!_isInitialize)
             {
                 lock (_lock)
                 {
-                    if (!isInitialize)
+                    if (!_isInitialize)
                     {
                         _wrappers = new Dictionary<string, Reflection.MemberInvokerWrapper>();
                         Func<MemberInfo, bool> predicate = x => x.MemberType == MemberTypes.Method || x.MemberType == MemberTypes.Field ||
@@ -154,7 +149,7 @@ namespace ICS.XFramework.Data
                             if(!_wrappers.ContainsKey(m.Member.Name)) _wrappers.Add(m.Member.Name, m);
                             if (!(m.Column != null && m.Column.NoMapped || m.ForeignKey != null || m.Member.MemberType == MemberTypes.Method)) _fieldCount += 1;
                         }
-                        isInitialize = true;
+                        _isInitialize = true;
                     }
                 }
             }
