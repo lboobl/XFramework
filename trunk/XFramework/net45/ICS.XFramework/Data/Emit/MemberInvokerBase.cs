@@ -18,6 +18,11 @@ namespace ICS.XFramework.Data
         private ColumnAttribute _column = null;
         private ForeignKeyAttribute _foreignKey = null;
 
+        private BindingFlags? _flags = null;
+        //private static MemberInvokerBase _fieldBindingFlagInvoker = null;
+        //private static MemberInvokerBase _propertyBindingFlagInvoker = null;
+        //private static MemberInvokerBase _methodBindingFlagInvoker = null;
+
         /// <summary>
         /// 列特性
         /// </summary>
@@ -92,6 +97,63 @@ namespace ICS.XFramework.Data
                 }
 
                 return _dataType;
+            }
+        }
+
+        /// <summary>
+        /// 指定控制绑定和由反射执行的成员和类型搜索方法的标志。
+        /// </summary>
+        public BindingFlags BindingFlags
+        {
+            get
+            {
+                if (_flags == null)
+                {
+                    //MemberInvokerBase invoker = null;
+                    //if (this.MemberType == MemberTypes.Property)
+                    //{
+                    //    if (_propertyBindingFlagInvoker == null)
+                    //    {
+                    //        Type type = this.Member.GetType();
+                    //        MemberInfo[] list = type.GetMember("BindingFlags", BindingFlags.Instance | BindingFlags.NonPublic);
+                    //        _propertyBindingFlagInvoker = MemberInvokerBase.Create(list[0]);
+                    //    }
+
+                    //    invoker = _propertyBindingFlagInvoker;
+                    //}
+                    //else if (this.MemberType == MemberTypes.Field && _fieldBindingFlagInvoker == null)
+                    //{
+                    //    Type type = this.Member.GetType();
+                    //    MemberInfo[] list = type.GetMember("BindingFlags", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                    //    _fieldBindingFlagInvoker = MemberInvokerBase.Create(list[0]);
+                    //    invoker = _fieldBindingFlagInvoker;
+                    //}
+                    //else if (this.MemberType == MemberTypes.Method && _methodBindingFlagInvoker == null)
+                    //{
+                    //    Type type = this.Member.GetType();
+                    //    MemberInfo[] list = type.GetMember("BindingFlags", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                    //    _methodBindingFlagInvoker = MemberInvokerBase.Create(list[0]);
+                    //    invoker = _methodBindingFlagInvoker;
+                    //}
+
+                    //if (invoker != null)
+                    //{
+                    //    var obj = invoker.Invoke(this.Member);
+                    //    if (obj != null) _flags = (BindingFlags)obj;
+                    //}
+                    Type type = this.Member.GetType();
+                    MemberInfo[] list = type.GetMember("BindingFlags", BindingFlags.Instance | BindingFlags.NonPublic);
+                    if (list != null && list.Length > 0)
+                    {
+                        var invoker = MemberInvokerBase.Create(list[0]);
+                        var obj = invoker.Invoke(this.Member);
+                        if (obj != null) _flags = (BindingFlags)obj;
+                    }
+                }
+
+                return _flags != null ? _flags.Value : BindingFlags.Default;
             }
         }
 

@@ -29,7 +29,7 @@ namespace ICS.XFramework.Data
         private TableAttribute _attribute = null;
         private Dictionary<string, MemberInvokerBase> _invokers = null;
         private IDictionary<string, MemberInvokerBase> _navInvokers = null;
-        private Dictionary<string, MemberInvokerBase> _keyWrappers = null;
+        private Dictionary<string, MemberInvokerBase> _keyInvokers = null;
 
         /// <summary>
         /// 类型对应的数据表
@@ -108,7 +108,7 @@ namespace ICS.XFramework.Data
         {
             get
             {
-                if (_keyWrappers == null)
+                if (_keyInvokers == null)
                 {
                     Func<MemberInvokerBase, bool> predicate = x => x != null && x.Column != null && x.Column.IsKey;
                     Dictionary<string, MemberInvokerBase> keyInvokers = new Dictionary<string, MemberInvokerBase>();
@@ -117,10 +117,10 @@ namespace ICS.XFramework.Data
                         MemberInvokerBase invoker = kvp.Value;
                         if (predicate(invoker)) keyInvokers.Add(kvp.Key, invoker);
                     }
-                    _keyWrappers = keyInvokers;
+                    _keyInvokers = keyInvokers;
                 }
 
-                return _keyWrappers;
+                return _keyInvokers;
             }
         }
 
@@ -254,11 +254,11 @@ namespace ICS.XFramework.Data
         /// <returns></returns>
         public object Invoke(string memberName, object target, params object[] parameters)
         {
-            MemberInvokerBase wrapper = null;
-            this.Invokers.TryGetValue(memberName, out wrapper);
+            MemberInvokerBase invoker = null;
+            this.Invokers.TryGetValue(memberName, out invoker);
 
-            if (wrapper == null) throw new XFrameworkException("{0}.{1} doesn't exists", _type.Name, memberName);
-            return wrapper.Invoke(target, parameters);
+            if (invoker == null) throw new XFrameworkException("{0}.{1} doesn't exists", _type.Name, memberName);
+            return invoker.Invoke(target, parameters);
         }
 
         /// <summary>
@@ -292,28 +292,27 @@ namespace ICS.XFramework.Data
                     if (!_isInitialize)
                     {
                         _invokers = new Dictionary<string, MemberInvokerBase>();
-                        Func<MemberInfo, bool> predicate = x => x.MemberType == MemberTypes.Property || x.MemberType == MemberTypes.Field || x.MemberType == MemberTypes.Method;
-                        BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+
+                        //Func<MemberInfo, bool> predicate = x => x.MemberType == MemberTypes.Property || x.MemberType == MemberTypes.Field || x.MemberType == MemberTypes.Method;
+                        //BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+                        //var collection =
+                        //    type
+                        //    .GetMembers(bindingFlags)
+                        //    .Where(predicate)
+                        //    .Select(x => MemberInvokerBase.Create(x));
+                        Func<MemberInfo, bool> predicate = x => x.MemberType == MemberTypes.Method || x.MemberType == MemberTypes.Field ||
+                            (x.MemberType == MemberTypes.Property && (x as PropertyInfo).CanRead && (this.IsAnonymousType ? true : (x as PropertyInfo).CanWrite));
+                        BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public;
                         var collection =
                             type
                             .GetMembers(flags)
                             .Where(predicate)
                             .Select(x => MemberInvokerBase.Create(x));
 
-                        //Func<MemberInfo, bool> predicate = x => x.MemberType == MemberTypes.Method || x.MemberType == MemberTypes.Field ||
-                        //    (x.MemberType == MemberTypes.Property && (x as PropertyInfo).CanRead && (this.IsAnonymousType ? true : (x as PropertyInfo).CanWrite));
-                        //IEnumerable<MemberAccessWrapper> members =
-                        //    type
-                        //    //.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                        //    .GetMembers(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
-                        //    //.Where(p => p.CanRead && (this.IsAnonymousType ? true : p.CanWrite))
-                        //    .Where(predicate)
-                        //    .Select(p => new MemberAccessWrapper(p));
-
                         foreach (MemberInvokerBase invoker in collection)
                         {
                             if (!_invokers.ContainsKey(invoker.Member.Name)) _invokers.Add(invoker.Member.Name, invoker);
-                            if (!(invoker.Column != null && invoker.Column.NoMapped || invoker.ForeignKey != null || invoker.Member.MemberType == MemberTypes.Method)) _dataFieldCount += 1;
+                            if (!(invoker.Column != null && invoker.Column.NoMapped || invoker.ForeignKey != null || invoker.Member.MemberType == MemberTypes.Method)) _dataFieldCount += 1;                            
                         }
                         _isInitialize = true;
                     }

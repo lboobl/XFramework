@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Reflection;
 using ICS.XFramework.Caching;
 
 namespace ICS.XFramework.Data

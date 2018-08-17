@@ -618,8 +618,13 @@ namespace ICS.XFramework
         public static T HttpPost<T>(string uri, string content, IDictionary<string, string> headers = null, string contentType = "application/json", int? timeout = null)
         {
             //application/x-www-form-urlencoded
+#if net45
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+#endif
+#if net40
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
+#endif
 
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             if (timeout != null) request.Timeout = timeout.Value;
             request.Method = "POST";
@@ -671,7 +676,13 @@ namespace ICS.XFramework
         /// <returns></returns>
         public static T HttpGet<T>(string uri, IDictionary<string, string> headers = null)
         {
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
+#if net45
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+#endif
+#if net40
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
+#endif
+
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             request.Method = "GET";
             request.ContentType = "text/json";
@@ -712,7 +723,13 @@ namespace ICS.XFramework
         /// <returns></returns>
         public static Stream HttpGet(string uri, IDictionary<string, string> headers = null, string contentType = "text/json")
         {
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
+#if net45
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+#endif
+#if net40
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
+#endif
+
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             request.Method = "GET";
             request.ContentType = contentType;
@@ -743,8 +760,13 @@ namespace ICS.XFramework
             //application/x-www-form-urlencoded
 
             encoding = encoding ?? Encoding.UTF8;
+#if net45
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+#endif
+#if net40
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
+#endif
 
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             if (timeout != null) request.Timeout = timeout.Value;
             request.Method = "POST";
@@ -787,8 +809,13 @@ namespace ICS.XFramework
             //application/x-www-form-urlencoded
 
             encoding = encoding ?? Encoding.UTF8;
+#if net45
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+#endif
+#if net40
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
+#endif
 
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             if (timeout != null) request.Timeout = timeout.Value;
             request.Method = "DELETE";
@@ -831,8 +858,13 @@ namespace ICS.XFramework
             //application/x-www-form-urlencoded
 
             encoding = encoding ?? Encoding.UTF8;
+#if net45
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+#endif
+#if net40
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
+#endif
 
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             if (timeout != null) request.Timeout = timeout.Value;
             request.Method = "POST";
@@ -914,6 +946,6 @@ namespace ICS.XFramework
             }
         }
 
-        #endregion
+#endregion
     }
 }

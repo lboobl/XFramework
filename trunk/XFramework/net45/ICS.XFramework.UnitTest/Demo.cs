@@ -931,7 +931,7 @@ namespace ICS.XFramework.UnitTest
                 };
                 demos.Add(d);
             }
-            //context.Insert<Model.Demo>(demos);
+            context.Insert<Model.Demo>(demos);
             context.SubmitChanges();
             //SQL=>
             //INSERT INTO[Sys_Demo]

@@ -31,7 +31,7 @@ namespace ICS.XFramework
             TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(instance.GetType());
             foreach (var kv in typeRuntime.Invokers)
             {
-                var invoker = kv.Value;
+                MemberInvokerBase invoker = kv.Value;
                 if (invoker.MemberType == System.Reflection.MemberTypes.Property)
                 {
                     ValidationContext context2 = XFrameworkValidator.CreateValidationContext(instance, context);

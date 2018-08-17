@@ -53,6 +53,29 @@ namespace ICS.XFramework.Data
         }
 
         /// <summary>
+        /// 可读
+        /// </summary>
+        public bool CanRead
+        {
+            get
+            {
+                return _member.CanRead;
+            }
+        }
+
+
+        /// <summary>
+        /// 可写
+        /// </summary>
+        public bool CanWrite
+        {
+            get
+            {
+                return _member.CanWrite;
+            }
+        }
+
+        /// <summary>
         /// 动态访问成员
         /// </summary>
         /// <param name="target">拥有该成员的类实例</param>
