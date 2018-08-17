@@ -119,6 +119,15 @@
     <Compile Include="..\..\net45\ICS.XFramework\Common\XFrameworkValidator.cs">
       <Link>Common\XFrameworkValidator.cs</Link>
     </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Annotation\ColumnAttribute.cs">
+      <Link>Data\Annotation\ColumnAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Annotation\ForeignKeyAttribute.cs">
+      <Link>Data\Annotation\ForeignKeyAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Annotation\TableAttribute.cs">
+      <Link>Data\Annotation\TableAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\BulkInfo.cs">
       <Link>Data\BulkInfo.cs</Link>
     </Compile>
@@ -182,6 +191,39 @@
     <Compile Include="..\..\net45\ICS.XFramework\Data\DbQueryProviderBase.cs">
       <Link>Data\DbQueryProviderBase.cs</Link>
     </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\ConstructorInvoker.cs">
+      <Link>Data\Emit\ConstructorInvoker.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\EmitHelper.cs">
+      <Link>Data\Emit\EmitHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\FieldInvoker.cs">
+      <Link>Data\Emit\FieldInvoker.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\MemberInfoComparer.cs">
+      <Link>Data\Emit\MemberInfoComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\MemberInvokerBase.cs">
+      <Link>Data\Emit\MemberInvokerBase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\MemberInvokerWrapper.cs">
+      <Link>Data\Emit\MemberInvokerWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\MethodInvoker.cs">
+      <Link>Data\Emit\MethodInvoker.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\PropertyInvoker.cs">
+      <Link>Data\Emit\PropertyInvoker.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\TypeRuntimeInfo.cs">
+      <Link>Data\Emit\TypeRuntimeInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\TypeRuntimeInfoCache.cs">
+      <Link>Data\Emit\TypeRuntimeInfoCache.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\TypeUtils.cs">
+      <Link>Data\Emit\TypeUtils.cs</Link>
+    </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\ExpressionVisitor\ColumnExpressionVisitor.cs">
       <Link>Data\ExpressionVisitor\ColumnExpressionVisitor.cs</Link>
     </Compile>
@@ -217,24 +259,6 @@
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\ExpressionVisitor\WhereExpressionVisitor.cs">
       <Link>Data\ExpressionVisitor\WhereExpressionVisitor.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Mapping\ColumnAttribute.cs">
-      <Link>Data\Mapping\ColumnAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Mapping\ForeignKeyAttribute.cs">
-      <Link>Data\Mapping\ForeignKeyAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Mapping\MemberAccessWrapper.cs">
-      <Link>Data\Mapping\MemberAccessWrapper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Mapping\TableAttribute.cs">
-      <Link>Data\Mapping\TableAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Mapping\TypeRuntimeInfo.cs">
-      <Link>Data\Mapping\TypeRuntimeInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Mapping\TypeRuntimeInfoCache.cs">
-      <Link>Data\Mapping\TypeRuntimeInfoCache.cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\Other\Column.cs">
       <Link>Data\Other\Column.cs</Link>
@@ -274,39 +298,6 @@
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\TableAliasCache.cs">
       <Link>Data\TableAliasCache.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\ConstructorInvoker.cs">
-      <Link>Reflection\Emit\ConstructorInvoker.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\EmitHelper.cs">
-      <Link>Reflection\Emit\EmitHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\FieldInvoker.cs">
-      <Link>Reflection\Emit\FieldInvoker.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\MethodInvoker.cs">
-      <Link>Reflection\Emit\MethodInvoker.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\Emit\PropertyInvoker.cs">
-      <Link>Reflection\Emit\PropertyInvoker.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberInfoComparer.cs">
-      <Link>Reflection\MemberInfoComparer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberInvokerBase.cs">
-      <Link>Reflection\MemberInvokerBase.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\MemberInvokerWrapper.cs">
-      <Link>Reflection\MemberInvokerWrapper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\TypeRuntimeInfo.cs">
-      <Link>Reflection\TypeRuntimeInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\TypeRuntimeInfoCache.cs">
-      <Link>Reflection\TypeRuntimeInfoCache.cs</Link>
-    </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Reflection\TypeUtils.cs">
-      <Link>Reflection\TypeUtils.cs</Link>
     </Compile>
     <Compile Include="Common\Helper\SerializeHelper.cs" />
     <Compile Include="Common\Helper\WebHelper .cs" />

@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using ICS.XFramework.Reflection.Emit;
 
 namespace ICS.XFramework.Data.SqlClient
 {
@@ -17,10 +16,10 @@ namespace ICS.XFramework.Data.SqlClient
         static IDictionary<string, MethodInvoker> _methods = null;
         static MethodCallExressionVisitor()
         {
-            BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic;
+            BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic;
             _methods = typeof(MethodCallExressionVisitor)
-                .GetMethods(bindingAttr)
-                .ToDictionary(m => m.Name, m => new MethodInvoker(m));
+                .GetMethods(flags)
+                .ToDictionary(x => x.Name, x => new MethodInvoker(x));
         }
 
         #region 重写方法

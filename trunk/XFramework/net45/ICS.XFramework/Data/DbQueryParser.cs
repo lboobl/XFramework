@@ -274,7 +274,7 @@ namespace ICS.XFramework.Data
                 IEnumerable<MemberBinding> bindings = initExpression != null
                     ? initExpression
                       .Bindings
-                      .Where(x => Reflection.TypeUtils.IsPrimitive((x.Member as System.Reflection.PropertyInfo).PropertyType))
+                      .Where(x => TypeUtils.IsPrimitive((x.Member as System.Reflection.PropertyInfo).PropertyType))
                     : new List<MemberBinding>();
 
                 if (constructor != null || bindings.Count() > 0)
@@ -309,7 +309,7 @@ namespace ICS.XFramework.Data
             {
                 // primitive 类型
                 Type type = (node.Bindings[i].Member as System.Reflection.PropertyInfo).PropertyType;
-                if (Reflection.TypeUtils.IsPrimitive(type)) continue;
+                if (TypeUtils.IsPrimitive(type)) continue;
 
                 // complex 类型
                 if (type.IsGenericType)

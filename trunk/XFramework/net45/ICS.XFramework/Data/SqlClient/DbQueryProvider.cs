@@ -428,18 +428,18 @@ namespace ICS.XFramework.Data.SqlClient
 
                 foreach (var kv in typeRuntime.Invokers)
                 {
-                    var wrapper = kv.Value as MemberAccessWrapper;
-                    var column = wrapper.Column;
+                    MemberInvokerBase invoker = kv.Value;
+                    var column = invoker.Column;
                     if (column != null && column.NoMapped) continue;
-                    if (wrapper.ForeignKey != null) continue;
-                    if (wrapper.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
+                    if (invoker.ForeignKey != null) continue;
+                    if (invoker.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
 
-                    if (wrapper != qInsert.AutoIncrement)
+                    if (invoker != qInsert.AutoIncrement)
                     {
-                        columns.AppendMember(wrapper.Member.Name);
+                        columns.AppendMember(invoker.Member.Name);
                         columns.Append(',');
 
-                        var value = wrapper.Invoke(entity);
+                        var value = invoker.Invoke(entity);
                         string seg = this.GetSqlSeg(value);
                         values.Append(seg);
                         values.Append(',');
@@ -521,15 +521,15 @@ namespace ICS.XFramework.Data.SqlClient
 
                 foreach (var kv in typeRuntime.Invokers)
                 {
-                    var wrapper = kv.Value as MemberAccessWrapper;
-                    var column = wrapper.Column;
+                    MemberInvokerBase invoker = kv.Value;
+                    var column = invoker.Column;
 
                     if (column != null && column.IsKey)
                     {
                         useKey = true;
-                        var value = wrapper.Invoke(entity);
+                        var value = invoker.Invoke(entity);
                         var seg = this.GetSqlSeg(value);
-                        builder.AppendMember("t0", wrapper.Member.Name);
+                        builder.AppendMember("t0", invoker.Member.Name);
                         builder.Append(" = ");
                         builder.Append(seg);
                         builder.Append(" AND ");
@@ -575,18 +575,18 @@ namespace ICS.XFramework.Data.SqlClient
 
                 foreach (var kv in typeRuntime.Invokers)
                 {
-                    var wrapper = kv.Value as MemberAccessWrapper;
-                    var column = wrapper.Column;
+                    MemberInvokerBase invoker = kv.Value;
+                    var column = invoker.Column;
                     if (column != null && column.IsIdentity) goto gotoLabel; // fix issue# 自增列同时又是主键
                     if (column != null && column.NoMapped) continue;
-                    if (wrapper.ForeignKey != null) continue;
-                    if (wrapper.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
+                    if (invoker.ForeignKey != null) continue;
+                    if (invoker.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
 
-                    builder.AppendMember("t0", wrapper.Member.Name);
+                    builder.AppendMember("t0", invoker.Member.Name);
                     builder.Append(" = ");
 
                     gotoLabel:
-                    var value = wrapper.Invoke(entity);
+                    var value = invoker.Invoke(entity);
                     var seg = this.GetSqlSeg(value);
 
                     if (column == null || !column.IsIdentity)
@@ -600,7 +600,7 @@ namespace ICS.XFramework.Data.SqlClient
                     if (column != null && column.IsKey)
                     {
                         useKey = true;
-                        whereBuilder.AppendMember("t0", wrapper.Member.Name);
+                        whereBuilder.AppendMember("t0", invoker.Member.Name);
                         whereBuilder.Append(" = ");
                         whereBuilder.Append(seg);
                         whereBuilder.Append(" AND ");

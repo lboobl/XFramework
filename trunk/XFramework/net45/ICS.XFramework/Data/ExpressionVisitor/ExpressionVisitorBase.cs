@@ -161,7 +161,7 @@ namespace ICS.XFramework.Data
             // => a.ActiveDate == DateTime.Now  => a.State == (byte)state
             if (node.CanEvaluate()) return this.VisitConstant(node.Evaluate());
             // => a.Name.Length
-            if (Reflection.TypeUtils.IsPrimitive(node.Expression.Type)) return _provider.MethodVisitor.VisitMemberMember(node, this);
+            if (TypeUtils.IsPrimitive(node.Expression.Type)) return _provider.MethodVisitor.VisitMemberMember(node, this);
             // => <>h__3.b.ClientName
             if (!node.Expression.Acceptable()) return _builder.AppendMember(node, _aliases);
             // => b.Client.Address.AddressName

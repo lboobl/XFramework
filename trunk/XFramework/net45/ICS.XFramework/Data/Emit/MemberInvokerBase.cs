@@ -146,7 +146,7 @@ namespace ICS.XFramework.Data
             if (member.MemberType == MemberTypes.Property) invoker = new PropertyInvoker((PropertyInfo)member);
             if (member.MemberType == MemberTypes.Field) invoker = new FieldInvoker((FieldInfo)member);
             if (member.MemberType == MemberTypes.Method) invoker = new MethodInvoker((MethodInfo)member);
-            if (invoker == null) throw new XFrameworkException("{0}.{1} not supported");
+            if (invoker == null) throw new XFrameworkException("{0}.{1} not supported", member.ReflectedType, member.Name);
             return invoker;
         }
     }
