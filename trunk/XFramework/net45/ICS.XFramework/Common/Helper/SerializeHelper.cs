@@ -23,53 +23,40 @@ namespace ICS.XFramework
         /// <returns></returns>
         public static string SerializeToJson(object obj,string format = null)
         {
-            // 还有个JavascriptSerializer
+
+#if net45
             DataContractJsonSerializer serializer = string.IsNullOrEmpty(format)
                 ? new DataContractJsonSerializer(obj.GetType())
                 : new DataContractJsonSerializer(obj.GetType(), new DataContractJsonSerializerSettings { DateTimeFormat = new DateTimeFormat(format) });
+#endif
+#if net40
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
+#endif
             using (var ms = new MemoryStream())
             {
                 serializer.WriteObject(ms, obj);
                 string strJson = Encoding.UTF8.GetString(ms.ToArray());
                 return strJson;
             }
-
-//#if Net45
-//            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(T), new DataContractJsonSerializerSettings()
-//            {
-//                DateTimeFormat = new DateTimeFormat("yyyy-MM-dd'T'HH:mm:ss")
-//            });
-//#endif
-//#if Net40
-//             private static string ConvertDateStringToJsonDate(Match m)
-//            {
-//                string result = string.Empty;
-//                DateTime dt = DateTime.Parse(m.Groups[0].Value);
-//                dt = dt.ToUniversalTime();
-            
-//                TimeSpan ts = dt - DateTime.Parse("1970-01-01");
-//                result = string.Format("\\/Date({0}+0800)\\/",ts.TotalMilliseconds.ToString("f0"));
-//                return result;
-//            }
-//            string datetimePattern="(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)(?:([\+-])(\d{2})\:(\d{2}))?Z?";
-//            MatchEvaluator matchEvaluator = new MatchEvaluator(ConvertDateStringToJsonDate);
-//            var reg = new Regex(datetimePattern);
-//            jsonString = reg.Replace(jsonString, matchEvaluator);
-//#endif
         }
 
         /// <summary>
         /// Json字符串反序列化成对象
         /// </summary>
         /// <typeparam name="T">T</typeparam>
-        /// <param name="strJson">Json字符串</param>
+        /// <param name="json">Json字符串</param>
         /// <returns></returns>
-        public static T DeserializeFromJson<T>(string strJson,string format = null)
+        public static T DeserializeFromJson<T>(string json,string format = null)
         {
+#if net45
             DataContractJsonSerializer serializer = string.IsNullOrEmpty(format)
                 ? new DataContractJsonSerializer(typeof(T))
                 : new DataContractJsonSerializer(typeof(T), new DataContractJsonSerializerSettings { DateTimeFormat = new DateTimeFormat(format) });
-            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(strJson)))
+#endif
+#if net40
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
+#endif
+            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
             {
                 T obj = (T)serializer.ReadObject(ms);
                 return obj;

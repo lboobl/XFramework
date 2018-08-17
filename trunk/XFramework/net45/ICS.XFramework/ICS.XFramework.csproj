@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;net45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>0108,1591,1571,1572,1573,1574,1587,1711</NoWarn>
@@ -79,6 +79,7 @@
     <Compile Include="Common\Ioc\XfwContainer.cs" />
     <Compile Include="Common\Ioc\IContainer.cs" />
     <Compile Include="Common\Mailer.cs" />
+    <Compile Include="Common\Helper\WebHelper45.cs" />
     <Compile Include="Common\XFrameworkExtensions.cs" />
     <Compile Include="Common\XFrameworkException.cs" />
     <Compile Include="Common\XFrameworkValidator.cs" />

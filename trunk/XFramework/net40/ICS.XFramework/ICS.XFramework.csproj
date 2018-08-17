@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;net40</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>0108,1591,1571,1572,1573,1574,1587,1711</NoWarn>
@@ -94,6 +94,12 @@
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\SecurityHelper.cs">
       <Link>Common\Helper\SecurityHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\SerializeHelper.cs">
+      <Link>Common\Helper\SerializeHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\WebHelper .cs">
+      <Link>Common\Helper\WebHelper .cs</Link>
     </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\XmlHelper.cs">
       <Link>Common\Helper\XmlHelper.cs</Link>
@@ -206,9 +212,6 @@
     <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\MemberInvokerBase.cs">
       <Link>Data\Emit\MemberInvokerBase.cs</Link>
     </Compile>
-    <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\MemberInvokerWrapper.cs">
-      <Link>Data\Emit\MemberInvokerWrapper.cs</Link>
-    </Compile>
     <Compile Include="..\..\net45\ICS.XFramework\Data\Emit\MethodInvoker.cs">
       <Link>Data\Emit\MethodInvoker.cs</Link>
     </Compile>
@@ -299,8 +302,6 @@
     <Compile Include="..\..\net45\ICS.XFramework\Data\TableAliasCache.cs">
       <Link>Data\TableAliasCache.cs</Link>
     </Compile>
-    <Compile Include="Common\Helper\SerializeHelper.cs" />
-    <Compile Include="Common\Helper\WebHelper .cs" />
     <Compile Include="Data\DbQueryableExtensions.cs" />
     <Compile Include="Data\DbQueryableInfo_Update.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

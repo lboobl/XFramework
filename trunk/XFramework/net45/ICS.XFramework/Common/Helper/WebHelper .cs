@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -15,7 +13,7 @@ namespace ICS.XFramework
     /// <summary>
     /// WEB助手类
     /// </summary>
-    public class WebHelper
+    public partial class WebHelper
     {
         #region Cookie
 
@@ -66,7 +64,7 @@ namespace ICS.XFramework
         /// <param name="expires">过期时间，分钟为单位，默认一天</param>
         /// <param name="encrypt">是否加密cookie</param>
         public static void SetCookie<T>(string key, T TCookie, int expires = 1440, bool encrypt = true)
-            where T : class,new()
+            where T : class, new()
         {
             string json = SerializeHelper.SerializeToJson(TCookie);
             WebHelper.SetCookie(key, json, expires, encrypt);
@@ -81,7 +79,7 @@ namespace ICS.XFramework
         /// <param name="expires">过期时间，分钟为单位，默认一天</param>
         /// <param name="encrypt">是否加密cookie</param>
         public static void SetCookie<T>(string key, T cookieObj, DateTime expires, bool encrypt = true)
-            where T : class,new()
+            where T : class, new()
         {
             string json = SerializeHelper.SerializeToJson(cookieObj);
             WebHelper.SetCookie(key, json, expires, encrypt);
@@ -91,7 +89,7 @@ namespace ICS.XFramework
         /// 取指定KEY值的Cookie
         /// </summary>
         public static T GetCookie<T>(string key, bool decrypt = true)
-            where T : class,new()
+            where T : class, new()
         {
             string cookieValue = WebHelper.GetCookie(key, decrypt);
             if (string.IsNullOrEmpty(cookieValue)) return default(T);
@@ -508,7 +506,7 @@ namespace ICS.XFramework
         public static byte[] CreateValidateGraphic(out string code, int length, int width, int height, int fontSize)
         {
             string validCode = string.Empty;
-            //颜色列表，用于验证码、噪线、噪点
+            //顏色列表，用於驗證碼、噪線、噪點
             Color[] colors ={
                  System.Drawing.Color.Black,
                  System.Drawing.Color.Red,
@@ -610,134 +608,6 @@ namespace ICS.XFramework
         #region 网络
 
         /// <summary>
-        /// HttpClient 用POST方法访问指定URI
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="uri">请求发送到的 URI。</param>
-        /// <param name="content">发送到服务器的 HTTP 请求内容。</param>
-        /// <param name="headers">请求的头部信息</param>
-        /// <param name="authentication">请求的验证信息</param>
-        /// <returns></returns>
-        public static async Task<T> PostAsync<T>(string uri, string content, IDictionary<string, string> headers = null, AuthenticationHeaderValue authentication = null)
-        {
-            HttpClient c = null;
-            HttpContent httpContent = null;
-            HttpResponseMessage msg = null;
-            T TEntity = default(T);
-
-            try
-            {
-                c = new HttpClient();
-                httpContent = new StringContent(content);
-                if (headers != null) foreach (var kv in headers) c.DefaultRequestHeaders.Add(kv.Key, kv.Value);
-                if (authentication != null) c.DefaultRequestHeaders.Authorization = authentication;
-
-                msg = await c.PostAsync(uri, httpContent);
-                string json = await msg.Content.ReadAsStringAsync(); // ReadAsAsync
-                TEntity = SerializeHelper.DeserializeFromJson<T>(json);
-            }
-            catch (WebException we)
-            {
-                WebHelper.ThrowWebException(we);
-                throw;
-            }
-            finally
-            {
-                if (httpContent != null) httpContent.Dispose();
-                if (c != null) c.Dispose();
-                if (msg != null) msg.Dispose();
-
-            }
-
-            return TEntity;
-        }
-
-        /// <summary>
-        /// HttpClient 用GET方法访问指定URI
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="uri">请求发送到的 URI。</param>
-        /// <param name="headers">请求的头部信息</param>
-        /// <param name="authentication">请求的验证信息</param>
-        /// <returns></returns>
-        public static async Task<T> GetAsync<T>(string uri, IDictionary<string, string> headers = null, AuthenticationHeaderValue authentication = null)
-        {
-            HttpClient c = null;
-            HttpResponseMessage msg = null;
-            T TEntity = default(T);
-
-            try
-            {
-                c = new HttpClient();
-                if (headers != null) foreach (var kv in headers) c.DefaultRequestHeaders.Add(kv.Key, kv.Value);
-                if (authentication != null) c.DefaultRequestHeaders.Authorization = authentication;
-
-                msg = await c.GetAsync(uri);
-                string json = await msg.Content.ReadAsStringAsync();
-                TEntity = SerializeHelper.DeserializeFromJson<T>(json);
-            }
-            catch (WebException we)
-            {
-                WebHelper.ThrowWebException(we);
-                throw;
-            }
-            finally
-            {
-                if (c != null) c.Dispose();
-                if (msg != null) msg.Dispose();
-
-            }
-
-            return TEntity;
-        }
-
-        /// <summary>
-        /// HttpClient 用GET方法访问指定URI
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="uri">请求发送到的 URI。</param>
-        /// <param name="token">Basic 验证模式的令牌</param>
-        /// <param name="headers">请求的头部信息</param>
-        /// <returns></returns>
-        public static async Task<T> GetAsync<T>(string uri, string token, IDictionary<string, string> headers = null)
-        {
-            return await WebHelper.GetAsync<T>(uri, headers, new AuthenticationHeaderValue("Basic", token));
-        }
-
-        /// <summary>
-        /// HttpClient 用GET方法访问指定URI <c>用完注意调用HttpContent.Dispose方法</c>
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="uri">请求发送到的 URI。</param>
-        /// <param name="token">Basic 验证模式的令牌</param>
-        /// <param name="headers">请求的头部信息</param>
-        /// <returns></returns>
-        public static async Task<HttpContent> GetAsync(string uri, string token, IDictionary<string, string> headers = null)
-        {
-            HttpClient c = null;
-
-            try
-            {
-                c = new HttpClient();
-                if (headers != null) foreach (var kv in headers) c.DefaultRequestHeaders.Add(kv.Key, kv.Value);
-                if (!string.IsNullOrEmpty(token)) c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
-
-
-                var r = await c.GetAsync(uri);
-                return r.Content;
-            }
-            catch (WebException we)
-            {
-                WebHelper.ThrowWebException(we);
-                throw;
-            }
-            finally
-            {
-                if (c != null) c.Dispose();
-            }
-        }
-
-        /// <summary>
         /// HttpWebRequest 用POST方法访问指定URI
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -749,7 +619,7 @@ namespace ICS.XFramework
         {
             //application/x-www-form-urlencoded
 
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             if (timeout != null) request.Timeout = timeout.Value;
             request.Method = "POST";
@@ -801,7 +671,7 @@ namespace ICS.XFramework
         /// <returns></returns>
         public static T HttpGet<T>(string uri, IDictionary<string, string> headers = null)
         {
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             request.Method = "GET";
             request.ContentType = "text/json";
@@ -842,12 +712,12 @@ namespace ICS.XFramework
         /// <returns></returns>
         public static Stream HttpGet(string uri, IDictionary<string, string> headers = null, string contentType = "text/json")
         {
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             request.Method = "GET";
             request.ContentType = contentType;
             if (headers != null) foreach (var kv in headers) request.Headers.Add(kv.Key, kv.Value);
-            
+
             try
             {
                 HttpWebResponse response = request.GetResponse() as HttpWebResponse;
@@ -868,13 +738,13 @@ namespace ICS.XFramework
         /// <param name="content">POST内容</param>
         /// <param name="headers">请求的头部信息</param>
         /// <returns></returns>
-        public static Stream HttpPost(string uri, string content, IDictionary<string, string> headers = null, string contentType = "application/json", int? timeout = null,Encoding encoding=null)
+        public static Stream HttpPost(string uri, string content, IDictionary<string, string> headers = null, string contentType = "application/json", int? timeout = null, Encoding encoding = null)
         {
             //application/x-www-form-urlencoded
 
             encoding = encoding ?? Encoding.UTF8;
 
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             if (timeout != null) request.Timeout = timeout.Value;
             request.Method = "POST";
@@ -897,14 +767,12 @@ namespace ICS.XFramework
                 HttpWebResponse response = request.GetResponse() as HttpWebResponse;
                 return response.GetResponseStream();
             }
-            catch(WebException we)
+            catch (WebException we)
             {
                 WebHelper.ThrowWebException(we);
                 throw;
             }
         }
-
-
 
         /// <summary>
         /// HttpWebRequest 用POST方法访问指定URI<c>使用完记得调用Stream.Close方法</c>
@@ -920,7 +788,7 @@ namespace ICS.XFramework
 
             encoding = encoding ?? Encoding.UTF8;
 
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             if (timeout != null) request.Timeout = timeout.Value;
             request.Method = "DELETE";
@@ -964,7 +832,7 @@ namespace ICS.XFramework
 
             encoding = encoding ?? Encoding.UTF8;
 
-            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            if (uri.StartsWith("https", StringComparison.OrdinalIgnoreCase)) ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3| SecurityProtocolType.Tls;
             HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
             if (timeout != null) request.Timeout = timeout.Value;
             request.Method = "POST";
@@ -1017,8 +885,6 @@ namespace ICS.XFramework
                 if (stream != null) stream.Dispose();
             }
         }
-
-
 
         /// <summary>
         /// 读取 WebException 里的详细信息
