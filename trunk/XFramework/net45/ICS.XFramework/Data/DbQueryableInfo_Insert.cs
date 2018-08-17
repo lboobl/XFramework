@@ -8,7 +8,7 @@ namespace ICS.XFramework.Data
     /// </summary>
     public class DbQueryableInfo_Insert<T> : DbQueryableInfo<T>, IDbQueryableInfo_Insert
     {
-        private MemberAccessWrapper _autoIncrement = null;
+        private MemberInvokerBase _autoIncrement = null;
 
         /// <summary>
         /// 初始化 <see cref="DbQueryableInfo_Insert"/> 类的新实例
@@ -31,7 +31,7 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 自增列
         /// </summary>
-        public MemberAccessWrapper AutoIncrement
+        public MemberInvokerBase AutoIncrement
         {
             get { return _autoIncrement; }
         }
@@ -45,11 +45,7 @@ namespace ICS.XFramework.Data
         private void InitializeIdentity()
         {
             TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
-            _autoIncrement = typeRuntime.Wrappers.FirstOrDefault(x =>
-            {
-                var column = (x.Value as MemberAccessWrapper).Column;
-                return column != null && column.IsIdentity;
-            }).Value as MemberAccessWrapper;
+            _autoIncrement = typeRuntime.Invokers.FirstOrDefault(x => x.Value.Column != null && x.Value.Column.IsIdentity).Value;
         }
     }
 }

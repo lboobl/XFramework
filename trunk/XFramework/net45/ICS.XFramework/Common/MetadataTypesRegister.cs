@@ -1,12 +1,8 @@
 ﻿
 using System;
-using System.Reflection;
-using System.Collections;
 using System.ComponentModel;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-
-using ICS.XFramework.Reflection.Emit;
+using System.Reflection;
 
 namespace ICS.XFramework
 {

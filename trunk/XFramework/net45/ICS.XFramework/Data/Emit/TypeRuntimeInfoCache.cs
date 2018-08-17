@@ -1,7 +1,8 @@
-﻿using System;
+﻿
+using System;
 using ICS.XFramework.Caching;
 
-namespace ICS.XFramework.Reflection
+namespace ICS.XFramework.Data
 {
     /// <summary>
     /// 类型运行时元数据缓存

@@ -5,11 +5,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ICS.XFramework.Data;
 
 namespace ICS.XFramework
 {
-    using Reflection;
-
     /// <summary>
     /// 实体验证器
     /// </summary>
@@ -30,17 +29,17 @@ namespace ICS.XFramework
         {
             IDictionary<ValidationContext, object> result = new Dictionary<ValidationContext, object>();
             TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(instance.GetType());
-            foreach (var kv in typeRuntime.Wrappers)
+            foreach (var kv in typeRuntime.Invokers)
             {
-                var wrapper = kv.Value;
-                if (wrapper.PropertyInfo != null)
+                var invoker = kv.Value;
+                if (invoker.MemberType == System.Reflection.MemberTypes.Property)
                 {
                     ValidationContext context2 = XFrameworkValidator.CreateValidationContext(instance, context);
-                    context2.MemberName = wrapper.Member.Name;
+                    context2.MemberName = invoker.Member.Name;
 
                     if (XFrameworkValidator._store.GetPropertyValidationAttributes(context2).Any<ValidationAttribute>())
                     {
-                        result.Add(context2, wrapper.Invoke(instance));
+                        result.Add(context2, invoker.Invoke(instance));
                     }
                 }
             }

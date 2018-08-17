@@ -119,12 +119,9 @@
     <Compile Include="Data\Contract\IDbQueryable`1.cs" />
     <Compile Include="Data\Contract\IDbQueryProvider45.cs" />
     <Compile Include="Data\Contract\IDbQueryProvider.cs" />
-    <Compile Include="Data\Mapping\ColumnAttribute.cs" />
-    <Compile Include="Data\Mapping\ForeignKeyAttribute.cs" />
-    <Compile Include="Data\Mapping\MemberAccessWrapper.cs" />
-    <Compile Include="Data\Mapping\TableAttribute.cs" />
-    <Compile Include="Data\Mapping\TypeRuntimeInfo.cs" />
-    <Compile Include="Data\Mapping\TypeRuntimeInfoCache.cs" />
+    <Compile Include="Data\Annotation\ColumnAttribute.cs" />
+    <Compile Include="Data\Annotation\ForeignKeyAttribute.cs" />
+    <Compile Include="Data\Annotation\TableAttribute.cs" />
     <Compile Include="Data\Other\Column.cs" />
     <Compile Include="Data\Other\NavigationDescriptor.cs" />
     <Compile Include="Data\Other\CommandBase.cs" />
@@ -140,22 +137,22 @@
     <Compile Include="Data\SqlClient\MethodCallExressionVisitor.cs" />
     <Compile Include="Data\TableAliasCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reflection\Emit\FieldInvoker.cs" />
-    <Compile Include="Reflection\Emit\PropertyInvoker.cs" />
-    <Compile Include="Reflection\Emit\ConstructorInvoker.cs" />
-    <Compile Include="Reflection\Emit\EmitHelper.cs" />
-    <Compile Include="Reflection\Emit\MethodInvoker.cs" />
-    <Compile Include="Reflection\MemberInvokerBase.cs" />
-    <Compile Include="Reflection\MemberInfoComparer.cs" />
-    <Compile Include="Reflection\MemberInvokerWrapper.cs" />
-    <Compile Include="Reflection\TypeRuntimeInfo.cs" />
-    <Compile Include="Reflection\TypeRuntimeInfoCache.cs" />
-    <Compile Include="Reflection\TypeUtils.cs" />
+    <Compile Include="Data\Emit\FieldInvoker.cs" />
+    <Compile Include="Data\Emit\PropertyInvoker.cs" />
+    <Compile Include="Data\Emit\ConstructorInvoker.cs" />
+    <Compile Include="Data\Emit\EmitHelper.cs" />
+    <Compile Include="Data\Emit\MethodInvoker.cs" />
+    <Compile Include="Data\Emit\MemberInvokerBase.cs" />
+    <Compile Include="Data\Emit\MemberInfoComparer.cs" />
+    <Compile Include="Data\Emit\TypeRuntimeInfo.cs" />
+    <Compile Include="Data\Emit\TypeRuntimeInfoCache.cs" />
+    <Compile Include="Data\Emit\TypeUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="EncomStrongKey.snk" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

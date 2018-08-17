@@ -1,9 +1,8 @@
 ﻿
-
-using System.Collections.Generic;
 using System.Reflection;
+using System.Collections.Generic;
 
-namespace ICS.XFramework.Reflection
+namespace ICS.XFramework.Data
 {
     internal sealed class MemberInfoComparer<T> : IEqualityComparer<T>, IComparer<T> where T : MemberInfo
     {

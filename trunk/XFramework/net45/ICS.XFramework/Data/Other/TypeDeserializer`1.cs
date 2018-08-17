@@ -1,13 +1,11 @@
 ﻿
 using System;
-using System.Text;
-using System.Linq;
 using System.Data;
+using System.Linq;
+using System.Text;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
-
-using ICS.XFramework.Reflection.Emit;
 
 namespace ICS.XFramework.Data
 {
@@ -58,7 +56,7 @@ namespace ICS.XFramework.Data
 
             #region 基元类型
 
-            if (Reflection.TypeUtils.IsPrimitive(typeof(T)))
+            if (TypeUtils.IsPrimitive(typeof(T)))
             {
                 if (_reader.IsDBNull(0)) return default(T);
 
@@ -87,7 +85,7 @@ namespace ICS.XFramework.Data
             #region 匿名类型
 
             TypeRuntimeInfo runtime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
-            ICS.XFramework.Reflection.Emit.ConstructorInvoker ctor = runtime.ConstructInvoker;
+            ConstructorInvoker ctor = runtime.ConstructInvoker;
             if (runtime.IsAnonymousType)
             {
                 object[] values = new object[_reader.FieldCount];
@@ -126,7 +124,7 @@ namespace ICS.XFramework.Data
                 {
                     isLine = true;
                     TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
-                    foreach (var key in typeRuntime.KeyWrappers)
+                    foreach (var key in typeRuntime.KeyInvokers)
                     {
                         var wrapper = key.Value;
                         var value1 = wrapper.Invoke(prevModel);
@@ -170,7 +168,7 @@ namespace ICS.XFramework.Data
                 string keyName = typeName + "." + descriptor.Name;
                 if (keyName != kvp.Key) continue;
 
-                var navWrapper = typeRuntime.GetWrapper(descriptor.Name);
+                var navWrapper = typeRuntime.GetInvoker(descriptor.Name);
                 if (navWrapper == null) continue;
 
                 Type navType = navWrapper.DataType;
@@ -218,13 +216,13 @@ namespace ICS.XFramework.Data
                             string[] keys = keyName.Split('.');
                             TypeRuntimeInfo curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo<T>();
                             Type curType = curTypeRuntime.Type;
-                            Reflection.MemberInvokerWrapper curWrapper = null;
+                            MemberInvokerBase curInvoker = null;
                             object curModel = prevModel;
 
                             for (int i = 1; i < keys.Length; i++)
                             {
-                                curWrapper = curTypeRuntime.GetWrapper(keys[i]);
-                                curModel = curWrapper.Invoke(curModel);
+                                curInvoker = curTypeRuntime.GetInvoker(keys[i]);
+                                curModel = curInvoker.Invoke(curModel);
                                 if (curModel == null) continue;
 
                                 curType = curModel.GetType();
@@ -237,11 +235,11 @@ namespace ICS.XFramework.Data
                                     curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(curType);
                                     if (curTypeRuntime.GenericTypeDefinition == typeof(List<>))
                                     {
-                                        var wrapper = curTypeRuntime.GetWrapper("get_Count");
+                                        var wrapper = curTypeRuntime.GetInvoker("get_Count");
                                         int count = Convert.ToInt32(wrapper.Invoke(curModel));      // List.Count
                                         if (count > 0)
                                         {
-                                            var wrapper2 = navTypeRuntime.GetWrapper("get_Item");
+                                            var wrapper2 = navTypeRuntime.GetInvoker("get_Item");
                                             curModel = wrapper2.Invoke(curModel, count - 1);        // List[List.Count-1]
                                             curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(curModel.GetType());
                                         }
@@ -271,7 +269,7 @@ namespace ICS.XFramework.Data
                                         curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navModel.GetType());
                                         StringBuilder keyBuilder = new StringBuilder(64);
 
-                                        foreach (var key in curTypeRuntime.KeyWrappers)
+                                        foreach (var key in curTypeRuntime.KeyInvokers)
                                         {
                                             var wrapper = key.Value;
                                             var value = wrapper.Invoke(navModel);
@@ -292,7 +290,7 @@ namespace ICS.XFramework.Data
                                 if (!isAny)
                                 {
                                     // 如果列表中不存在，则添加到上一行的相同导航列表中去
-                                    var myAddMethod = navTypeRuntime.GetWrapper("Add");
+                                    var myAddMethod = navTypeRuntime.GetInvoker("Add");
                                     myAddMethod.Invoke(curModel, navModel);
                                 }
                             }
@@ -303,13 +301,13 @@ namespace ICS.XFramework.Data
                         {
                             // 此时的 navTypeRuntime 是 List<> 类型的运行时
                             // 先添加 List 列表
-                            var myAddMethod = navTypeRuntime.GetWrapper("Add");
+                            var myAddMethod = navTypeRuntime.GetInvoker("Add");
                             myAddMethod.Invoke(list, navModel);
 
                             var curTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navModel.GetType());
                             StringBuilder keyBuilder = new StringBuilder(64);
 
-                            foreach (var key in curTypeRuntime.KeyWrappers)
+                            foreach (var key in curTypeRuntime.KeyInvokers)
                             {
                                 var wrapper = key.Value;
                                 var value = wrapper.Invoke(navModel);
@@ -322,7 +320,7 @@ namespace ICS.XFramework.Data
                     }
 
                     if (navTypeRuntime.GenericTypeDefinition == typeof(List<>)) navTypeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(navTypeRuntime.GenericArguments[0]);
-                    if (navTypeRuntime.NavWrappers.Count > 0) Deserialize_Navigation(prevModel, navModel, keyName, isLine);
+                    if (navTypeRuntime.NavInvokers.Count > 0) Deserialize_Navigation(prevModel, navModel, keyName, isLine);
                 }
             }
         }
@@ -359,8 +357,8 @@ namespace ICS.XFramework.Data
                     g.Emit(OpCodes.Brtrue, loadNullLabel);
                 }
 
-                var wrapper = typeRuntime.GetWrapper(keyName);
-                if (wrapper == null) continue;
+                var invoker = typeRuntime.GetInvoker(keyName);
+                if (invoker == null) continue;
 
                 var isDBNullLabel = g.DefineLabel();
                 g.Emit(OpCodes.Ldarg_0);
@@ -376,7 +374,7 @@ namespace ICS.XFramework.Data
                 g.Emit(OpCodes.Ldc_I4, index);
                 g.Emit(OpCodes.Callvirt, m);
 
-                Type memberType = wrapper.DataType;
+                Type memberType = invoker.DataType;
                 Type nullUnderlyingType = memberType.IsGenericType ? Nullable.GetUnderlyingType(memberType) : null;
                 Type unboxType = nullUnderlyingType != null ? nullUnderlyingType : memberType;
 
@@ -391,13 +389,13 @@ namespace ICS.XFramework.Data
                     g.Emit(OpCodes.Newobj, memberType.GetConstructor(new[] { nullUnderlyingType }));
                 }
 
-                if (wrapper.Member.MemberType == MemberTypes.Field)
+                if (invoker.Member.MemberType == MemberTypes.Field)
                 {
-                    g.Emit(OpCodes.Stfld, wrapper.FieldInfo);
+                    g.Emit(OpCodes.Stfld, invoker.Member as FieldInfo);
                 }
                 else
                 {
-                    g.Emit(OpCodes.Callvirt, wrapper.SetMethod);
+                    g.Emit(OpCodes.Callvirt, (invoker as PropertyInvoker).SetMethod);
                 }
 
                 g.MarkLabel(isDBNullLabel);

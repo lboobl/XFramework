@@ -5,7 +5,7 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace ICS.XFramework.Reflection.Emit
+namespace ICS.XFramework.Data
 {
     /// <summary>
     /// 构造函数访问器

@@ -23,9 +23,11 @@ namespace ICS.XFramework.Data
 
         /// <summary>
         /// 标志该属性不是主表字段
+        /// <para>
         /// 用途：
         /// 1. 生成 INSERT/UPDATE 语句时忽略此字段
         /// 2. 生成不指定具体字段的 SELECT 语句时忽略此字段
+        /// </para>
         /// </summary>
         public bool NoMapped { get; set; }
 

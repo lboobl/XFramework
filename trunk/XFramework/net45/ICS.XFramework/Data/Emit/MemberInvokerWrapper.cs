@@ -1,13 +1,11 @@
 ﻿
-
-
 using System;
 using System.Linq;
 using System.Reflection;
 using ICS.XFramework.Reflection.Emit;
 using System.Collections.Generic;
 
-namespace ICS.XFramework.Reflection
+namespace ICS.XFramework.Data
 {
     /// <summary>
     /// 成员访问包装器 Facade

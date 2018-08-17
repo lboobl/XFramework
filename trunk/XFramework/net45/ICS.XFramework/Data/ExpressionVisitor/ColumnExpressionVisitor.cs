@@ -3,7 +3,6 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
-using TypeUtils = ICS.XFramework.Reflection.TypeUtils;
 
 namespace ICS.XFramework.Data
 {
@@ -197,7 +196,7 @@ namespace ICS.XFramework.Data
                     if (binding.Expression.NodeType == ExpressionType.MemberAccess && binding.Expression.Acceptable())
                     {
                         TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(binding.Member.DeclaringType);
-                        var attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(binding.Member.Name);
+                        var attribute = typeRuntime.GetInvokerAttribute<ForeignKeyAttribute>(binding.Member.Name);
                         if (attribute == null) throw new XFrameworkException("Complex property {{{0}}} must mark 'ForeignKeyAttribute' ", binding.Member.Name);
                     }
 
@@ -414,19 +413,19 @@ namespace ICS.XFramework.Data
             else
             {
                 TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(type);
-                Dictionary<string, Reflection.MemberInvokerWrapper> wrappers = typeRuntime.Wrappers;
+                Dictionary<string, MemberInvokerBase> invokers = typeRuntime.Invokers;
 
-                foreach (var w in wrappers)
+                foreach (var m in invokers)
                 {
-                    var wrapper = w.Value as MemberAccessWrapper;
-                    if (wrapper != null && wrapper.Column != null && wrapper.Column.NoMapped) continue;
-                    if (wrapper != null && wrapper.ForeignKey != null) continue; // 不加载导航属性
-                    if (wrapper.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
+                    var invoker = m.Value;
+                    if (invoker != null && invoker.Column != null && invoker.Column.NoMapped) continue;
+                    if (invoker != null && invoker.ForeignKey != null) continue; // 不加载导航属性
+                    if (invoker.Member.MemberType == System.Reflection.MemberTypes.Method) continue;
 
-                    _builder.AppendMember(alias, wrapper.Member.Name);
+                    _builder.AppendMember(alias, invoker.Member.Name);
 
                     // 选择字段
-                    string newName = AddColumn(_columns, wrapper.Member.Name);
+                    string newName = AddColumn(_columns, invoker.Member.Name);
                     _builder.AppendAs(newName);
                     _builder.Append(",");
                     _builder.AppendNewLine();
@@ -483,7 +482,7 @@ namespace ICS.XFramework.Data
                 {
                     // a.Client 要求 <Client> 必须标明 ForeignKeyAttribute
                     TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(memberExpression.Expression.Type);
-                    ForeignKeyAttribute attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(memberExpression.Member.Name);
+                    ForeignKeyAttribute attribute = typeRuntime.GetInvokerAttribute<ForeignKeyAttribute>(memberExpression.Member.Name);
                     if (attribute == null) throw new XFrameworkException("Include member {{{0}}} must mark 'ForeignKeyAttribute'.", memberExpression);
 
                     MemberExpression m = null;
@@ -528,7 +527,7 @@ namespace ICS.XFramework.Data
         private void AppendNullColumn(System.Reflection.MemberInfo member, string alias)
         {
             TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(member.DeclaringType);
-            var foreignKey = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(member.Name);
+            var foreignKey = typeRuntime.GetInvokerAttribute<ForeignKeyAttribute>(member.Name);
             string keyName = foreignKey.OuterKeys[0];
 
             _builder.Append("CASE WHEN ");
@@ -599,7 +598,7 @@ namespace ICS.XFramework.Data
         }
 
         static Func<Expression, int> _typeFieldAggregator = exp =>
-            exp.NodeType == ExpressionType.MemberAccess && TypeUtils.IsPrimitive(exp.Type) ? 1 : TypeRuntimeInfoCache.GetRuntimeInfo(exp.Type.IsGenericType ? exp.Type.GetGenericArguments()[0] : exp.Type).FieldCount;
+            exp.NodeType == ExpressionType.MemberAccess && TypeUtils.IsPrimitive(exp.Type) ? 1 : TypeRuntimeInfoCache.GetRuntimeInfo(exp.Type.IsGenericType ? exp.Type.GetGenericArguments()[0] : exp.Type).DataFieldCount;
         static Func<Type, int> _primitiveAggregator = type => TypeUtils.IsPrimitive(type) ? 1 : 0;
     }
 }

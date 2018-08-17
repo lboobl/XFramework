@@ -3,10 +3,13 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace ICS.XFramework.Reflection.Emit
+namespace ICS.XFramework.Data
 {
     /// <summary>
     /// 方法成员访问器
+    /// <para>
+    /// 底层使用 Emit IL 实现
+    /// </para>
     /// </summary>
     public sealed class MethodInvoker : MemberInvokerBase
     {

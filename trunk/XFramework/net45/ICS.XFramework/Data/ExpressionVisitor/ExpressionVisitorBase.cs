@@ -379,7 +379,7 @@ namespace ICS.XFramework.Data
                 MemberExpression memberExpression = node as MemberExpression;
 
                 TypeRuntimeInfo typeRuntime = TypeRuntimeInfoCache.GetRuntimeInfo(memberExpression.Expression.Type);
-                ForeignKeyAttribute attribute = typeRuntime.GetWrapperAttribute<ForeignKeyAttribute>(memberExpression.Member.Name);
+                ForeignKeyAttribute attribute = typeRuntime.GetInvokerAttribute<ForeignKeyAttribute>(memberExpression.Member.Name);
                 if (attribute == null) break;
 
                 string key = memberExpression.GetKeyWidthoutAnonymous();

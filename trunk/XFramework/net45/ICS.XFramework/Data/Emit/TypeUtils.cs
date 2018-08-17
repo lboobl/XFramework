@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ICS.XFramework.Reflection
+namespace ICS.XFramework.Data
 {
     /// <summary>
     /// 运行时类型工具类

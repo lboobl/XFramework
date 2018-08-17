@@ -14,6 +14,6 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 自增列
         /// </summary>
-        MemberAccessWrapper AutoIncrement { get; }
+        MemberInvokerBase AutoIncrement { get; }
     }
 }

@@ -426,7 +426,7 @@ namespace ICS.XFramework.Data.SqlClient
                 SqlBuilder columns = new SqlBuilder(this);
                 SqlBuilder values = new SqlBuilder(this);
 
-                foreach (var kv in typeRuntime.Wrappers)
+                foreach (var kv in typeRuntime.Invokers)
                 {
                     var wrapper = kv.Value as MemberAccessWrapper;
                     var column = wrapper.Column;
@@ -519,7 +519,7 @@ namespace ICS.XFramework.Data.SqlClient
                 builder.AppendNewLine();
                 builder.Append("WHERE ");
 
-                foreach (var kv in typeRuntime.Wrappers)
+                foreach (var kv in typeRuntime.Invokers)
                 {
                     var wrapper = kv.Value as MemberAccessWrapper;
                     var column = wrapper.Column;
@@ -573,7 +573,7 @@ namespace ICS.XFramework.Data.SqlClient
                 bool useKey = false;
                 int length = 0;
 
-                foreach (var kv in typeRuntime.Wrappers)
+                foreach (var kv in typeRuntime.Invokers)
                 {
                     var wrapper = kv.Value as MemberAccessWrapper;
                     var column = wrapper.Column;

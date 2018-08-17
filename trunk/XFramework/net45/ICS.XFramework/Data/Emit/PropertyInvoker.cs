@@ -2,19 +2,21 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace ICS.XFramework.Reflection.Emit
+namespace ICS.XFramework.Data
 {
     /// <summary>
-    /// 属性反射
+    /// 属性反射器
+    /// <para>
+    /// 底层使用 Emit IL 实现
+    /// </para>
     /// </summary>
-    public class PropertyInvoker : MemberInvokerBase
+    public partial class PropertyInvoker : MemberInvokerBase
     {
         private Func<object, object> _get = null;
         private Action<object, object> _set = null;
         private PropertyInfo _member = null;
         private MethodInfo _getMethod = null;
         private MethodInfo _setMethod = null;
-
 
         /// <summary>
         /// 初始化 <see cref="PropertyInvoker"/> 类的新实例
