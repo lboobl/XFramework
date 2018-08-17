@@ -21,7 +21,8 @@ namespace ICS.XFramework.Data
     {
         private IDataReader _reader = null;
         private CommandDefinition _define = null;
-        //static ICache<string, object> _deserializers = new ReaderWriterCache<string, object>();
+        // #使用缓存时需要注意线程安全问题，暂时去掉
+        // static ICache<string, object> _deserializers = new ReaderWriterCache<string, object>();
 
         public TypeDeserializer(IDataReader reader, CommandDefinition define)
         {

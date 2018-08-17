@@ -17,11 +17,11 @@ namespace ICS.XFramework.UnitTest
             //    var a = cmd;
             //}));
             Demo.Run();
-            //for (int i = 0; i < 20; i++)
+            //for (int i = 0; i < 3; i++)
             //{
             //    Task.Factory.StartNew(() => Demo.Run());
             //}
-            //Console.ReadLine();
+            Console.ReadLine();
         }
     }
 }

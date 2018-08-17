@@ -15,7 +15,7 @@ namespace ICS.XFramework.Reflection
     public class MemberInvokerWrapper
     {
         private MemberInvokerBase _invoker = null;
-        private object[] _customAttributes = null;
+        private object[] _attributes = null;
         private MemberInfo _member = null;
         private Type _dataType = null;
         private MethodInfo _setMethod = null;
@@ -119,10 +119,8 @@ namespace ICS.XFramework.Reflection
         /// <returns></returns>
         public TAttribute GetCustomAttribute<TAttribute>() where TAttribute : Attribute
         {
-            _customAttributes = _customAttributes ?? _member.GetCustomAttributes(false);
-            return _customAttributes.Length == 0
-                 ? null
-                 : (_customAttributes.Length == 1 ? _customAttributes[0] : _customAttributes.FirstOrDefault(a => (a as TAttribute) != null)) as TAttribute;
+            if (_attributes == null) _attributes = _member.GetCustomAttributes(false);
+            return _attributes.FirstOrDefault(x => x is TAttribute) as TAttribute;
         }
 
         /// <summary>

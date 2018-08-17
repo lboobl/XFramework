@@ -17,7 +17,7 @@ namespace ICS.XFramework.Reflection
         private Type _type = null;
         private bool _isAnonymousType = false;
 
-        private object[] _customAttributes;
+        private object[] _attributes;
         private ConstructorInvoker _ctorInvoker = null;
         private Dictionary<string, MemberInvokerWrapper> _wrappers = null;
         private Type[] _genericArguments = null;
@@ -158,7 +158,7 @@ namespace ICS.XFramework.Reflection
             this.Wrappers.TryGetValue(memberName, out wrapper);
 
             if (wrapper == null) throw new XFrameworkException("[{0}.{1}] doesn't exists", _type.Name, memberName);
-            return wrapper.Invoke(target,parameters);
+            return wrapper.Invoke(target, parameters);
         }
 
         /// <summary>
@@ -179,10 +179,8 @@ namespace ICS.XFramework.Reflection
         /// <returns></returns>
         public TAttribute GetCustomAttribute<TAttribute>() where TAttribute : Attribute
         {
-            _customAttributes = _customAttributes ?? _type.GetCustomAttributes(false);
-            return _customAttributes.Length == 0
-                 ? null
-                 : (_customAttributes.Length == 1 ? _customAttributes[0] : _customAttributes.FirstOrDefault(a => (a as TAttribute) != null)) as TAttribute;
+            if (_attributes == null) _attributes = _type.GetCustomAttributes(false);
+            return _attributes.FirstOrDefault(x => x is TAttribute) as TAttribute;
         }
 
         /// <summary>
@@ -193,19 +191,22 @@ namespace ICS.XFramework.Reflection
         protected virtual Dictionary<string, MemberInvokerWrapper> InitializeWrapper(Type type)
         {
             // 静态/实例 私有/公有
-            BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-            IEnumerable<MemberInvokerWrapper> wrappers = type.GetMembers(bindingAttr)
-                .Where(p => p.MemberType == MemberTypes.Property || p.MemberType == MemberTypes.Field || p.MemberType == MemberTypes.Method)
-                .Select(p => new MemberInvokerWrapper(p));
+            Func<MemberInfo, bool> predicate = x => x.MemberType == MemberTypes.Property || x.MemberType == MemberTypes.Field || x.MemberType == MemberTypes.Method;
+            BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+            var wrappers = 
+                type
+                .GetMembers(flags)
+                .Where(predicate)
+                .Select(x => new MemberInvokerWrapper(x));
 
             // fix issue # overide method
-            Dictionary<string, MemberInvokerWrapper> d = new Dictionary<string, MemberInvokerWrapper>();
-            foreach (var p in wrappers)
+            Dictionary<string, MemberInvokerWrapper> result = new Dictionary<string, MemberInvokerWrapper>();
+            foreach (var w in wrappers)
             {
-                if (!d.ContainsKey(p.Member.Name)) d.Add(p.Member.Name, p);
+                if (!result.ContainsKey(w.Member.Name)) result.Add(w.Member.Name, w);
             }
 
-            return d;
+            return result;
         }
 
         /// <summary>
