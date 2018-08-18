@@ -18,9 +18,9 @@ namespace ICS.XFramework.UnitTest
 
         public static void Run()
         {
-            Query();
-            Join();
-            Other();
+            //Query();
+            //Join();
+            //Other();
             Performance();
         }
 
@@ -958,7 +958,7 @@ namespace ICS.XFramework.UnitTest
             }
 
             stop.Stop();
-            Console.WriteLine(string.Format("{1} 运行 10 次 100w 行单表数据，用时：{0}", stop.Elapsed, System.Threading.Thread.CurrentThread.ManagedThreadId));
+            Console.WriteLine(string.Format("运行 10 次 100w 行单表数据，用时：{0}", stop.Elapsed));
             Console.ReadLine();
 
             stop = new Stopwatch();
