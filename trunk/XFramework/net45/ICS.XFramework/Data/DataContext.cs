@@ -307,11 +307,11 @@ namespace ICS.XFramework.Data
         /// <summary>
         /// 计算要插入、更新或删除的已修改对象的集，并执行相应命令以实现对数据库的更改
         /// </summary>
-        /// <param name="singleRowEffect">每一个 <see cref="IDbQueryable"/> 只影响一行</param>
+        /// <param name="oneRowPerQuery">每一个 <see cref="IDbQueryable"/> 只影响一行</param>
         /// <returns></returns>
-        public virtual int SubmitChanges(out bool singleRowEffect)
+        public virtual int SubmitChanges(out bool oneRowPerQuery)
         {
-            singleRowEffect = true;
+            oneRowPerQuery = true;
 
             int count = _dbQueryables.Count;
             if (count == 0) return 0;
@@ -330,7 +330,7 @@ namespace ICS.XFramework.Data
                     int line = _provider.ExecuteNonQuery(cmd, trans);
                     if (line != 1)
                     {
-                        singleRowEffect = false;
+                        oneRowPerQuery = false;
                         if (trans != null) trans.Rollback();
                         return 0;
                     }

@@ -18,9 +18,9 @@ namespace ICS.XFramework.UnitTest
 
         public static void Run()
         {
-            //Query();
-            //Join();
-            //Other();
+            Query();
+            Join();
+            Other();
             Performance();
         }
 
@@ -305,7 +305,7 @@ namespace ICS.XFramework.UnitTest
         // 多表查询
         static void Join()
         {
-            var context = new DataContext();            
+            var context = new DataContext();
 
             // INNER JOIN
             var query =
@@ -340,7 +340,7 @@ namespace ICS.XFramework.UnitTest
                 from a in query
                 join b in context.GetTable<Model.CloudServer>() on a.CloudServerId equals b.CloudServerId
                 orderby a.ClientId
-                select new Model.Client (a)
+                select new Model.Client(a)
                 {
                     CloudServer = a.CloudServer
                 };
@@ -914,6 +914,24 @@ namespace ICS.XFramework.UnitTest
             //FROM[Bas_Client] AS[t0]
             //LEFT JOIN[Sys_CloudServer] t1 ON t0.[CloudServerId] = t1.[CloudServerId]
             //WHERE t1.[CloudServerId] <> 0
+
+            query3 =
+                from a in context.GetTable<Model.Client>()
+                join b in context.GetTable<Model.CloudServer>() on a.CloudServerId equals b.CloudServerId
+                select a;
+            context.Update<Model.Client, Model.CloudServer>((a, b) => new Model.Client
+            {
+                CloudServerId = b.CloudServerId,
+                Remark = "001.TAN"
+            }, query3);
+            context.SubmitChanges();
+            //SQL=>
+            //UPDATE t0 SET
+            //t0.[CloudServerId] = t1.[CloudServerId],
+            //t0.[Remark] = N'001.TAN'
+            //FROM[Bas_Client] AS[t0]
+            //INNER JOIN[Sys_CloudServer] t1 ON t0.[CloudServerId] = t1.[CloudServerId]
+
 
             // 批量增加
             // 产生 INSERT INTO VALUES(),(),()... 语法。注意这种批量增加的方法并不能给自增列自动赋值
