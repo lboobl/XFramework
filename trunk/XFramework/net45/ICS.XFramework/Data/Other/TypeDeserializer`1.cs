@@ -130,7 +130,12 @@ namespace ICS.XFramework.Data
                         var value1 = wrapper.Invoke(prevModel);
                         var value2 = wrapper.Invoke(model);
                         isLine = isLine && value1.Equals(value2);
-                        if (!isLine) break;
+                        if (!isLine)
+                        {
+                            // fix issue#换行时清空上一行的导航键缓存
+                            _listNavigationKeys.Clear(); 
+                            break;
+                        }
                     }
                 }
 

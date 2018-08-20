@@ -291,7 +291,7 @@ namespace ICS.XFramework.Data
                 {
                     if (!_isInitialize)
                     {
-                        _invokers = new Dictionary<string, MemberInvokerBase>();
+                        Dictionary<string, MemberInvokerBase> invokers = new Dictionary<string, MemberInvokerBase>();
 
                         //Func<MemberInfo, bool> predicate = x => x.MemberType == MemberTypes.Property || x.MemberType == MemberTypes.Field || x.MemberType == MemberTypes.Method;
                         //BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
@@ -311,9 +311,12 @@ namespace ICS.XFramework.Data
 
                         foreach (MemberInvokerBase invoker in collection)
                         {
-                            if (!_invokers.ContainsKey(invoker.Member.Name)) _invokers.Add(invoker.Member.Name, invoker);
+                            if (!invokers.ContainsKey(invoker.Member.Name)) invokers.Add(invoker.Member.Name, invoker);
                             if (!(invoker.Column != null && invoker.Column.NoMapped || invoker.ForeignKey != null || invoker.Member.MemberType == MemberTypes.Method)) _dataFieldCount += 1;                            
                         }
+
+
+                        _invokers = invokers;
                         _isInitialize = true;
                     }
                 }
