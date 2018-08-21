@@ -4,4 +4,34 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Collection\IPagedList.cs" Link="Common\Collection\IPagedList.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Collection\PagedList.cs" Link="Common\Collection\PagedList.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Common.cs" Link="Common\Common.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\HashFluent.cs" Link="Common\HashFluent.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\ConvertHelper.cs" Link="Common\Helper\ConvertHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\FileHelper.cs" Link="Common\Helper\FileHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\GZipHelper.cs" Link="Common\Helper\GZipHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\PhoneticizeHelper.cs" Link="Common\Helper\PhoneticizeHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\SecurityHelper.cs" Link="Common\Helper\SecurityHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\SerializeHelper.cs" Link="Common\Helper\SerializeHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\WebHelper .cs" Link="Common\Helper\WebHelper .cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\WebHelper45.cs" Link="Common\Helper\WebHelper45.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\XmlHelper.cs" Link="Common\Helper\XmlHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Ioc\IContainer.cs" Link="Common\Ioc\IContainer.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Ioc\XfwContainer.cs" Link="Common\Ioc\XfwContainer.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\KatamaNodeLocator.cs" Link="Common\KatamaNodeLocator.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Mailer.cs" Link="Common\Mailer.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\MetadataTypesRegister.cs" Link="Common\MetadataTypesRegister.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\XFrameworkException.cs" Link="Common\XFrameworkException.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\XFrameworkExtensions.cs" Link="Common\XFrameworkExtensions.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\XFrameworkValidator.cs" Link="Common\XFrameworkValidator.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Collection\" />
+    <Folder Include="Common\Helper\" />
+    <Folder Include="Common\Ioc\" />
+  </ItemGroup>
+
 </Project>
