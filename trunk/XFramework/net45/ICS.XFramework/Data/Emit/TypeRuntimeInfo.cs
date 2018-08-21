@@ -257,7 +257,7 @@ namespace ICS.XFramework.Data
             MemberInvokerBase invoker = null;
             this.Invokers.TryGetValue(memberName, out invoker);
 
-            if (invoker == null) throw new XFrameworkException("{0}.{1} doesn't exists", _type.Name, memberName);
+            if (invoker == null) throw new XFrameworkException("{0}.{1} Not Found.", _type.Name, memberName);
             return invoker.Invoke(target, parameters);
         }
 
@@ -300,8 +300,8 @@ namespace ICS.XFramework.Data
                         //    .GetMembers(bindingFlags)
                         //    .Where(predicate)
                         //    .Select(x => MemberInvokerBase.Create(x));
-                        Func<MemberInfo, bool> predicate = x => x.MemberType == MemberTypes.Method || x.MemberType == MemberTypes.Field ||
-                            (x.MemberType == MemberTypes.Property && (x as PropertyInfo).CanRead && (this.IsAnonymousType ? true : (x as PropertyInfo).CanWrite));
+                        Func<MemberInfo, bool> predicate = x => x.MemberType == MemberTypes.Method || x.MemberType == MemberTypes.Field || x.MemberType == MemberTypes.Property;
+                            //(x.MemberType == MemberTypes.Property && (x as PropertyInfo).CanRead && (this.IsAnonymousType ? true : (x as PropertyInfo).CanWrite));
                         BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public;
                         var collection =
                             type

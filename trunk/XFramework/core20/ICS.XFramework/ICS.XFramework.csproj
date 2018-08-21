@@ -4,4 +4,32 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="..\..\net45\ICS.XFramework\Caching\ExpirationCache.cs" Link="Caching\ExpirationCache.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Caching\ICache.cs" Link="Caching\ICache.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Caching\MemberInfoComparer.cs" Link="Caching\MemberInfoComparer.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Caching\ReaderWriterCache.cs" Link="Caching\ReaderWriterCache.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Caching\SimpleCache.cs" Link="Caching\SimpleCache.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Collection\IPagedList.cs" Link="Common\Collection\IPagedList.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Collection\PagedList.cs" Link="Common\Collection\PagedList.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\ConvertHelper.cs" Link="Common\Helper\ConvertHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\FileHelper.cs" Link="Common\Helper\FileHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\GZipHelper.cs" Link="Common\Helper\GZipHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\PhoneticizeHelper.cs" Link="Common\Helper\PhoneticizeHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\SecurityHelper.cs" Link="Common\Helper\SecurityHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\SerializeHelper.cs" Link="Common\Helper\SerializeHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\WebHelper .cs" Link="Common\Helper\WebHelper .cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\WebHelper45.cs" Link="Common\Helper\WebHelper45.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\XmlHelper.cs" Link="Common\Helper\XmlHelper.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Ioc\IContainer.cs" Link="Common\Ioc\IContainer.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Ioc\XfwContainer.cs" Link="Common\Ioc\XfwContainer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Caching\" />
+    <Folder Include="Common\Collection\" />
+    <Folder Include="Common\Helper\" />
+    <Folder Include="Common\Ioc\" />
+  </ItemGroup>
+
 </Project>
