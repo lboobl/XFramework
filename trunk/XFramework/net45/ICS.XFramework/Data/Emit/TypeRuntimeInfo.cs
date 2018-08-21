@@ -25,7 +25,7 @@ namespace ICS.XFramework.Data
         private object _lock = new object();
         private bool _isInitialize = false;
 
-        private int _dataFieldCount = 0; 
+        private int _dataFieldCount = 0;
         private TableAttribute _attribute = null;
         private Dictionary<string, MemberInvokerBase> _invokers = null;
         private IDictionary<string, MemberInvokerBase> _navInvokers = null;
@@ -252,7 +252,7 @@ namespace ICS.XFramework.Data
         /// </summary>
         /// <param name="memberName">成员名称</param>
         /// <returns></returns>
-        public object Invoke(string memberName, object target, params object[] parameters)
+        public object Invoke(object target, string memberName, params object[] parameters)
         {
             MemberInvokerBase invoker = null;
             this.Invokers.TryGetValue(memberName, out invoker);
@@ -312,7 +312,7 @@ namespace ICS.XFramework.Data
                         foreach (MemberInvokerBase invoker in collection)
                         {
                             if (!invokers.ContainsKey(invoker.Member.Name)) invokers.Add(invoker.Member.Name, invoker);
-                            if (!(invoker.Column != null && invoker.Column.NoMapped || invoker.ForeignKey != null || invoker.Member.MemberType == MemberTypes.Method)) _dataFieldCount += 1;                            
+                            if (!(invoker.Column != null && invoker.Column.NoMapped || invoker.ForeignKey != null || invoker.Member.MemberType == MemberTypes.Method)) _dataFieldCount += 1;
                         }
 
 

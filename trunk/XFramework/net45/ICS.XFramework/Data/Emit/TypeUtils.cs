@@ -170,5 +170,52 @@ namespace ICS.XFramework.Data
             return t.IsDefined(typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute), false)
                 || IsCompilerGenerated(t.DeclaringType);
         }
+
+        /// <summary>
+        /// 返回给定类型的 NULL 值
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static object GetNullValue(Type type)
+        {
+            if (type.IsValueType)
+            {
+                if (type.IsEnum)
+                {
+                    return GetNullValue(Enum.GetUnderlyingType(type));
+                }
+
+                if (type.IsPrimitive)
+                {
+                    if (type == typeof(Int32)) { return 0; }
+                    if (type == typeof(Double)) { return (Double)0; }
+                    if (type == typeof(Int16)) { return (Int16)0; }
+                    if (type == typeof(SByte)) { return (SByte)0; }
+                    if (type == typeof(Int64)) { return (Int64)0; }
+                    if (type == typeof(Byte)) { return (Byte)0; }
+                    if (type == typeof(UInt16)) { return (UInt16)0; }
+                    if (type == typeof(UInt32)) { return (UInt32)0; }
+                    if (type == typeof(UInt64)) { return (UInt64)0; }
+                    if (type == typeof(UInt64)) { return (UInt64)0; }
+                    if (type == typeof(Single)) { return (Single)0; }
+                    if (type == typeof(Boolean)) { return false; }
+                    if (type == typeof(char)) { return '\0'; }
+                }
+                else
+                {
+                    //DateTime : 01/01/0001 00:00:00
+                    //TimeSpan : 00:00:00
+                    //Guid : 00000000-0000-0000-0000-000000000000
+                    //Decimal : 0
+
+                    if (type == typeof(DateTime)) { return DateTime.MinValue; }
+                    if (type == typeof(Decimal)) { return 0m; }
+                    if (type == typeof(Guid)) { return Guid.Empty; }
+                    if (type == typeof(TimeSpan)) { return new TimeSpan(0, 0, 0); }
+                }
+            }
+
+            return null;
+        }
     }
 }

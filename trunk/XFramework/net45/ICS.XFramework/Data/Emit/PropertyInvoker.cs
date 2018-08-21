@@ -91,7 +91,7 @@ namespace ICS.XFramework.Data
             else
             {
                 // set
-                Set(target, parameters[0]);
+                Set(target, parameters != null ? parameters[0] : TypeUtils.GetNullValue(base.DataType));
                 return null;
             }
         }
