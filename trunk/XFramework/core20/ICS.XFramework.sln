@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27703.2047
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core20", "core20", "{8C20EA70-5A23-4ED3-A818-08C72D9AC835}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICS.XFramework", "ICS.XFramework\ICS.XFramework.csproj", "{75180A74-B9A1-4C5D-A838-3BD9B18915E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICS.XFramework", "ICS.XFramework\ICS.XFramework.csproj", "{8ADA1326-B7C3-4B5C-936A-73FDD8F7E53F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,16 +13,16 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{75180A74-B9A1-4C5D-A838-3BD9B18915E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{75180A74-B9A1-4C5D-A838-3BD9B18915E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{75180A74-B9A1-4C5D-A838-3BD9B18915E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{75180A74-B9A1-4C5D-A838-3BD9B18915E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ADA1326-B7C3-4B5C-936A-73FDD8F7E53F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ADA1326-B7C3-4B5C-936A-73FDD8F7E53F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ADA1326-B7C3-4B5C-936A-73FDD8F7E53F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ADA1326-B7C3-4B5C-936A-73FDD8F7E53F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{75180A74-B9A1-4C5D-A838-3BD9B18915E6} = {8C20EA70-5A23-4ED3-A818-08C72D9AC835}
+		{8ADA1326-B7C3-4B5C-936A-73FDD8F7E53F} = {8C20EA70-5A23-4ED3-A818-08C72D9AC835}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DB1C9FE-3743-4973-BC61-0BFD7F063824}
