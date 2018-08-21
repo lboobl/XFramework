@@ -311,6 +311,7 @@ namespace ICS.XFramework.Data
 
                         foreach (MemberInvokerBase invoker in collection)
                         {
+                            if (invoker.GetCustomAttribute<System.Runtime.CompilerServices.CompilerGeneratedAttribute>() != null) continue;
                             if (!invokers.ContainsKey(invoker.Member.Name)) invokers.Add(invoker.Member.Name, invoker);
                             if (!(invoker.Column != null && invoker.Column.NoMapped || invoker.ForeignKey != null || invoker.Member.MemberType == MemberTypes.Method)) _dataFieldCount += 1;
                         }
