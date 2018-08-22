@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <Compile Include="..\..\net45\ICS.XFramework\Caching\ExpirationCache.cs" Link="Caching\ExpirationCache.cs" />
     <Compile Include="..\..\net45\ICS.XFramework\Caching\ICache.cs" Link="Caching\ICache.cs" />
     <Compile Include="..\..\net45\ICS.XFramework\Caching\MemberInfoComparer.cs" Link="Caching\MemberInfoComparer.cs" />
@@ -12,6 +13,12 @@
     <Compile Include="..\..\net45\ICS.XFramework\Caching\SimpleCache.cs" Link="Caching\SimpleCache.cs" />
     <Compile Include="..\..\net45\ICS.XFramework\Common\Collection\IPagedList.cs" Link="Common\Collection\IPagedList.cs" />
     <Compile Include="..\..\net45\ICS.XFramework\Common\Collection\PagedList.cs" Link="Common\Collection\PagedList.cs" />
+=======
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Collection\IPagedList.cs" Link="Common\Collection\IPagedList.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Collection\PagedList.cs" Link="Common\Collection\PagedList.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Common.cs" Link="Common\Common.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\HashFluent.cs" Link="Common\HashFluent.cs" />
+>>>>>>> 454496fa46849b34c84e641851ed552beed54286
     <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\ConvertHelper.cs" Link="Common\Helper\ConvertHelper.cs" />
     <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\FileHelper.cs" Link="Common\Helper\FileHelper.cs" />
     <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\GZipHelper.cs" Link="Common\Helper\GZipHelper.cs" />
@@ -23,10 +30,22 @@
     <Compile Include="..\..\net45\ICS.XFramework\Common\Helper\XmlHelper.cs" Link="Common\Helper\XmlHelper.cs" />
     <Compile Include="..\..\net45\ICS.XFramework\Common\Ioc\IContainer.cs" Link="Common\Ioc\IContainer.cs" />
     <Compile Include="..\..\net45\ICS.XFramework\Common\Ioc\XfwContainer.cs" Link="Common\Ioc\XfwContainer.cs" />
+<<<<<<< HEAD
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Caching\" />
+=======
+    <Compile Include="..\..\net45\ICS.XFramework\Common\KatamaNodeLocator.cs" Link="Common\KatamaNodeLocator.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\Mailer.cs" Link="Common\Mailer.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\MetadataTypesRegister.cs" Link="Common\MetadataTypesRegister.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\XFrameworkException.cs" Link="Common\XFrameworkException.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\XFrameworkExtensions.cs" Link="Common\XFrameworkExtensions.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework\Common\XFrameworkValidator.cs" Link="Common\XFrameworkValidator.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+>>>>>>> 454496fa46849b34c84e641851ed552beed54286
     <Folder Include="Common\Collection\" />
     <Folder Include="Common\Helper\" />
     <Folder Include="Common\Ioc\" />
