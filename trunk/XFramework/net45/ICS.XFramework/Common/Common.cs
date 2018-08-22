@@ -70,7 +70,7 @@ namespace ICS.XFramework
         /// <returns></returns>
         public static DateTime ConvertToDateTime(long ticks)
         {
-            DateTime sDate = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+            DateTime sDate = XCommon.ToServerLocalTime(new DateTime(1970, 1, 1));
             ticks = long.Parse(ticks + "0000");
             TimeSpan ts = new TimeSpan(ticks);
             DateTime nDate = sDate.Add(ts);
@@ -83,7 +83,7 @@ namespace ICS.XFramework
         /// <returns></returns>
         public static long ConvertToLong(DateTime time)
         {
-            DateTime sDate = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+            DateTime sDate = XCommon.ToServerLocalTime(new DateTime(1970, 1, 1));
             TimeSpan ts = time.Subtract(sDate);
             long ticks = ts.Ticks;
             ticks = long.Parse(ticks.ToString().Substring(0, ticks.ToString().Length - 4));
@@ -98,7 +98,7 @@ namespace ICS.XFramework
         public static DateTime ConvertToDateTimeSec(string sec)
         {
 
-            DateTime dtStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+            DateTime dtStart = XCommon.ToServerLocalTime(new DateTime(1970, 1, 1));
 
             long lTime = long.Parse(sec + "0000000");
             TimeSpan toNow = new TimeSpan(lTime);
@@ -111,8 +111,19 @@ namespace ICS.XFramework
         public static long ConvertToLongSec(string date)
         {
             System.DateTime time = DateTime.Parse(date);
-            System.DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
-            return (long)(time - startTime).TotalSeconds;
+            System.DateTime sDate = XCommon.ToServerLocalTime(new DateTime(1970, 1, 1));
+            return (long)(time - sDate).TotalSeconds;
+        }
+
+        // 将客户端时间转换为服务端本地时间
+        static DateTime ToServerLocalTime(DateTime clientTime)
+        {
+#if core20
+            DateTime serverTime1 = TimeZoneInfo.ConvertTime(clientTime, TimeZoneInfo.Local);
+#else
+            DateTime serverTime1 = TimeZone.CurrentTimeZone.ToLocalTime(clientTime);
+#endif
+            return serverTime1;
         }
 
         /// <summary>

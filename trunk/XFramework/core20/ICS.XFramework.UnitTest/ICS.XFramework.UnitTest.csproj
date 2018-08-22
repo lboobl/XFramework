@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\net45\ICS.XFramework.UnitTest\Demo.cs" Link="Demo.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework.UnitTest\Model\Model.cs" Link="Model\Model.cs" />
+    <Compile Include="..\..\net45\ICS.XFramework.UnitTest\Program.cs" Link="Program.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Model\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\net45\ICS.XFramework.UnitTest\App.config" Link="App.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ICS.XFramework\ICS.XFramework.csproj" />
+  </ItemGroup>
+
+</Project>

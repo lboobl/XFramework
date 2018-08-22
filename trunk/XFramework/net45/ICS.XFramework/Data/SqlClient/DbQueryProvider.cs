@@ -1,9 +1,5 @@
 ﻿
-using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq.Expressions;
-
 namespace ICS.XFramework.Data.SqlClient
 {
     /// <summary>

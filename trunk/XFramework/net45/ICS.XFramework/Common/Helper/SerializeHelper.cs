@@ -23,14 +23,12 @@ namespace ICS.XFramework
         /// <returns></returns>
         public static string SerializeToJson(object obj,string format = null)
         {
-
-#if net45
+#if net40
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
+#else
             DataContractJsonSerializer serializer = string.IsNullOrEmpty(format)
                 ? new DataContractJsonSerializer(obj.GetType())
                 : new DataContractJsonSerializer(obj.GetType(), new DataContractJsonSerializerSettings { DateTimeFormat = new DateTimeFormat(format) });
-#endif
-#if net40
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
 #endif
             using (var ms = new MemoryStream())
             {
@@ -48,13 +46,12 @@ namespace ICS.XFramework
         /// <returns></returns>
         public static T DeserializeFromJson<T>(string json,string format = null)
         {
-#if net45
+#if net40
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
+#else
             DataContractJsonSerializer serializer = string.IsNullOrEmpty(format)
                 ? new DataContractJsonSerializer(typeof(T))
                 : new DataContractJsonSerializer(typeof(T), new DataContractJsonSerializerSettings { DateTimeFormat = new DateTimeFormat(format) });
-#endif
-#if net40
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
 #endif
             using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
             {
