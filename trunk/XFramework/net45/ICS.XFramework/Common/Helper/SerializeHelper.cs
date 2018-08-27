@@ -47,7 +47,7 @@ namespace ICS.XFramework
         public static T DeserializeFromJson<T>(string json,string format = null)
         {
 #if net40
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
 #else
             DataContractJsonSerializer serializer = string.IsNullOrEmpty(format)
                 ? new DataContractJsonSerializer(typeof(T))

@@ -159,6 +159,7 @@ namespace ICS.XFramework.Caching
                         return default(TValue);
 
                     TValue obj2 = updator(key);
+                    obj.Value = default(TValue);
                     obj.Value = obj2;
                     obj.SetLastAccess();
                     this._innerCache[key] = obj;
